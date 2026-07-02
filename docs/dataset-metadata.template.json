@@ -1,0 +1,11 @@
+{
+  "source_id": "blastchar/telco-customer-churn",
+  "source_type": "kaggle",
+  "license_name": "Replace with the license shown on Kaggle",
+  "redistribution": "metadata_only",
+  "download_instructions": "Download the dataset from Kaggle and place the CSV under data/raw/telco-customer-churn/.",
+  "credential_guidance": "Keep Kaggle credentials in ~/.kaggle/kaggle.json or environment variables; never commit credentials or raw restricted datasets.",
+  "raw_file_path": "data/raw/telco-customer-churn/customer_churn.csv",
+  "sha256": "replace-after-local-download",
+  "acquired_at_utc": "replace-after-local-download"
+}
