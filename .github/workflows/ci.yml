@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pr-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PR metadata
+        if: github.event_name == 'pull_request'
+        run: |
+          test -n "${{ github.event.pull_request.title }}"
+          test -n "${{ github.event.pull_request.body }}"
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run Python tests
+        run: uv run --no-project --python 3.12 --with pytest --with pytest-cov pytest packages/ml/tests apps/api/tests
+      - name: Run Python lint
+        run: uv run --no-project --python 3.12 --with ruff ruff check packages/ml apps/api
+      - name: Run Python type checks
+        run: uv run --no-project --python 3.12 --with mypy mypy packages/ml/src apps/api/src
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install web dependencies
+        run: pnpm --dir apps/web install --lockfile=false
+      - name: Run web tests
+        run: pnpm --dir apps/web test
+      - name: Run web lint
+        run: pnpm --dir apps/web lint
+      - name: Run web type checks
+        run: pnpm --dir apps/web typecheck
+
+  web-e2e:
+    runs-on: ubuntu-latest
+    needs: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install web dependencies
+        run: pnpm --dir apps/web install --lockfile=false
+      - name: Run web E2E tests
+        run: pnpm --dir apps/web test:e2e
