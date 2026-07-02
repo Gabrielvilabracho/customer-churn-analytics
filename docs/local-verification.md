@@ -1,6 +1,7 @@
 # Local Verification
 
-Use these commands to validate the PR 0 tooling and CI foundation locally.
+Use these commands to validate the current project slices locally before opening
+or updating a PR.
 
 ## Python checks
 

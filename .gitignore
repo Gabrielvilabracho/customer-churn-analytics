@@ -24,13 +24,19 @@ test-results/
 !.env.example
 
 # Data and generated artifacts
-data/raw/
-data/processed/
+data/raw/*
+data/processed/*
+!data/
+!data/raw/
+!data/raw/.gitkeep
+!data/processed/
+!data/processed/.gitkeep
 artifacts/models/
 artifacts/metrics/
 *.joblib
 *.pkl
 
 # Local tool caches
+.codegraph/
 .atl/*.cache.json
 .DS_Store

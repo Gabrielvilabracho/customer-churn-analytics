@@ -34,10 +34,10 @@ Chain strategy: stacked-to-main
 
 ## Phase 1: Dataset Foundation
 
-- [ ] 1.1 Create `packages/ml/src/churn_ml/application/pipelines/acquire.py` and `.../ports/dataset_source.py` for Kaggle/manual acquisition, license metadata, checksum capture, and local-only credential guidance.
-- [ ] 1.2 Create `packages/ml/src/churn_ml/application/pipelines/profile.py` to block leakage, duplicate rows, missing targets, and identifier-only features per `openspec/specs/dataset-acquisition/spec.md`.
-- [ ] 1.3 Add `data/raw/.gitkeep`, `data/processed/.gitkeep`, `docs/dataset-card.md`, and dataset metadata template for redistribution-allowed vs metadata-only flows.
-- [ ] 1.4 Write failing pytest tests for acquisition metadata and leakage screening before completing 1.1-1.3.
+- [x] 1.1 Create `packages/ml/src/churn_ml/application/pipelines/acquire.py` and `.../ports/dataset_source.py` for Kaggle/manual acquisition, license metadata, checksum capture, and local-only credential guidance.
+- [x] 1.2 Create `packages/ml/src/churn_ml/application/pipelines/profile.py` to block leakage, duplicate rows, missing targets, and identifier-only features per `openspec/specs/dataset-acquisition/spec.md`.
+- [x] 1.3 Add `data/raw/.gitkeep`, `data/processed/.gitkeep`, `docs/dataset-card.md`, and dataset metadata template for redistribution-allowed vs metadata-only flows.
+- [x] 1.4 Write failing pytest tests for acquisition metadata and leakage screening before completing 1.1-1.3.
 
 ## Phase 2: ML Artifacts
 
