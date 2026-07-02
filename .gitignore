@@ -31,8 +31,13 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/
 !data/processed/.gitkeep
-artifacts/models/
-artifacts/metrics/
+!artifacts/
+!artifacts/models/
+artifacts/models/**
+!artifacts/models/.gitkeep
+!artifacts/metrics/
+artifacts/metrics/**
+!artifacts/metrics/.gitkeep
 *.joblib
 *.pkl
 
