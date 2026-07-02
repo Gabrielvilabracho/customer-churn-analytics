@@ -48,10 +48,10 @@ Chain strategy: stacked-to-main
 
 ## Phase 3: Analytics API
 
-- [ ] 3.1 Create `apps/api/src/churn_api/application/` use cases and `ports/` readers so prediction, dashboard analytics, metadata, and health do not import sklearn/pandas directly.
-- [ ] 3.2 Implement `apps/api/src/churn_api/presentation/http/{schemas.py,routes.py}` for `POST /predict`, `GET /analytics/dashboard`, `GET /model/metadata`, and `GET /health` with structured validation/degraded-health responses.
-- [ ] 3.3 Add `apps/api/src/churn_api/adapters/` filesystem/model loaders that map versioned artifacts into API DTOs with freshness metadata.
-- [ ] 3.4 Write failing API tests for valid prediction, invalid payload, dashboard analytics, and degraded health before completing 3.1-3.3.
+- [x] 3.1 Create `apps/api/src/churn_api/application/` use cases and `ports/` readers so prediction, dashboard analytics, metadata, and health do not import sklearn/pandas directly.
+- [x] 3.2 Implement `apps/api/src/churn_api/presentation/http/{schemas.py,routes.py}` for `POST /predict`, `GET /analytics/dashboard`, `GET /model/metadata`, and `GET /health` with structured validation/degraded-health responses.
+- [x] 3.3 Add `apps/api/src/churn_api/adapters/` filesystem/model loaders that map versioned artifacts into API DTOs with freshness metadata.
+- [x] 3.4 Write failing API tests for valid prediction, invalid payload, dashboard analytics, and degraded health before completing 3.1-3.3.
 
 ## Phase 4: Executive Dashboard
 

@@ -3,7 +3,10 @@ name = "churn-api"
 version = "0.1.0"
 description = "FastAPI adapter package for churn analytics artifacts."
 requires-python = ">=3.12,<3.15"
-dependencies = []
+dependencies = [
+  "fastapi>=0.125.0",
+  "httpx>=0.28.1",
+]
 
 [build-system]
 requires = ["hatchling"]

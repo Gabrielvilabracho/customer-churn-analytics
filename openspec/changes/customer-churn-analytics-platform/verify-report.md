@@ -1,121 +1,121 @@
 # Verification Report
 
 **Change**: customer-churn-analytics-platform
+**Version**: N/A
 **Mode**: Strict TDD
-**Scope**: PR2 / Phase 2 ML Artifacts remediation re-verification
+**Scope**: PR3 blocker-fix re-verification after fresh review
 **Final verdict**: PASS WITH WARNINGS
 
 ## Completeness
 
-| Area | Expected | Verified | Result |
-|---|---:|---:|---|
-| Phase 2 ML artifact tasks | 4 complete | 4 complete in `tasks.md` and apply-progress | ✅ PASS |
-| Cleaned split / feature artifact persistence | Cleaned split files plus feature metadata are persisted | `CleanedSplitArtifact` writes CSV rows plus metadata JSON with feature columns, target, row count under `processed/<run_id>/` | ✅ PASS |
-| Baseline-vs-candidate metrics/comparison | Baseline and candidate are trained/evaluated on shared data and selected by churn-usefulness metrics | `compare_model_candidates` evaluates both models and selects by recall, top-risk capture, PR-AUC, precision | ✅ PASS |
-| Nested generated artifact ignore rules | Generated model/metric payloads ignored; `.gitkeep` placeholders remain trackable | `git check-ignore` exits 0 for nested payloads and 1 for `.gitkeep` placeholders | ✅ PASS |
-| Scope guard | No API/dashboard implementation in PR2 | Phase 3+ tasks remain unchecked; source changes stay in ML artifact foundations plus generated-artifact ignore rules | ✅ PASS |
+| Metric | Value |
+|---|---:|
+| PR3 blocker fixes requested | 4 |
+| PR3 blocker fixes verified complete | 4 |
+| PR3 blocker fixes incomplete | 0 |
+| Dashboard UI files changed in this re-check | 0 |
 
-## Build / Tests / Coverage Evidence
+| Scope Item | Evidence | Result |
+|---|---|---|
+| `/model/metadata` returns structured 503 when artifacts are missing | `apps/api/tests/test_analytics_api.py::test_default_app_reports_degraded_without_configured_artifacts` asserts `/model/metadata` returns `503` with `{"status":"degraded","reason":"No artifact reader configured"}`; route source catches `FileNotFoundError` for `/model/metadata`. | ✅ PASS |
+| Filesystem-backed snapshots expose persisted `feature_schema` | `test_filesystem_artifact_reader_maps_persisted_feature_schema_into_api_snapshot` asserts `model_metadata.json` persists the schema and `FilesystemArtifactSnapshotReader` maps it into `snapshot.model.feature_schema`. | ✅ PASS |
+| Root API pytest command works | `uv run pytest apps/api/tests/test_analytics_api.py` passed 12 tests from the repository root. | ✅ PASS |
+| Boolean numeric features are rejected | `test_boolean_feature_value_is_rejected_for_numeric_schema_without_scoring` asserts `tenure_months: true` returns structured 422 and does not invoke scoring. | ✅ PASS |
+| Full Python/web checks pass | Python pytest, Ruff, mypy, Vitest, ESLint, TypeScript, Playwright, and Next build all passed. | ✅ PASS |
+| No dashboard UI scope creep | `git status --short apps/web`, `git diff --name-only -- apps/web`, and untracked-file scan under `apps/web` produced no output. | ✅ PASS |
+
+Future OpenSpec Phase 4 dashboard and Phase 5 documentation tasks remain intentionally outside this PR3 blocker-fix scope.
+
+## Build & Tests Execution
 
 | Command | Result | Evidence |
 |---|---|---|
-| `uv run --no-project --python 3.12 --with pytest --with pytest-cov pytest packages/ml/tests/test_ml_artifact_contracts.py packages/ml/tests/test_ml_evaluation_pipeline.py` | ✅ PASS | 11 passed; PR2 targeted coverage includes `train.py` 97%, filesystem artifact store 100%, baseline adapter 93% |
-| `uv run --no-project --python 3.12 --with pytest --with pytest-cov pytest packages/ml/tests apps/api/tests` | ✅ PASS | 26 passed; total Python coverage 89% |
-| `uv run --no-project --python 3.12 --with ruff ruff check packages/ml apps/api` | ✅ PASS | All checks passed |
-| `uv run --no-project --python 3.12 --with mypy mypy packages/ml/src apps/api/src` | ✅ PASS | Success: no issues found in 22 source files |
-| `pnpm --dir apps/web test` | ✅ PASS | 1 Vitest file passed; 2 tests passed |
-| `pnpm --dir apps/web lint` | ✅ PASS | ESLint completed without reported errors |
-| `pnpm --dir apps/web typecheck` | ✅ PASS | `tsc --noEmit` completed without reported errors |
-| `pnpm --dir apps/web build` | ✅ PASS | Next.js 15 production build compiled and prerendered successfully |
-| `pnpm --dir apps/web test:e2e --reporter=line` | ✅ PASS | 1 Playwright bootstrap test passed |
-| `git check-ignore -v artifacts/models/run-001/model_metadata.json artifacts/metrics/run-001/metrics.json` | ✅ PASS | Nested model and metric payloads match `artifacts/models/**` and `artifacts/metrics/**` |
-| `git check-ignore -q artifacts/models/.gitkeep ...` | ✅ PASS | `.gitkeep` placeholders exit 1 (not ignored); nested payloads exit 0 (ignored) |
+| `uv run pytest apps/api/tests/test_analytics_api.py` | ✅ PASS | 12 passed; coverage report emitted; 1 `StarletteDeprecationWarning`. |
+| `uv run pytest packages/ml/tests apps/api/tests` | ✅ PASS | 38 passed; total coverage 91%; 1 `StarletteDeprecationWarning`. |
+| `uv run ruff check packages/ml apps/api` | ✅ PASS | All checks passed. |
+| `uv run mypy packages/ml/src apps/api/src` | ✅ PASS | Success: no issues found in 35 source files. |
+| `pnpm --dir apps/web test` | ✅ PASS | 1 Vitest file passed; 2 tests passed. |
+| `pnpm --dir apps/web lint` | ✅ PASS | ESLint completed without reported errors. |
+| `pnpm --dir apps/web typecheck` | ✅ PASS | `tsc --noEmit` completed without reported errors. |
+| `pnpm --dir apps/web test:e2e --reporter=line` | ✅ PASS | 1 Playwright test passed. |
+| `pnpm --dir apps/web build` | ✅ PASS | Next.js 15.5.20 production build compiled, linted, typechecked, and prerendered 4 static pages. |
+
+**Coverage**: 91% total Python coverage from the full Python test command.
 
 ## TDD Compliance
 
 | Check | Result | Details |
 |---|---|---|
-| TDD Evidence reported | ✅ | Engram apply-progress contains PR2 and PR2-remediation TDD Cycle Evidence rows. |
-| All PR2 tasks have tests/evidence | ✅ | 4/4 Phase 2 tasks plus remediation rows list concrete pytest files or `git check-ignore` guardrail evidence. |
-| RED confirmed | ✅ | Apply-progress records failing-first evidence for missing PR2 modules and remediation failures for missing `CleanedSplitArtifact` / `compare_model_candidates`. Historical RED cannot be replayed, but reported failures match current symbols. |
-| GREEN confirmed | ✅ | Targeted PR2 tests and full Python checks pass now. |
-| Triangulation adequate | ✅ | Deterministic split uses same-seed and different-seed cases; artifact store covers metrics/prediction samples and cleaned split metadata; model comparison covers baseline and stronger candidate selection. |
-| Safety net for modified files | ✅ | Apply-progress records existing Python slice passing before PR2 remediation; current full suite remains green. |
+| TDD Evidence reported | ✅ | Engram apply-progress contains a `TDD Cycle Evidence` table with PR3 blocker-fix rows. |
+| All PR3 fixes have tests | ✅ | Metadata degradation, persisted feature schema, root dependency coherence, and boolean numeric validation all reference `apps/api/tests/test_analytics_api.py`. |
+| RED confirmed (tests exist) | ✅ | The reported PR3 tests exist on disk and assert the requested behavior. Historical RED failures are recorded in apply-progress. |
+| GREEN confirmed (tests pass) | ✅ | `uv run pytest apps/api/tests/test_analytics_api.py` passed 12/12; full Python tests passed 38/38. |
+| Triangulation adequate | ✅ | Tests cover degraded default app behavior, valid prediction, wrong-typed prediction, boolean numeric rejection, dashboard analytics, model metadata, and filesystem artifact mapping. |
+| Safety net for modified files | ✅ | Apply-progress records baseline/relevant safety-net runs; current target and full suites pass. |
 
-**TDD Compliance**: PASS.
+**TDD Compliance**: 6/6 checks passed for this PR3 blocker-fix verification.
 
 ## Test Layer Distribution
 
 | Layer | Tests | Files | Tools |
 |---|---:|---:|---|
-| Python unit / adapter | 26 | 6 | pytest, pytest-cov |
+| Python unit / adapter / integration | 38 | 7 | pytest, pytest-cov, FastAPI TestClient |
+| API integration for PR3 blocker fixes | 12 | 1 | pytest, FastAPI TestClient |
 | Web unit/tooling | 2 | 1 | Vitest |
 | Web E2E bootstrap | 1 | 1 | Playwright |
-| **Total executed** | **29** | **8** | |
+| **Total executed** | **41** | **9** | |
 
 ## Changed File Coverage
 
 | File | Line % | Branch % | Uncovered Lines | Rating |
 |---|---:|---:|---|---|
-| `packages/ml/src/churn_ml/application/pipelines/evaluate.py` | 88% | N/A | 16, 18, 20, 64, 83, 91, 101, 120 | ⚠️ Acceptable |
-| `packages/ml/src/churn_ml/application/pipelines/features.py` | 85% | N/A | 21, 23, 41 | ⚠️ Acceptable |
-| `packages/ml/src/churn_ml/application/pipelines/train.py` | 97% | N/A | 92 | ✅ Excellent |
-| `packages/ml/src/churn_ml/application/ports/artifact_store.py` | 0% | N/A | 1-6 | ⚠️ Low |
-| `packages/ml/src/churn_ml/application/ports/model_trainer.py` | 100% | N/A | — | ✅ Excellent |
+| `apps/api/src/churn_api/presentation/http/routes.py` | 100% | N/A | — | ✅ Excellent |
+| `apps/api/src/churn_api/application/services.py` | 97% | N/A | 110, 118 | ✅ Excellent |
+| `apps/api/src/churn_api/presentation/http/schemas.py` | 100% | N/A | — | ✅ Excellent |
+| `apps/api/src/churn_api/adapters/filesystem.py` | 100% | N/A | — | ✅ Excellent |
 | `packages/ml/src/churn_ml/domain/artifacts.py` | 100% | N/A | — | ✅ Excellent |
-| `packages/ml/src/churn_ml/domain/customer.py` | 88% | N/A | 30, 40, 46, 67 | ⚠️ Acceptable |
-| `packages/ml/src/churn_ml/domain/model.py` | 0% | N/A | 1-24 | ⚠️ Low |
-| `packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py` | 100% | N/A | — | ✅ Excellent |
-| `packages/ml/src/churn_ml/infrastructure/sklearn/baseline.py` | 93% | N/A | 17 | ✅ Excellent |
+| `pyproject.toml` | N/A | N/A | N/A | Configuration file; validated by root `uv run pytest ...`. |
 
-**Average changed PR2 source-file coverage**: 74.9% including protocol/data-model scaffolding; core executable PR2 remediation files are covered at 93-100% except `features.py`/`evaluate.py` acceptable branches.
+**Average changed executable file coverage**: 99.4%.
 
 ## Assertion Quality
 
-**Assertion quality**: ✅ All inspected PR2/remediation assertions verify real behavior. No tautologies, orphan empty checks, ghost loops, smoke-only checks, or mock-heavy tests were found. Filesystem tests assert real files and loaded values; comparison tests assert baseline metrics, candidate metrics, selected model, and selection reason.
+**Assertion quality**: ✅ All inspected PR3 assertions verify real behavior. No tautologies, orphan empty checks, ghost loops, smoke-only assertions, type-only assertions, or mock-heavy tests were found. Assertions check exact HTTP statuses, exact JSON payloads, no-scoring behavior, persisted artifact JSON, and adapter DTO mapping.
 
 ## Spec Compliance Matrix
 
-| Spec / Scenario | Runtime Evidence | Status |
+| Requirement | Scenario | Test | Result |
+|---|---|---|---|
+| Churn Analytics API — Prediction Endpoint | Valid prediction request | `test_prediction_contract_returns_risk_decision_and_driver_payload`; full API and full Python commands passed. | ✅ COMPLIANT |
+| Churn Analytics API — Prediction Endpoint | Invalid prediction request | `test_invalid_prediction_payload_returns_structured_error_without_scoring` and `test_boolean_feature_value_is_rejected_for_numeric_schema_without_scoring`; full API and full Python commands passed. | ✅ COMPLIANT |
+| Churn Analytics API — Artifact-backed Analytics Endpoints | Dashboard requests analytics | `test_model_metadata_and_dashboard_analytics_are_artifact_backed`; full API and full Python commands passed. | ✅ COMPLIANT |
+| Churn Analytics API — Artifact-backed Analytics Endpoints | Required artifact is missing | `test_default_app_reports_degraded_without_configured_artifacts`, `test_health_reports_degraded_when_required_artifacts_are_missing`, and `test_dashboard_reports_degraded_without_fabricated_analytics`; full API and full Python commands passed. | ✅ COMPLIANT |
+| Churn ML Artifacts — Model metadata artifacts | Persisted feature schema feeds API snapshot | `test_filesystem_artifact_reader_maps_persisted_feature_schema_into_api_snapshot`; full API and full Python commands passed. | ✅ COMPLIANT |
+| Engineering Delivery Workflow — Strict Module-level TDD | API behavior is tested before completion | Apply-progress TDD evidence plus current target/full executions pass. | ✅ COMPLIANT |
+
+**Compliance summary**: 6/6 checked scenarios compliant.
+
+## Correctness (Static Evidence)
+
+| Check | Status | Notes |
 |---|---|---|
-| Churn ML Artifacts — cleaning pipeline completes | `test_deterministic_train_test_split_is_stable_for_same_seed`, `test_deterministic_train_test_split_changes_with_seed_without_losing_rows`, `test_feature_dictionary_exports_business_feature_metadata`, `test_filesystem_artifact_store_round_trips_cleaned_split_csv_and_metadata_json` | ✅ PASS |
-| Churn ML Artifacts — invalid input schema | `test_feature_dictionary_rejects_missing_target_and_customer_key` | ✅ PASS |
-| Churn ML Artifacts — model is evaluated for churn usefulness | `test_evaluate_predictions_reports_business_oriented_metrics`, `test_threshold_selection_documents_recall_workload_tradeoff`, `test_model_candidate_comparison_selects_candidate_with_better_churn_usefulness`, `test_filesystem_artifact_store_round_trips_json_and_prediction_samples` | ✅ PASS |
-| Churn ML Artifacts — accuracy is misleading | `test_misleading_accuracy_is_rejected_for_executive_reporting` | ✅ PASS |
-| Dataset Acquisition — no raw/generated payloads | `git status --short --untracked-files=all artifacts data` shows only `artifacts/{models,metrics}/.gitkeep`; data dirs contain only `.gitkeep` placeholders | ✅ PASS |
-| Engineering Workflow — strict module-level TDD | Apply-progress TDD evidence plus targeted/full pytest execution | ✅ PASS for PR2 |
-| API/dashboard specs | Not in PR2 scope | ➖ SKIPPED |
+| `/model/metadata` degraded response | ✅ Implemented | `routes.py` catches `FileNotFoundError` and returns `JSONResponse(status_code=503, content={"status":"degraded","reason":...})`. |
+| Persisted `feature_schema` | ✅ Implemented | `ArtifactManifest` includes `feature_schema` with backward-compatible default; filesystem API adapter maps `bundle.manifest.feature_schema` into `ModelMetadata`. |
+| Boolean numeric validation | ✅ Implemented | `PredictionRequest` preserves bools and `_validate_features` rejects `isinstance(value, bool)` for `number` schema entries before scoring. |
+| Root dependency coherence | ✅ Implemented | Root `pyproject.toml` dev group includes `fastapi` and `httpx`; root pytest command passed. |
+| Dashboard scope boundary | ✅ Implemented | No modified, staged, or untracked files under `apps/web`; existing web checks only validate bootstrap/tooling. |
 
-## Correctness
+## Coherence (Design)
 
-| Check | Evidence | Result |
+| Decision | Followed? | Notes |
 |---|---|---|
-| Cleaned split persistence | `FilesystemArtifactStore.save_cleaned_split/load_cleaned_split` writes `processed/<run_id>/<split>.csv` and `<split>.metadata.json`; pytest round-trip passes | ✅ PASS |
-| Feature metadata included with split artifact | `CleanedSplitArtifact.metadata_json_dict()` persists `feature_columns`, `target_column`, `row_count`, `dataset_id`, `run_id`, and `split_name`; pytest asserts loaded metadata | ✅ PASS |
-| Baseline-vs-candidate comparison | `compare_model_candidates` trains both ports, evaluates both with `evaluate_predictions`, and selects by churn-usefulness tuple | ✅ PASS |
-| Baseline adapter coverage | `BaselineChurnRateTrainer` predicts the observed training churn rate; pytest asserts 0.5 probability output | ✅ PASS |
-| Metrics/threshold/prediction sample artifacts | `FilesystemArtifactStore.save_bundle/load_bundle` writes metrics JSON, model metadata JSON, prediction CSV and round-trips loaded values | ✅ PASS |
-| Generated artifact ignore rules | `.gitignore` uses `artifacts/models/**` and `artifacts/metrics/**` with `.gitkeep` negations; `git check-ignore` proves payloads ignored/placeholders trackable | ✅ PASS |
-| No generated/raw artifacts included | Only `.gitkeep` files appear under `artifacts/`; `data/raw` and `data/processed` remain placeholder-only | ✅ PASS |
+| Core-first ML/data -> API -> dashboard/docs | ✅ Yes | PR3 fixes harden the API/artifact boundary and do not start dashboard UI implementation. |
+| FastAPI Clean/Hexagonal adapter | ✅ Yes | Application services stay framework-free; HTTP error mapping remains in presentation routes; filesystem mapping remains in adapter. |
+| Artifact-first tracking | ✅ Yes | API reads local versioned artifact metadata and schema; no MLflow/model registry introduced. |
+| Strict TDD | ✅ Yes | Apply-progress includes PR3 RED/GREEN evidence; current test execution confirms the green state. |
+| English-only artifacts/code | ✅ Yes | Source, tests, and report content are English. |
 
-## Design Coherence
-
-| Design Decision | Evidence | Result |
-|---|---|---|
-| Core-first ML/data before API/dashboard | Changes remain in `packages/ml`, artifact boundaries, `.gitignore`, and task status | ✅ PASS |
-| Clean/Hexagonal boundaries | Domain/application modules avoid FastAPI, pandas, sklearn, and filesystem imports; filesystem/sklearn code stays under `infrastructure/` | ✅ PASS |
-| Artifact-first tracking | CSV/JSON artifacts are the persistence shape; no MLflow or model registry introduced | ✅ PASS |
-| Strict TDD | TDD evidence exists and current tests pass | ✅ PASS |
-| English-only artifacts/code | Source, tests, docs, and generated report content are English | ✅ PASS |
-
-## Quality Metrics
-
-**Linter**: ✅ No errors  
-**Type Checker**: ✅ No errors  
-**Python Coverage**: ⚠️ 89% total; two changed scaffolding files remain under 80% (`application/ports/artifact_store.py`, `domain/model.py`)
-**Web Checks**: ✅ test/lint/typecheck/build/E2E passed
-
-## Issues
+## Issues Found
 
 ### CRITICAL
 
@@ -123,18 +123,16 @@ None.
 
 ### WARNING
 
-1. `packages/ml/src/churn_ml/domain/model.py` remains at 0% coverage and `application/ports/artifact_store.py` reports 0% under coverage. These are scaffolding/protocol-style files and do not block PR2 remediation, but Strict TDD coverage reporting requires the warning.
-2. The persisted cleaned split metadata captures feature column names, target, row count, dataset, run, and split, but there is not yet a separate persisted feature-dictionary artifact with semantic roles. Current PR2 scope is compliant through split metadata plus in-memory feature dictionary tests; a dedicated feature dictionary artifact may be useful before the API/dashboard consume model schema.
+1. FastAPI/Starlette emits `StarletteDeprecationWarning: Using httpx with starlette.testclient is deprecated; install httpx2 instead.` Tests pass; this is non-blocking for PR3 but should be watched during dependency hardening.
 
 ### SUGGESTION
 
-- Add direct tests for `risk_segment_for_probability` and the artifact-store protocol/use-case boundary in the next ML hardening pass.
-- If Phase 3 API needs schema introspection, promote the feature dictionary into its own versioned JSON artifact instead of relying only on split metadata.
+None.
 
-## Final Verdict
+## Verdict
 
-PASS WITH WARNINGS — the prior PR2 critical failures are fixed. Cleaned split/feature metadata persistence, baseline-vs-candidate comparison coverage, and nested generated artifact ignore rules now have runtime evidence. All Python checks and relevant web checks pass.
+PASS WITH WARNINGS — all requested PR3 blocker fixes are verified with runtime evidence, full Python/web checks pass, and dashboard UI scope remains untouched. The only warning is the non-blocking FastAPI/Starlette TestClient deprecation warning.
 
 ## next_recommended
 
-Proceed to Phase 3 Analytics API (`sdd-apply`) after accepting the non-blocking coverage/schema-artifact warnings, or add the suggested feature-dictionary JSON hardening first if the API contract needs it immediately.
+Proceed with PR3 review/acceptance. Do not start Phase 4 dashboard implementation until the orchestrator opens a new SDD apply scope for dashboard work.

@@ -25,11 +25,11 @@ jobs:
         with:
           python-version: "3.12"
       - name: Run Python tests
-        run: uv run --no-project --python 3.12 --with pytest --with pytest-cov pytest packages/ml/tests apps/api/tests
+        run: uv run --no-project --python 3.12 --with pytest --with pytest-cov --with fastapi --with httpx pytest packages/ml/tests apps/api/tests
       - name: Run Python lint
         run: uv run --no-project --python 3.12 --with ruff ruff check packages/ml apps/api
       - name: Run Python type checks
-        run: uv run --no-project --python 3.12 --with mypy mypy packages/ml/src apps/api/src
+        run: uv run --no-project --python 3.12 --with mypy --with fastapi mypy packages/ml/src apps/api/src
 
   web:
     runs-on: ubuntu-latest
