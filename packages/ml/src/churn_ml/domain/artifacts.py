@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any, Self
 
 
@@ -25,6 +25,7 @@ class ArtifactManifest:
     dataset_id: str
     model_name: str
     created_at_utc: str
+    feature_schema: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
