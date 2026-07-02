@@ -41,10 +41,10 @@ Chain strategy: stacked-to-main
 
 ## Phase 2: ML Artifacts
 
-- [ ] 2.1 Create `packages/ml/src/churn_ml/domain/{customer.py,model.py,artifacts.py}` plus `.../application/ports/{artifact_store.py,model_trainer.py}` for feature schema, metrics, threshold, and run metadata contracts.
-- [ ] 2.2 Implement `packages/ml/src/churn_ml/application/pipelines/{features.py,train.py,evaluate.py}` to write deterministic splits, feature dictionary, baseline/candidate metrics, threshold tradeoffs, and prediction samples.
-- [ ] 2.3 Add `packages/ml/src/churn_ml/infrastructure/{filesystem,sklearn}/` adapters and versioned outputs under `artifacts/models/<run_id>/` and `artifacts/metrics/<run_id>/`.
-- [ ] 2.4 Write failing pytest tests for schema errors, deterministic splits, misleading-accuracy rejection, and artifact export/load before completing 2.1-2.3.
+- [x] 2.1 Create `packages/ml/src/churn_ml/domain/{customer.py,model.py,artifacts.py}` plus `.../application/ports/{artifact_store.py,model_trainer.py}` for feature schema, metrics, threshold, and run metadata contracts.
+- [x] 2.2 Implement `packages/ml/src/churn_ml/application/pipelines/{features.py,train.py,evaluate.py}` to write deterministic splits, feature dictionary, baseline/candidate metrics, threshold tradeoffs, and prediction samples.
+- [x] 2.3 Add `packages/ml/src/churn_ml/infrastructure/{filesystem,sklearn}/` adapters and versioned outputs under `artifacts/models/<run_id>/` and `artifacts/metrics/<run_id>/`.
+- [x] 2.4 Write failing pytest tests for schema errors, deterministic splits, misleading-accuracy rejection, and artifact export/load before completing 2.1-2.3.
 
 ## Phase 3: Analytics API
 
