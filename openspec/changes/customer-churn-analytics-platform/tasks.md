@@ -28,9 +28,9 @@ Chain strategy: stacked-to-main
 
 ## Phase 0: TDD and CI Foundation
 
-- [ ] 0.1 Add Python test/lint/coverage tooling for `packages/ml` and `apps/api` before application code.
-- [ ] 0.2 Add Next.js test/typecheck/E2E tooling for `apps/web` before dashboard code.
-- [ ] 0.3 Add `.github/workflows/ci.yml` with PR validation plus ML, API, web, and E2E jobs.
+- [x] 0.1 Add Python test/lint/coverage tooling for `packages/ml` and `apps/api` before application code.
+- [x] 0.2 Add Next.js test/typecheck/E2E tooling for `apps/web` before dashboard code.
+- [x] 0.3 Add `.github/workflows/ci.yml` with PR validation plus ML, API, web, and E2E jobs.
 
 ## Phase 1: Dataset Foundation
 
