@@ -1,0 +1,61 @@
+schema: spec-driven
+
+strict_tdd: true
+
+context: |
+  Project: personal-portafolio
+  Intended product: Customer Churn Prediction portfolio.
+  Detected codebase: bootstrap only; no app source files found yet.
+  Detected stack: none yet; target direction is Python ML, FastAPI, Next.js, Tailwind, shadcn/ui.
+  Architecture intent: Clean/Hexagonal, modular system, English artifacts.
+  Persistence mode: openspec.
+  Testing: strict TDD requested and active; runners are not installed yet.
+  Style: formal design brief first; MLflow and deployment later.
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes.
+  specs:
+    - Use Given/When/Then for scenarios.
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY).
+  design:
+    - Include sequence diagrams for complex flows.
+    - Document architecture decisions with rationale.
+  tasks:
+    - Group by phase and keep tasks completable in one session.
+
+testing:
+  runner: planned
+  coverage: planned
+  lint: planned
+  typecheck: planned
+  formatter: planned
+  strict_tdd:
+    requested: true
+    active: true
+    mode: red-green-refactor
+    note: First implementation slice must install the relevant runners before application code.
+  layers:
+    unit: true
+    integration: true
+    e2e: true
+  planned_commands:
+    ml_unit: pytest packages/ml/tests
+    api_unit_integration: pytest apps/api/tests
+    web_unit: pnpm --dir apps/web test
+    web_typecheck: pnpm --dir apps/web typecheck
+    e2e: pnpm --dir apps/web test:e2e
+    ci: GitHub Actions workflow pending installation
+
+apply:
+  test_command: ""
+  tdd: true
+  tdd_mode: strict
+
+verify:
+  test_command: ""
+  build_command: ""
+  coverage_threshold: 0
+
+archive:
+  - Warn before merging destructive deltas.
