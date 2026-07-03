@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from importlib import import_module
 from math import exp, log
 from typing import Any, cast
 
@@ -81,13 +82,12 @@ def _fit_sklearn_model(
     random_state: int,
 ) -> Any | None:
     try:
-        from sklearn.compose import ColumnTransformer  # type: ignore[import-untyped]
-        from sklearn.linear_model import LogisticRegression  # type: ignore[import-untyped]
-        from sklearn.pipeline import Pipeline  # type: ignore[import-untyped]
-        from sklearn.preprocessing import (  # type: ignore[import-untyped]
-            OneHotEncoder,
-            StandardScaler,
-        )
+        ColumnTransformer = import_module("sklearn.compose").ColumnTransformer
+        LogisticRegression = import_module("sklearn.linear_model").LogisticRegression
+        Pipeline = import_module("sklearn.pipeline").Pipeline
+        preprocessing = import_module("sklearn.preprocessing")
+        OneHotEncoder = preprocessing.OneHotEncoder
+        StandardScaler = preprocessing.StandardScaler
     except ModuleNotFoundError:
         return None
 
