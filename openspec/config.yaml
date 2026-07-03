@@ -3,13 +3,13 @@ schema: spec-driven
 strict_tdd: true
 
 context: |
-  Project: personal-portafolio
+  Project: customer-churn-analytics (repo root: personal-portafolio)
   Intended product: Customer Churn Prediction portfolio.
-  Detected codebase: bootstrap only; no app source files found yet.
-  Detected stack: none yet; target direction is Python ML, FastAPI, Next.js, Tailwind, shadcn/ui.
+  Detected codebase: active monorepo with a Next.js web app, a FastAPI API package, and a Python ML package.
+  Detected stack: TypeScript/React 19/Next.js 15 web app, Python 3.12+ packages, uv-managed Python workspace, pnpm-managed web app, pytest, pytest-cov, ruff, mypy, Vitest, Playwright, ESLint, and TypeScript.
   Architecture intent: Clean/Hexagonal, modular system, English artifacts.
   Persistence mode: openspec.
-  Testing: strict TDD requested and active; runners are not installed yet.
+  Testing: strict TDD requested and active; runners are present in repo config and CI.
   Style: formal design brief first; MLflow and deployment later.
 
 rules:
@@ -25,16 +25,16 @@ rules:
     - Group by phase and keep tasks completable in one session.
 
 testing:
-  runner: planned
-  coverage: planned
-  lint: planned
-  typecheck: planned
-  formatter: planned
+  runner: mixed
+  coverage: pytest-cov
+  lint: ruff + eslint
+  typecheck: mypy + tsc
+  formatter: not explicitly configured
   strict_tdd:
     requested: true
     active: true
     mode: red-green-refactor
-    note: First implementation slice must install the relevant runners before application code.
+    note: Python tests use pytest, web unit tests use Vitest, and web e2e uses Playwright.
   layers:
     unit: true
     integration: true

@@ -43,5 +43,6 @@ artifacts/metrics/**
 
 # Local tool caches
 .codegraph/
+.atl/skill-registry.md
 .atl/*.cache.json
 .DS_Store
