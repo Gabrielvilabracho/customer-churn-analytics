@@ -4,11 +4,11 @@
 
 | Field | Value |
 |-------|-------|
-| Estimated changed lines | 1,400-2,200 |
+| Estimated changed lines | 480-700 |
 | 400-line budget risk | High |
 | Chained PRs recommended | Yes |
-| Suggested split | PR 0 tooling/CI -> PR 1 ML/data -> PR 2 API -> PR 3 dashboard/docs |
-| Delivery strategy | chained PRs |
+| Suggested split | PR 1A fixture/preprocess -> PR 1B training/artifacts |
+| Delivery strategy | ask-on-risk |
 | Chain strategy | stacked-to-main |
 | Strict TDD | Active |
 
@@ -22,8 +22,8 @@ Chain strategy: stacked-to-main
 | Unit | Goal | Likely PR | Notes |
 |------|------|-----------|-------|
 | 0 | Tooling, test runners, GitHub Actions | PR 0 | Must land before application behavior. |
-| 1 | Dataset + ML artifact contract | PR 1 | pytest tests first; depends on PR 0. |
-| 2 | FastAPI artifact-backed API | PR 2 | API tests first; depends on PR 1 artifacts. |
+| 1 | Real CSV fixture, identifier exclusion, train-only preprocessing | PR 1A | Tests first; base depends on PR 0. |
+| 2 | sklearn candidate training, persisted model bundle, adapter compatibility | PR 1B | Tests first; depends on PR 1A and should stay ML-only. |
 | 3 | Next.js dashboard + portfolio docs | PR 3 | component/E2E tests first; depends on PR 2 endpoints. |
 
 ## Phase 0: TDD and CI Foundation
@@ -46,6 +46,15 @@ Chain strategy: stacked-to-main
 - [x] 2.3 Add `packages/ml/src/churn_ml/infrastructure/{filesystem,sklearn}/` adapters and versioned outputs under `artifacts/models/<run_id>/` and `artifacts/metrics/<run_id>/`.
 - [x] 2.4 Write failing pytest tests for schema errors, deterministic splits, misleading-accuracy rejection, and artifact export/load before completing 2.1-2.3.
 
+## Phase 2B: Real Local ML Training Pipeline
+
+- [x] 2B.1 RED: Add failing pytest fixture/integration tests in `packages/ml/tests/application/test_real_training_pipeline.py` for local Telco CSV loading, required target validation, `customerID` exclusion, and zero artifact writes on schema failure.
+- [x] 2B.2 GREEN: Add committed CSV fixture under `packages/ml/tests/fixtures/` and implement `packages/ml/src/churn_ml/application/pipelines/{features.py,profile.py}` updates for identifier exclusion, deterministic/stratified splits, and train-only fit metadata.
+- [ ] 2B.3 RED: Add failing trainer tests in `packages/ml/tests/infrastructure/sklearn/test_candidate_trainer.py` for baseline-vs-candidate comparison, threshold tradeoff selection, and misleading-accuracy rejection from `openspec/specs/churn-ml-artifacts/spec.md`.
+- [ ] 2B.4 GREEN: Implement `packages/ml/src/churn_ml/infrastructure/sklearn/` candidate trainer plus `packages/ml/src/churn_ml/application/pipelines/{train.py,evaluate.py}` orchestration using pandas/scikit-learn behind existing ports.
+- [ ] 2B.5 RED/GREEN: Add `packages/ml/tests/integration/test_training_entrypoint.py` for an executable local run and implement `packages/ml/src/churn_ml/__main__.py` or `packages/ml/src/churn_ml/application/pipelines/run_training.py` to turn `data/raw/...` into processed splits and versioned artifacts.
+- [ ] 2B.6 REFACTOR: Extend `packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py` to persist model binaries/references under `artifacts/models/<run_id>/` and add adapter-contract tests in `apps/api/tests/adapters/test_filesystem_snapshot_reader.py` so API readers keep accepting the bundle shape.
+
 ## Phase 3: Analytics API
 
 - [x] 3.1 Create `apps/api/src/churn_api/application/` use cases and `ports/` readers so prediction, dashboard analytics, metadata, and health do not import sklearn/pandas directly.
@@ -62,6 +71,6 @@ Chain strategy: stacked-to-main
 
 ## Phase 5: Verification and Documentation
 
-- [ ] 5.1 Verify ML pytest coverage for schema errors, deterministic splits, leakage blocking, misleading-accuracy rejection, and artifact export/load paths.
-- [ ] 5.2 Verify API route tests for valid prediction, invalid payload, dashboard analytics, and degraded health when artifacts are missing.
+- [ ] 5.1 Verify ML pytest coverage for CSV fixture loading, identifier exclusion, deterministic splits, misleading-accuracy rejection, and model/artifact persistence paths.
+- [ ] 5.2 Verify API adapter/route tests for artifact compatibility, valid prediction, invalid payload, and degraded health when artifacts are missing.
 - [ ] 5.3 Verify frontend tests and add `README.md`, `docs/{modeling-report.md,architecture.md,api-contract.md}` to document setup, artifact flow, guarantees, and reviewer verification commands.
