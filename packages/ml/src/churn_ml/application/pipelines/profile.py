@@ -15,10 +15,14 @@ class DatasetProfileResult:
 
 
 def screen_dataset_profile(
-    rows: list[dict[str, Any]], *, target_column: str
+    rows: list[dict[str, Any]],
+    *,
+    target_column: str,
+    excluded_identifier_columns: tuple[str, ...] = (),
 ) -> DatasetProfileResult:
     if not rows:
         raise DatasetProfileError("Dataset contains no rows.")
+    _validate_required_columns(rows, target_column=target_column)
     if any(not row.get(target_column) for row in rows):
         raise DatasetProfileError("Dataset contains missing target labels.")
     if len({_row_signature(row) for row in rows}) != len(rows):
@@ -35,7 +39,9 @@ def screen_dataset_profile(
     identifier_columns = tuple(
         column
         for column in rows[0]
-        if column != target_column and column.lower().endswith("id")
+        if column != target_column
+        and column not in excluded_identifier_columns
+        and column.lower().endswith("id")
     )
     if identifier_columns:
         raise DatasetProfileError(
@@ -52,3 +58,11 @@ def screen_dataset_profile(
 
 def _row_signature(row: dict[str, Any]) -> tuple[tuple[str, str], ...]:
     return tuple(sorted((key, str(value)) for key, value in row.items()))
+
+
+def _validate_required_columns(rows: list[dict[str, Any]], *, target_column: str) -> None:
+    columns = set(rows[0])
+    if target_column not in columns:
+        raise DatasetProfileError(f"Dataset is missing required target column: {target_column}.")
+    if any(set(row) != columns for row in rows):
+        raise DatasetProfileError("Dataset rows must share an equivalent schema.")
