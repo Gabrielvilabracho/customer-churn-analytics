@@ -1,9 +1,13 @@
 from dataclasses import dataclass
 from typing import Any
 
-from churn_ml.application.pipelines.evaluate import evaluate_predictions
+from churn_ml.application.pipelines.evaluate import (
+    evaluate_predictions,
+    reject_misleading_accuracy,
+    select_threshold_tradeoff,
+)
 from churn_ml.application.ports.model_trainer import ModelTrainer, ProbabilityModel
-from churn_ml.domain.artifacts import ClassificationMetricSet
+from churn_ml.domain.artifacts import ClassificationMetricSet, ThresholdSelection
 
 
 @dataclass(frozen=True)
@@ -20,6 +24,13 @@ class ModelComparison:
     candidate_metrics: ClassificationMetricSet
     selected_model_name: str
     selection_reason: str
+
+
+@dataclass(frozen=True)
+class TrainingEvaluationResult:
+    comparison: ModelComparison
+    threshold: ThresholdSelection
+    metrics: ClassificationMetricSet
 
 
 def train_model_candidate(
@@ -76,6 +87,51 @@ def compare_model_candidates(
         selected_model_name=selected_name,
         selection_reason=reason,
     )
+
+
+def train_and_evaluate_model_candidate(
+    *,
+    baseline_trainer: ModelTrainer,
+    candidate_trainer: ModelTrainer,
+    train_rows: list[dict[str, Any]],
+    evaluation_rows: list[dict[str, Any]],
+    target_column: str,
+    candidate_thresholds: tuple[float, ...],
+    min_recall: float,
+    min_top_risk_capture: float,
+    top_risk_fraction: float,
+) -> TrainingEvaluationResult:
+    candidate = train_model_candidate(candidate_trainer, train_rows, target_column=target_column)
+    actual_labels = tuple(_label_to_int(row[target_column]) for row in evaluation_rows)
+    candidate_probabilities = candidate.model.predict_probabilities(evaluation_rows)
+    threshold = select_threshold_tradeoff(
+        actual_labels=actual_labels,
+        probabilities=candidate_probabilities,
+        candidate_thresholds=candidate_thresholds,
+        min_recall=min_recall,
+        top_risk_fraction=top_risk_fraction,
+    )
+    metrics = evaluate_predictions(
+        actual_labels=actual_labels,
+        probabilities=candidate_probabilities,
+        threshold=threshold.threshold,
+        top_risk_fraction=top_risk_fraction,
+    )
+    reject_misleading_accuracy(
+        metrics,
+        min_recall=min_recall,
+        min_top_risk_capture=min_top_risk_capture,
+    )
+    comparison = compare_model_candidates(
+        baseline_trainer=baseline_trainer,
+        candidate_trainer=candidate_trainer,
+        train_rows=train_rows,
+        evaluation_rows=evaluation_rows,
+        target_column=target_column,
+        threshold=threshold.threshold,
+        top_risk_fraction=top_risk_fraction,
+    )
+    return TrainingEvaluationResult(comparison=comparison, threshold=threshold, metrics=metrics)
 
 
 def _select_model_name(
