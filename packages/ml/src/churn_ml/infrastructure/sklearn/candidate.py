@@ -1,7 +1,12 @@
+import logging
 from dataclasses import dataclass
 from importlib import import_module
 from math import exp, log
 from typing import Any, cast
+
+from churn_ml.domain.model import label_to_int
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -13,7 +18,7 @@ class SklearnLogisticRegressionTrainer:
     def train(self, rows: list[dict[str, Any]], *, target_column: str) -> "SklearnProbabilityModel":
         if len(rows) < 2:
             raise ValueError("At least two rows are required to train a candidate model.")
-        labels = tuple(_label_to_int(row[target_column]) for row in rows)
+        labels = tuple(label_to_int(row[target_column]) for row in rows)
         if len(set(labels)) < 2:
             raise ValueError("Candidate training requires both churn and non-churn examples.")
 
@@ -30,6 +35,7 @@ class SklearnLogisticRegressionTrainer:
                 estimator=sklearn_model,
             )
 
+        logger.warning("sklearn unavailable, falling back to _FallbackModel")
         return SklearnProbabilityModel(
             model_name=self.model_name,
             feature_columns=self.feature_columns,
@@ -112,7 +118,11 @@ def _fit_sklearn_model(
             ),
         ]
     )
-    model.fit(frame, labels)
+    try:
+        model.fit(frame, labels)
+    except Exception as exc:
+        logger.error("sklearn model.fit failed: %s", exc)
+        raise RuntimeError(f"Model training failed: {exc}") from exc
     return model
 
 
@@ -157,7 +167,7 @@ def _fit_fallback_model(
 
 def _build_pandas_frame(rows: list[dict[str, Any]], feature_columns: tuple[str, ...]) -> Any:
     try:
-        import pandas as pd  # type: ignore[import-untyped]
+        import pandas as pd
     except ModuleNotFoundError as error:
         raise RuntimeError("pandas is required for sklearn model prediction") from error
     return pd.DataFrame([{column: row[column] for column in feature_columns} for row in rows])
@@ -185,10 +195,6 @@ def _to_float(value: Any) -> float:
     if isinstance(value, bool):
         raise ValueError("Boolean values are not numeric features.")
     return float(value)
-
-
-def _label_to_int(value: Any) -> int:
-    return 1 if value in {1, "1", "Yes", "yes"} else 0
 
 
 def _sigmoid(value: float) -> float:

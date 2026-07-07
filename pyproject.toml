@@ -9,10 +9,13 @@ dependencies = []
 dev = [
   "fastapi>=0.125.0",
   "httpx>=0.28.1",
+  "joblib>=1.5.3",
   "mypy>=1.18.2",
+  "pandas>=3.0.3",
   "pytest>=8.4.2",
   "pytest-cov>=7.0.0",
   "ruff>=0.14.9",
+  "scikit-learn>=1.9.0",
 ]
 
 [tool.pytest.ini_options]

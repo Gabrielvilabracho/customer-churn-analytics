@@ -1,7 +1,8 @@
 from typing import Any
+from unittest.mock import patch
 
 import pytest
-from churn_ml.application.pipelines.evaluate import EvaluationError
+from churn_ml.application.pipelines.evaluate import EvaluationError, select_threshold_tradeoff
 from churn_ml.application.pipelines.train import train_and_evaluate_model_candidate
 from churn_ml.application.ports.model_trainer import ProbabilityModel
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
@@ -113,6 +114,88 @@ def _row(customer_id: str, tenure: int, charges: int, contract: str, churn: str)
         "Contract": contract,
         "Churn": churn,
     }
+
+
+# ---------------------------------------------------------------------------
+# C3 — _FallbackModel is used when sklearn is unavailable
+# ---------------------------------------------------------------------------
+
+
+def test_fallback_model_used_when_sklearn_import_fails() -> None:
+    """When sklearn import raises ModuleNotFoundError, _FallbackModel must be used."""
+    from churn_ml.infrastructure.sklearn.candidate import _FallbackModel
+
+    rows = [
+        {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
+        {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
+        {"tenure": "6", "MonthlyCharges": "65.0", "Churn": "Yes"},
+        {"tenure": "36", "MonthlyCharges": "30.0", "Churn": "No"},
+        {"tenure": "12", "MonthlyCharges": "55.0", "Churn": "Yes"},
+    ]
+    trainer = SklearnLogisticRegressionTrainer(
+        model_name="test_fallback",
+        feature_columns=("tenure", "MonthlyCharges"),
+        random_state=42,
+    )
+
+    with patch(
+        "churn_ml.infrastructure.sklearn.candidate.import_module",
+        side_effect=ModuleNotFoundError("No module named 'sklearn'"),
+    ):
+        model = trainer.train(rows, target_column="Churn")
+
+    assert model is not None
+    assert isinstance(model.estimator, _FallbackModel)
+
+
+def test_fallback_model_predictions_are_valid_probabilities() -> None:
+    """_FallbackModel must return floats in [0, 1] for every row."""
+    from churn_ml.infrastructure.sklearn.candidate import _FallbackModel
+
+    rows = [
+        {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
+        {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
+        {"tenure": "6", "MonthlyCharges": "65.0", "Churn": "Yes"},
+        {"tenure": "36", "MonthlyCharges": "30.0", "Churn": "No"},
+        {"tenure": "12", "MonthlyCharges": "55.0", "Churn": "No"},
+    ]
+    trainer = SklearnLogisticRegressionTrainer(
+        model_name="test_fallback",
+        feature_columns=("tenure", "MonthlyCharges"),
+        random_state=42,
+    )
+
+    with patch(
+        "churn_ml.infrastructure.sklearn.candidate.import_module",
+        side_effect=ModuleNotFoundError("No module named 'sklearn'"),
+    ):
+        model = trainer.train(rows, target_column="Churn")
+
+    probs = model.predict_probabilities(rows)
+    assert len(probs) == len(rows)
+    for prob in probs:
+        assert isinstance(prob, float)
+        assert 0.0 <= prob <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# C4 — "No threshold satisfies recall" path raises EvaluationError
+# ---------------------------------------------------------------------------
+
+
+def test_select_threshold_tradeoff_raises_when_no_threshold_satisfies_min_recall() -> None:
+    """select_threshold_tradeoff must raise EvaluationError containing 'recall'
+    when no candidate threshold achieves the minimum recall requirement."""
+    # The single positive example gets probability 0.3, which is below all candidate
+    # thresholds; recall is 0 at every threshold so min_recall=1.0 is unsatisfiable.
+    with pytest.raises(EvaluationError, match="recall"):
+        select_threshold_tradeoff(
+            actual_labels=(1, 0, 0),
+            probabilities=(0.3, 0.4, 0.5),
+            candidate_thresholds=(0.5, 0.4),
+            min_recall=1.0,
+            top_risk_fraction=0.5,
+        )
 
 
 # ---------------------------------------------------------------------------

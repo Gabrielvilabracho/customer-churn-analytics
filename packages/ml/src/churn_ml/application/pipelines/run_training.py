@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -9,6 +10,8 @@ from churn_ml.application.pipelines.train import (
 from churn_ml.application.ports.artifact_store import ArtifactStore
 from churn_ml.application.ports.model_trainer import ModelTrainer
 from churn_ml.domain.artifacts import ArtifactBundle, ArtifactManifest
+
+logger = logging.getLogger(__name__)
 
 
 def run_training(
@@ -36,6 +39,8 @@ def run_training(
     concrete store's save_model_binary (e.g. FilesystemArtifactStore),
     via result.trained_candidate.
     """
+    logger.info("Pipeline started: run_id=%s dataset_id=%s", run_id, dataset_id)
+
     preprocessing = prepare_training_splits_from_csv(
         csv_path,
         artifact_store=artifact_store,
@@ -46,18 +51,25 @@ def run_training(
         test_fraction=test_fraction,
         seed=seed,
     )
+    logger.info("Splits written: run_id=%s", run_id)
 
-    eval_result = train_and_evaluate_model_candidate(
-        baseline_trainer=baseline_trainer,
-        candidate_trainer=candidate_trainer,
-        train_rows=preprocessing.train_rows,
-        evaluation_rows=preprocessing.test_rows,
-        target_column=target_column,
-        candidate_thresholds=candidate_thresholds,
-        min_recall=min_recall,
-        min_top_risk_capture=min_top_risk_capture,
-        top_risk_fraction=top_risk_fraction,
-    )
+    try:
+        eval_result = train_and_evaluate_model_candidate(
+            baseline_trainer=baseline_trainer,
+            candidate_trainer=candidate_trainer,
+            train_rows=preprocessing.train_rows,
+            evaluation_rows=preprocessing.test_rows,
+            target_column=target_column,
+            candidate_thresholds=candidate_thresholds,
+            min_recall=min_recall,
+            min_top_risk_capture=min_top_risk_capture,
+            top_risk_fraction=top_risk_fraction,
+        )
+    except Exception:
+        logger.error("Training failed for run_id=%s — cleaning up partial splits", run_id)
+        artifact_store.delete_processed_run(run_id)
+        raise
+    logger.info("Training complete: run_id=%s", run_id)
 
     categorical_columns = set(
         preprocessing.train_fit_metadata.get("categorical_levels", {}).keys()
@@ -87,6 +99,7 @@ def run_training(
         prediction_samples=prediction_samples,
     )
     artifact_store.save_bundle(bundle)
+    logger.info("Artifact bundle saved: run_id=%s", run_id)
 
     return eval_result
 

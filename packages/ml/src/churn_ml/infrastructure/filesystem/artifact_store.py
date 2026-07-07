@@ -1,5 +1,7 @@
 import csv
+import hashlib
 import json
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -54,10 +56,16 @@ class FilesystemArtifactStore:
 
         # Read-merge-write so that an existing model_binary_path is not erased.
         metadata_path = models_dir / "model_metadata.json"
-        metadata = _read_metadata_or_empty(metadata_path)
-        metadata.update(bundle.to_json_dict()["manifest"])
+        existing = _read_metadata_or_empty(metadata_path)
+        # Preserve model_binary_path if the binary file exists but metadata lost it
+        # (e.g. due to corruption between save_model_binary and save_bundle).
+        if "model_binary_path" not in existing:
+            candidate_binary = models_dir / "model.joblib"
+            if candidate_binary.exists():
+                existing["model_binary_path"] = "model.joblib"
+        merged = {**existing, **bundle.to_json_dict()["manifest"]}
         metadata_path.write_text(
-            json.dumps(metadata, indent=2, sort_keys=True),
+            json.dumps(merged, indent=2, sort_keys=True),
             encoding="utf-8",
         )
 
@@ -83,11 +91,18 @@ class FilesystemArtifactStore:
 
     def save_model_binary(self, model: Any, *, run_id: str) -> None:
         _validate_run_id(run_id)
-        import joblib  # type: ignore[import-not-found]  # transitive dep of scikit-learn
+        import joblib
 
         models_dir = self._root / "models" / run_id
         models_dir.mkdir(parents=True, exist_ok=True)
-        joblib.dump(model, models_dir / "model.joblib")
+
+        final_path = models_dir / "model.joblib"
+        tmp_path = models_dir / "model.joblib.tmp"
+        joblib.dump(model, tmp_path)
+        os.replace(tmp_path, final_path)
+
+        checksum = hashlib.sha256(final_path.read_bytes()).hexdigest()
+        (models_dir / "model.joblib.sha256").write_text(checksum, encoding="utf-8")
 
         metadata_path = models_dir / "model_metadata.json"
         metadata = _read_metadata_or_empty(metadata_path)
@@ -101,6 +116,14 @@ class FilesystemArtifactStore:
         import joblib  # transitive dep of scikit-learn; type already resolved by save_model_binary
 
         return joblib.load(self._root / "models" / run_id / "model.joblib")
+
+    def delete_processed_run(self, run_id: str) -> None:
+        import shutil
+
+        _validate_run_id(run_id)
+        processed_run_dir = self._root / "processed" / run_id
+        if processed_run_dir.exists():
+            shutil.rmtree(processed_run_dir)
 
     def load_cleaned_split(self, run_id: str, split_name: str) -> CleanedSplitArtifact:
         _validate_run_id(run_id)

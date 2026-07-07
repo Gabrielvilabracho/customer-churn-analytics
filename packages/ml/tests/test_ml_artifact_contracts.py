@@ -184,6 +184,26 @@ def test_save_model_binary_recovers_from_corrupt_metadata(tmp_path: Path) -> Non
 # ---------------------------------------------------------------------------
 
 
+def test_save_bundle_after_corrupt_metadata_preserves_model_binary_path_when_file_exists(
+    tmp_path: Path,
+) -> None:
+    """When metadata is corrupted between save_model_binary and save_bundle,
+    save_bundle must restore model_binary_path if the .joblib file is on disk."""
+    store = FilesystemArtifactStore(root=tmp_path)
+    model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    store.save_model_binary(model, run_id="run-c6")
+
+    metadata_path = tmp_path / "models" / "run-c6" / "model_metadata.json"
+    metadata_path.write_text("{corrupt json!", encoding="utf-8")
+
+    store.save_bundle(_minimal_bundle("run-c6"))
+
+    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    assert metadata.get("model_binary_path") == "model.joblib"
+
+
 def test_save_bundle_and_save_model_binary_recover_from_null_metadata(
     tmp_path: Path,
 ) -> None:

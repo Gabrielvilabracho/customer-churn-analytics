@@ -1,4 +1,5 @@
 import argparse
+import logging
 import uuid
 from pathlib import Path
 
@@ -6,6 +7,8 @@ from churn_ml.application.pipelines.run_training import run_training
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
+
+logger = logging.getLogger(__name__)
 
 _DEFAULT_FEATURE_COLUMNS: tuple[str, ...] = (
     "gender",
@@ -75,30 +78,38 @@ def main() -> None:
     if not csv_path.is_file():
         parser.error(f"CSV not found: {csv_path}")
 
+    logger.info("CSV loaded: %s", csv_path)
+
     artifact_root = Path(args.artifact_root)
     run_id: str = args.run_id or str(uuid.uuid4())[:8]
 
     store = FilesystemArtifactStore(root=artifact_root)
 
-    result = run_training(
-        csv_path,
-        artifact_store=store,
-        run_id=run_id,
-        dataset_id=args.dataset_id,
-        customer_key=args.customer_key,
-        target_column=args.target_column,
-        baseline_trainer=BaselineChurnRateTrainer(),
-        candidate_trainer=SklearnLogisticRegressionTrainer(
-            model_name="candidate_logistic_regression",
-            feature_columns=_DEFAULT_FEATURE_COLUMNS,
-            random_state=args.seed,
-        ),
-        test_fraction=args.test_fraction,
-        seed=args.seed,
-    )
+    logger.info("Training started: run_id=%s", run_id)
+    try:
+        result = run_training(
+            csv_path,
+            artifact_store=store,
+            run_id=run_id,
+            dataset_id=args.dataset_id,
+            customer_key=args.customer_key,
+            target_column=args.target_column,
+            baseline_trainer=BaselineChurnRateTrainer(),
+            candidate_trainer=SklearnLogisticRegressionTrainer(
+                model_name="candidate_logistic_regression",
+                feature_columns=_DEFAULT_FEATURE_COLUMNS,
+                random_state=args.seed,
+            ),
+            test_fraction=args.test_fraction,
+            seed=args.seed,
+        )
+    except Exception as exc:
+        logger.error("Training pipeline failed: %s", exc)
+        raise
 
     if result.trained_candidate is not None:
         store.save_model_binary(result.trained_candidate, run_id=run_id)
+        logger.info("Model binary saved: artifacts/models/%s/model.joblib", run_id)
         print(f"Model binary saved: {artifact_root}/models/{run_id}/model.joblib")
 
     print(f"Run ID:          {run_id}")

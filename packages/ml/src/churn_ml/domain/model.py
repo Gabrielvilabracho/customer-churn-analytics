@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -22,3 +23,7 @@ def risk_segment_for_probability(probability: float) -> str:
     if probability >= 0.4:
         return "medium"
     return "low"
+
+
+def label_to_int(value: Any) -> int:
+    return 1 if value in {1, "1", "Yes", "yes"} else 0
