@@ -52,8 +52,8 @@ Chain strategy: stacked-to-main
 - [x] 2B.2 GREEN: Add committed CSV fixture under `packages/ml/tests/fixtures/` and implement `packages/ml/src/churn_ml/application/pipelines/{features.py,profile.py}` updates for identifier exclusion, deterministic/stratified splits, and train-only fit metadata.
 - [x] 2B.3 RED: Add failing trainer tests in `packages/ml/tests/infrastructure/sklearn/test_candidate_trainer.py` for baseline-vs-candidate comparison, threshold tradeoff selection, and misleading-accuracy rejection from `openspec/specs/churn-ml-artifacts/spec.md`.
 - [x] 2B.4 GREEN: Implement `packages/ml/src/churn_ml/infrastructure/sklearn/` candidate trainer plus `packages/ml/src/churn_ml/application/pipelines/{train.py,evaluate.py}` orchestration using pandas/scikit-learn behind existing ports.
-- [ ] 2B.5 RED/GREEN: Add `packages/ml/tests/integration/test_training_entrypoint.py` for an executable local run and implement `packages/ml/src/churn_ml/__main__.py` or `packages/ml/src/churn_ml/application/pipelines/run_training.py` to turn `data/raw/...` into processed splits and versioned artifacts.
-- [ ] 2B.6 REFACTOR: Extend `packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py` to persist model binaries/references under `artifacts/models/<run_id>/` and add adapter-contract tests in `apps/api/tests/adapters/test_filesystem_snapshot_reader.py` so API readers keep accepting the bundle shape.
+- [x] 2B.5 RED/GREEN: Add `packages/ml/tests/integration/test_training_entrypoint.py` for an executable local run and implement `packages/ml/src/churn_ml/__main__.py` or `packages/ml/src/churn_ml/application/pipelines/run_training.py` to turn `data/raw/...` into processed splits and versioned artifacts.
+- [x] 2B.6 REFACTOR: Extend `packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py` to persist model binaries/references under `artifacts/models/<run_id>/` and add adapter-contract tests in `apps/api/tests/adapters/test_filesystem_snapshot_reader.py` so API readers keep accepting the bundle shape.
 
 ## Phase 3: Analytics API
 

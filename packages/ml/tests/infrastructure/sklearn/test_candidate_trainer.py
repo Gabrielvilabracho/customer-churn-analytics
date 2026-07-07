@@ -1,6 +1,10 @@
+from typing import Any
+from unittest.mock import patch
+
 import pytest
-from churn_ml.application.pipelines.evaluate import EvaluationError
+from churn_ml.application.pipelines.evaluate import EvaluationError, select_threshold_tradeoff
 from churn_ml.application.pipelines.train import train_and_evaluate_model_candidate
+from churn_ml.application.ports.model_trainer import ProbabilityModel
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
 
@@ -51,7 +55,7 @@ def test_training_evaluation_selects_threshold_with_documented_tradeoff() -> Non
         min_top_risk_capture=1.0,
     )
 
-    assert result.threshold.threshold in {0.8, 0.6, 0.4}
+    assert result.threshold.threshold == 0.6  # highest threshold satisfying min_recall=1.0 with random_state=7
     assert "recall" in result.threshold.tradeoff
     assert "workload" in result.threshold.tradeoff
     assert 0 < result.metrics.workload_at_threshold <= 1
@@ -110,3 +114,136 @@ def _row(customer_id: str, tenure: int, charges: int, contract: str, churn: str)
         "Contract": contract,
         "Churn": churn,
     }
+
+
+# ---------------------------------------------------------------------------
+# C3 — _FallbackModel is used when sklearn is unavailable
+# ---------------------------------------------------------------------------
+
+
+def test_fallback_model_used_when_sklearn_import_fails() -> None:
+    """When sklearn import raises ModuleNotFoundError, _FallbackModel must be used."""
+    from churn_ml.infrastructure.sklearn.candidate import _FallbackModel
+
+    rows = [
+        {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
+        {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
+        {"tenure": "6", "MonthlyCharges": "65.0", "Churn": "Yes"},
+        {"tenure": "36", "MonthlyCharges": "30.0", "Churn": "No"},
+        {"tenure": "12", "MonthlyCharges": "55.0", "Churn": "Yes"},
+    ]
+    trainer = SklearnLogisticRegressionTrainer(
+        model_name="test_fallback",
+        feature_columns=("tenure", "MonthlyCharges"),
+        random_state=42,
+    )
+
+    with patch(
+        "churn_ml.infrastructure.sklearn.candidate.import_module",
+        side_effect=ModuleNotFoundError("No module named 'sklearn'"),
+    ):
+        model = trainer.train(rows, target_column="Churn")
+
+    assert model is not None
+    assert isinstance(model.estimator, _FallbackModel)
+
+
+def test_fallback_model_predictions_are_valid_probabilities() -> None:
+    """_FallbackModel must return floats in [0, 1] for every row."""
+    from churn_ml.infrastructure.sklearn.candidate import _FallbackModel
+
+    rows = [
+        {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
+        {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
+        {"tenure": "6", "MonthlyCharges": "65.0", "Churn": "Yes"},
+        {"tenure": "36", "MonthlyCharges": "30.0", "Churn": "No"},
+        {"tenure": "12", "MonthlyCharges": "55.0", "Churn": "No"},
+    ]
+    trainer = SklearnLogisticRegressionTrainer(
+        model_name="test_fallback",
+        feature_columns=("tenure", "MonthlyCharges"),
+        random_state=42,
+    )
+
+    with patch(
+        "churn_ml.infrastructure.sklearn.candidate.import_module",
+        side_effect=ModuleNotFoundError("No module named 'sklearn'"),
+    ):
+        model = trainer.train(rows, target_column="Churn")
+
+    probs = model.predict_probabilities(rows)
+    assert len(probs) == len(rows)
+    for prob in probs:
+        assert isinstance(prob, float)
+        assert 0.0 <= prob <= 1.0
+
+
+# ---------------------------------------------------------------------------
+# C4 — "No threshold satisfies recall" path raises EvaluationError
+# ---------------------------------------------------------------------------
+
+
+def test_select_threshold_tradeoff_raises_when_no_threshold_satisfies_min_recall() -> None:
+    """select_threshold_tradeoff must raise EvaluationError containing 'recall'
+    when no candidate threshold achieves the minimum recall requirement."""
+    # The single positive example gets probability 0.3, which is below all candidate
+    # thresholds; recall is 0 at every threshold so min_recall=1.0 is unsatisfiable.
+    with pytest.raises(EvaluationError, match="recall"):
+        select_threshold_tradeoff(
+            actual_labels=(1, 0, 0),
+            probabilities=(0.3, 0.4, 0.5),
+            candidate_thresholds=(0.5, 0.4),
+            min_recall=1.0,
+            top_risk_fraction=0.5,
+        )
+
+
+# ---------------------------------------------------------------------------
+# F2 — candidate must be trained exactly once
+# ---------------------------------------------------------------------------
+
+class _CountingTrainer:
+    """Wraps a real trainer and counts how many times train() is called."""
+
+    def __init__(self, delegate: SklearnLogisticRegressionTrainer) -> None:
+        self._delegate = delegate
+        self.train_call_count = 0
+
+    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> ProbabilityModel:
+        self.train_call_count += 1
+        return self._delegate.train(rows, target_column=target_column)
+
+
+def test_candidate_trained_exactly_once_during_train_and_evaluate() -> None:
+    """train_and_evaluate_model_candidate must not train the candidate model twice."""
+    counting = _CountingTrainer(
+        SklearnLogisticRegressionTrainer(
+            model_name="candidate_logistic_regression",
+            feature_columns=FEATURE_COLUMNS,
+            random_state=7,
+        )
+    )
+    train_rows = [
+        _row("C001", 1, 92, "Month-to-month", "Yes"),
+        _row("C002", 2, 88, "Month-to-month", "Yes"),
+        _row("C003", 30, 52, "Two year", "No"),
+        _row("C004", 36, 48, "Two year", "No"),
+    ]
+    evaluation_rows = [
+        _row("C101", 3, 90, "Month-to-month", "Yes"),
+        _row("C102", 40, 49, "Two year", "No"),
+    ]
+    train_and_evaluate_model_candidate(
+        baseline_trainer=BaselineChurnRateTrainer(),
+        candidate_trainer=counting,
+        train_rows=train_rows,
+        evaluation_rows=evaluation_rows,
+        target_column="Churn",
+        candidate_thresholds=(0.7, 0.5, 0.3),
+        min_recall=0.5,
+        min_top_risk_capture=0.5,
+        top_risk_fraction=0.5,
+    )
+    assert counting.train_call_count == 1, (
+        f"Expected candidate to be trained once, got {counting.train_call_count}."
+    )

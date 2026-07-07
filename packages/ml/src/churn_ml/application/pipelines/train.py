@@ -1,13 +1,18 @@
-from dataclasses import dataclass
+import logging
+from dataclasses import dataclass, field
 from typing import Any
 
 from churn_ml.application.pipelines.evaluate import (
+    EvaluationError,
     evaluate_predictions,
     reject_misleading_accuracy,
     select_threshold_tradeoff,
 )
 from churn_ml.application.ports.model_trainer import ModelTrainer, ProbabilityModel
 from churn_ml.domain.artifacts import ClassificationMetricSet, ThresholdSelection
+from churn_ml.domain.model import label_to_int
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -31,6 +36,8 @@ class TrainingEvaluationResult:
     comparison: ModelComparison
     threshold: ThresholdSelection
     metrics: ClassificationMetricSet
+    # Excluded from eq/hash: holds the trained model object, not part of result identity.
+    trained_candidate: ProbabilityModel | None = field(hash=False, compare=False, default=None)
 
 
 def train_model_candidate(
@@ -52,10 +59,16 @@ def compare_model_candidates(
     target_column: str,
     threshold: float,
     top_risk_fraction: float,
+    pretrained_candidate: TrainedModelCandidate | None = None,
 ) -> ModelComparison:
     baseline = train_model_candidate(baseline_trainer, train_rows, target_column=target_column)
-    candidate = train_model_candidate(candidate_trainer, train_rows, target_column=target_column)
-    actual_labels = tuple(_label_to_int(row[target_column]) for row in evaluation_rows)
+    # Reuse a pre-trained candidate when provided to avoid training the same model twice.
+    candidate = (
+        pretrained_candidate
+        if pretrained_candidate is not None
+        else train_model_candidate(candidate_trainer, train_rows, target_column=target_column)
+    )
+    actual_labels = tuple(label_to_int(row[target_column]) for row in evaluation_rows)
     baseline_metrics = evaluate_predictions(
         actual_labels=actual_labels,
         probabilities=baseline.model.predict_probabilities(evaluation_rows),
@@ -102,26 +115,34 @@ def train_and_evaluate_model_candidate(
     top_risk_fraction: float,
 ) -> TrainingEvaluationResult:
     candidate = train_model_candidate(candidate_trainer, train_rows, target_column=target_column)
-    actual_labels = tuple(_label_to_int(row[target_column]) for row in evaluation_rows)
+    actual_labels = tuple(label_to_int(row[target_column]) for row in evaluation_rows)
     candidate_probabilities = candidate.model.predict_probabilities(evaluation_rows)
-    threshold = select_threshold_tradeoff(
-        actual_labels=actual_labels,
-        probabilities=candidate_probabilities,
-        candidate_thresholds=candidate_thresholds,
-        min_recall=min_recall,
-        top_risk_fraction=top_risk_fraction,
-    )
+    try:
+        threshold = select_threshold_tradeoff(
+            actual_labels=actual_labels,
+            probabilities=candidate_probabilities,
+            candidate_thresholds=candidate_thresholds,
+            min_recall=min_recall,
+            top_risk_fraction=top_risk_fraction,
+        )
+    except EvaluationError as exc:
+        logger.warning("Threshold selection failed: %s", exc)
+        raise
     metrics = evaluate_predictions(
         actual_labels=actual_labels,
         probabilities=candidate_probabilities,
         threshold=threshold.threshold,
         top_risk_fraction=top_risk_fraction,
     )
-    reject_misleading_accuracy(
-        metrics,
-        min_recall=min_recall,
-        min_top_risk_capture=min_top_risk_capture,
-    )
+    try:
+        reject_misleading_accuracy(
+            metrics,
+            min_recall=min_recall,
+            min_top_risk_capture=min_top_risk_capture,
+        )
+    except EvaluationError as exc:
+        logger.warning("Evaluation rejected — misleading accuracy: %s", exc)
+        raise
     comparison = compare_model_candidates(
         baseline_trainer=baseline_trainer,
         candidate_trainer=candidate_trainer,
@@ -130,8 +151,14 @@ def train_and_evaluate_model_candidate(
         target_column=target_column,
         threshold=threshold.threshold,
         top_risk_fraction=top_risk_fraction,
+        pretrained_candidate=candidate,
     )
-    return TrainingEvaluationResult(comparison=comparison, threshold=threshold, metrics=metrics)
+    return TrainingEvaluationResult(
+        comparison=comparison,
+        threshold=threshold,
+        metrics=metrics,
+        trained_candidate=candidate.model,
+    )
 
 
 def _select_model_name(
@@ -152,5 +179,3 @@ def _churn_usefulness_score(metrics: ClassificationMetricSet) -> tuple[float, fl
     return (metrics.recall, metrics.top_risk_capture, metrics.pr_auc, metrics.precision)
 
 
-def _label_to_int(value: Any) -> int:
-    return 1 if value in {1, "1", "Yes", "yes"} else 0

@@ -3,7 +3,11 @@ name = "churn-ml"
 version = "0.1.0"
 description = "Data and ML package for churn analytics artifacts."
 requires-python = ">=3.12,<3.15"
-dependencies = []
+dependencies = [
+    "pandas>=2.0",
+    "scikit-learn>=1.3",
+    "joblib>=1.3",
+]
 
 [build-system]
 requires = ["hatchling"]
