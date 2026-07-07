@@ -2,7 +2,8 @@ from typing import Any, Protocol
 
 
 class ProbabilityModel(Protocol):
-    model_name: str
+    @property
+    def model_name(self) -> str: ...
 
     def predict_probabilities(self, rows: list[dict[str, Any]]) -> tuple[float, ...]: ...
 
