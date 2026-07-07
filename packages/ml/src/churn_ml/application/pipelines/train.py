@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from churn_ml.application.pipelines.evaluate import (
@@ -31,6 +31,8 @@ class TrainingEvaluationResult:
     comparison: ModelComparison
     threshold: ThresholdSelection
     metrics: ClassificationMetricSet
+    # Excluded from eq/hash: holds the trained model object, not part of result identity.
+    trained_candidate: ProbabilityModel | None = field(hash=False, compare=False, default=None)
 
 
 def train_model_candidate(
@@ -52,9 +54,15 @@ def compare_model_candidates(
     target_column: str,
     threshold: float,
     top_risk_fraction: float,
+    _trained_candidate: TrainedModelCandidate | None = None,
 ) -> ModelComparison:
     baseline = train_model_candidate(baseline_trainer, train_rows, target_column=target_column)
-    candidate = train_model_candidate(candidate_trainer, train_rows, target_column=target_column)
+    # Reuse a pre-trained candidate when provided to avoid training the same model twice.
+    candidate = (
+        _trained_candidate
+        if _trained_candidate is not None
+        else train_model_candidate(candidate_trainer, train_rows, target_column=target_column)
+    )
     actual_labels = tuple(_label_to_int(row[target_column]) for row in evaluation_rows)
     baseline_metrics = evaluate_predictions(
         actual_labels=actual_labels,
@@ -130,8 +138,14 @@ def train_and_evaluate_model_candidate(
         target_column=target_column,
         threshold=threshold.threshold,
         top_risk_fraction=top_risk_fraction,
+        _trained_candidate=candidate,
     )
-    return TrainingEvaluationResult(comparison=comparison, threshold=threshold, metrics=metrics)
+    return TrainingEvaluationResult(
+        comparison=comparison,
+        threshold=threshold,
+        metrics=metrics,
+        trained_candidate=candidate.model,
+    )
 
 
 def _select_model_name(

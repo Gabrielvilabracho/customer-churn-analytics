@@ -1,6 +1,9 @@
+from typing import Any
+
 import pytest
 from churn_ml.application.pipelines.evaluate import EvaluationError
 from churn_ml.application.pipelines.train import train_and_evaluate_model_candidate
+from churn_ml.application.ports.model_trainer import ProbabilityModel
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
 
@@ -110,3 +113,54 @@ def _row(customer_id: str, tenure: int, charges: int, contract: str, churn: str)
         "Contract": contract,
         "Churn": churn,
     }
+
+
+# ---------------------------------------------------------------------------
+# F2 — candidate must be trained exactly once
+# ---------------------------------------------------------------------------
+
+class _CountingTrainer:
+    """Wraps a real trainer and counts how many times train() is called."""
+
+    def __init__(self, delegate: SklearnLogisticRegressionTrainer) -> None:
+        self._delegate = delegate
+        self.train_call_count = 0
+
+    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> ProbabilityModel:
+        self.train_call_count += 1
+        return self._delegate.train(rows, target_column=target_column)
+
+
+def test_candidate_trained_exactly_once_during_train_and_evaluate() -> None:
+    """train_and_evaluate_model_candidate must not train the candidate model twice."""
+    counting = _CountingTrainer(
+        SklearnLogisticRegressionTrainer(
+            model_name="candidate_logistic_regression",
+            feature_columns=FEATURE_COLUMNS,
+            random_state=7,
+        )
+    )
+    train_rows = [
+        _row("C001", 1, 92, "Month-to-month", "Yes"),
+        _row("C002", 2, 88, "Month-to-month", "Yes"),
+        _row("C003", 30, 52, "Two year", "No"),
+        _row("C004", 36, 48, "Two year", "No"),
+    ]
+    evaluation_rows = [
+        _row("C101", 3, 90, "Month-to-month", "Yes"),
+        _row("C102", 40, 49, "Two year", "No"),
+    ]
+    train_and_evaluate_model_candidate(
+        baseline_trainer=BaselineChurnRateTrainer(),
+        candidate_trainer=counting,
+        train_rows=train_rows,
+        evaluation_rows=evaluation_rows,
+        target_column="Churn",
+        candidate_thresholds=(0.7, 0.5, 0.3),
+        min_recall=0.5,
+        min_top_risk_capture=0.5,
+        top_risk_fraction=0.5,
+    )
+    assert counting.train_call_count == 1, (
+        f"Expected candidate to be trained once, got {counting.train_call_count}."
+    )
