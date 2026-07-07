@@ -10,6 +10,8 @@ from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionT
 
 logger = logging.getLogger(__name__)
 
+# Telco Customer Churn dataset columns; see packages/ml/tests/fixtures/ for the committed CSV
+# schema.
 _DEFAULT_FEATURE_COLUMNS: tuple[str, ...] = (
     "gender",
     "SeniorCitizen",
@@ -108,8 +110,17 @@ def main() -> None:
         raise
 
     if result.trained_candidate is not None:
-        store.save_model_binary(result.trained_candidate, run_id=run_id)
-        logger.info("Model binary saved: artifacts/models/%s/model.joblib", run_id)
+        try:
+            store.save_model_binary(result.trained_candidate, run_id=run_id)
+            logger.info("Model binary saved: run_id=%s", run_id)
+        except Exception as exc:
+            logger.error(
+                "Model binary save failed for run_id=%s; metrics bundle is on disk but "
+                "model.joblib is missing. Re-run with the same run_id to retry.",
+                run_id,
+                exc_info=exc,
+            )
+            raise
         print(f"Model binary saved: {artifact_root}/models/{run_id}/model.joblib")
 
     print(f"Run ID:          {run_id}")

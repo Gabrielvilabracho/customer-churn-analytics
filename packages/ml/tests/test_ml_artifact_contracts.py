@@ -349,32 +349,11 @@ def test_filesystem_artifact_store_persists_model_binary_under_models_dir(
     tmp_path: Path,
 ) -> None:
     store = FilesystemArtifactStore(root=tmp_path)
-    bundle = ArtifactBundle(
-        manifest=ArtifactManifest(
-            run_id="run-001",
-            dataset_id="telco-sample",
-            model_name="baseline",
-            created_at_utc="2026-07-02T00:00:00Z",
-        ),
-        metrics=ClassificationMetricSet(
-            pr_auc=0.42,
-            roc_auc=0.71,
-            precision=0.5,
-            recall=0.75,
-            accuracy=0.81,
-            top_risk_capture=0.67,
-            workload_at_threshold=0.4,
-        ),
-        threshold=ThresholdSelection(threshold=0.35, tradeoff="test tradeoff"),
-        prediction_samples=(
-            {"customer_id": "C001", "churn_probability": "0.82", "actual_churn": "Yes"},
-        ),
-    )
     model = BaselineChurnRateTrainer().train(
         [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
     )
 
-    store.save_bundle(bundle)
+    store.save_bundle(_minimal_bundle("run-001"))
     store.save_model_binary(model, run_id="run-001")
 
     model_binary_path = tmp_path / "models" / "run-001" / "model.joblib"
@@ -390,30 +369,11 @@ def test_filesystem_artifact_store_round_trips_model_binary(
     tmp_path: Path,
 ) -> None:
     store = FilesystemArtifactStore(root=tmp_path)
-    bundle = ArtifactBundle(
-        manifest=ArtifactManifest(
-            run_id="run-001",
-            dataset_id="telco-sample",
-            model_name="baseline",
-            created_at_utc="2026-07-02T00:00:00Z",
-        ),
-        metrics=ClassificationMetricSet(
-            pr_auc=0.42,
-            roc_auc=0.71,
-            precision=0.5,
-            recall=0.75,
-            accuracy=0.81,
-            top_risk_capture=0.67,
-            workload_at_threshold=0.4,
-        ),
-        threshold=ThresholdSelection(threshold=0.35, tradeoff="test tradeoff"),
-        prediction_samples=(),
-    )
     original_model = BaselineChurnRateTrainer().train(
         [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
     )
 
-    store.save_bundle(bundle)
+    store.save_bundle(_minimal_bundle("run-001"))
     store.save_model_binary(original_model, run_id="run-001")
     loaded_model = store.load_model_binary("run-001")
 

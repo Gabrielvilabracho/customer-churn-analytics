@@ -3,9 +3,9 @@ from unittest.mock import patch
 
 import pytest
 from churn_ml.application.pipelines.profile import DatasetProfileError
-from churn_ml.application.pipelines.run_training import run_training
-from churn_ml.application.pipelines.train import ModelComparison
-from churn_ml.domain.artifacts import ClassificationMetricSet
+from churn_ml.application.pipelines.run_training import _build_prediction_samples, run_training
+from churn_ml.application.pipelines.train import ModelComparison, TrainingEvaluationResult
+from churn_ml.domain.artifacts import ClassificationMetricSet, ThresholdSelection
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
@@ -50,7 +50,7 @@ def test_run_training_writes_processed_splits_and_versioned_artifact_bundle(
     # Result contains meaningful evaluation data
     assert result.comparison.baseline_model_name == "baseline_churn_rate"
     assert result.comparison.candidate_model_name == "candidate_logistic_regression"
-    assert result.metrics.recall >= 0.0
+    assert result.metrics.recall >= 0.95  # deterministic with random_state=42 and the committed fixture
     assert result.threshold.threshold > 0.0
     assert result.trained_candidate is not None
 
@@ -212,3 +212,48 @@ def test_run_training_prediction_samples_include_customer_key_field(
     assert len(loaded.prediction_samples) > 0
     for sample in loaded.prediction_samples:
         assert "customerID" in sample, f"customerID missing from sample: {sample}"
+
+
+# ---------------------------------------------------------------------------
+# R3-W4 — empty raw_test_rows early-return path in _build_prediction_samples
+# ---------------------------------------------------------------------------
+
+
+def test_build_prediction_samples_returns_empty_when_no_raw_test_rows() -> None:
+    """_build_prediction_samples must return () immediately when raw_test_rows is empty."""
+    from churn_ml.application.pipelines.train import ModelComparison
+
+    fake_metrics = ClassificationMetricSet(
+        pr_auc=0.5,
+        roc_auc=0.6,
+        precision=0.5,
+        recall=0.5,
+        accuracy=0.7,
+        top_risk_capture=0.5,
+        workload_at_threshold=0.3,
+    )
+    comparison = ModelComparison(
+        baseline_model_name="baseline",
+        candidate_model_name="candidate",
+        baseline_metrics=fake_metrics,
+        candidate_metrics=fake_metrics,
+        selected_model_name="candidate",
+        selection_reason="test",
+    )
+    trained_model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    eval_result = TrainingEvaluationResult(
+        comparison=comparison,
+        threshold=ThresholdSelection(threshold=0.5, tradeoff="test"),
+        metrics=fake_metrics,
+        trained_candidate=trained_model,
+    )
+
+    samples = _build_prediction_samples(
+        eval_result,
+        raw_test_rows=[],
+        target_column="churn",
+        customer_key="customerID",
+    )
+    assert samples == ()

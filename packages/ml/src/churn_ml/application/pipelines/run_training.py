@@ -81,7 +81,7 @@ def run_training(
 
     prediction_samples = _build_prediction_samples(
         eval_result,
-        test_rows=preprocessing.test_rows,
+        raw_test_rows=preprocessing.test_rows,
         target_column=target_column,
         customer_key=customer_key,
     )
@@ -90,6 +90,7 @@ def run_training(
         manifest=ArtifactManifest(
             run_id=run_id,
             dataset_id=dataset_id,
+            # manifest tracks what was trained, not what was selected
             model_name=eval_result.comparison.candidate_model_name,
             created_at_utc=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
             feature_schema=feature_schema,
@@ -107,18 +108,18 @@ def run_training(
 def _build_prediction_samples(
     eval_result: TrainingEvaluationResult,
     *,
-    test_rows: list[dict[str, str]],
+    raw_test_rows: list[dict[str, str]],
     target_column: str,
     customer_key: str,
 ) -> tuple[dict[str, str], ...]:
-    if eval_result.trained_candidate is None or not test_rows:
+    if eval_result.trained_candidate is None or not raw_test_rows:
         return ()
-    probabilities = eval_result.trained_candidate.predict_probabilities(test_rows)
+    probabilities = eval_result.trained_candidate.predict_probabilities(raw_test_rows)
     return tuple(
         {
             customer_key: str(row[customer_key]),
             "churn_probability": f"{prob:.4f}",
             "actual_churn": str(row[target_column]),
         }
-        for row, prob in zip(test_rows, probabilities, strict=True)
+        for row, prob in zip(raw_test_rows, probabilities, strict=True)
     )

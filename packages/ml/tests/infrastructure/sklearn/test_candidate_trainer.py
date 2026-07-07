@@ -55,7 +55,7 @@ def test_training_evaluation_selects_threshold_with_documented_tradeoff() -> Non
         min_top_risk_capture=1.0,
     )
 
-    assert result.threshold.threshold in {0.8, 0.6, 0.4}
+    assert result.threshold.threshold == 0.6  # highest threshold satisfying min_recall=1.0 with random_state=7
     assert "recall" in result.threshold.tradeoff
     assert "workload" in result.threshold.tradeoff
     assert 0 < result.metrics.workload_at_threshold <= 1

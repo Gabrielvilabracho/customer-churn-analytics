@@ -59,13 +59,13 @@ def compare_model_candidates(
     target_column: str,
     threshold: float,
     top_risk_fraction: float,
-    _trained_candidate: TrainedModelCandidate | None = None,
+    pretrained_candidate: TrainedModelCandidate | None = None,
 ) -> ModelComparison:
     baseline = train_model_candidate(baseline_trainer, train_rows, target_column=target_column)
     # Reuse a pre-trained candidate when provided to avoid training the same model twice.
     candidate = (
-        _trained_candidate
-        if _trained_candidate is not None
+        pretrained_candidate
+        if pretrained_candidate is not None
         else train_model_candidate(candidate_trainer, train_rows, target_column=target_column)
     )
     actual_labels = tuple(label_to_int(row[target_column]) for row in evaluation_rows)
@@ -151,7 +151,7 @@ def train_and_evaluate_model_candidate(
         target_column=target_column,
         threshold=threshold.threshold,
         top_risk_fraction=top_risk_fraction,
-        _trained_candidate=candidate,
+        pretrained_candidate=candidate,
     )
     return TrainingEvaluationResult(
         comparison=comparison,

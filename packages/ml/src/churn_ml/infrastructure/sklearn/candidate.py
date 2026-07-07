@@ -8,6 +8,9 @@ from churn_ml.domain.model import label_to_int
 
 logger = logging.getLogger(__name__)
 
+_NUMERIC_WEIGHT_SCALE = 4
+_CATEGORICAL_LIFT_SCALE = 3
+
 
 @dataclass(frozen=True)
 class SklearnLogisticRegressionTrainer:
@@ -154,7 +157,7 @@ def _fit_fallback_model(
                 sum(positive_values) / len(positive_values)
                 - sum(negative_values) / len(negative_values)
             ) / scale
-            numeric_weights[column] = (weight * 4, midpoint, scale)
+            numeric_weights[column] = (weight * _NUMERIC_WEIGHT_SCALE, midpoint, scale)
         else:
             categorical_weights[column] = _categorical_churn_lift(rows, labels, column, prior)
     return _FallbackModel(
@@ -179,7 +182,10 @@ def _categorical_churn_lift(
     grouped: dict[str, list[int]] = {}
     for row, label in zip(rows, labels, strict=True):
         grouped.setdefault(str(row[column]), []).append(label)
-    return {value: ((sum(group) / len(group)) - prior) * 3 for value, group in grouped.items()}
+    return {
+        value: ((sum(group) / len(group)) - prior) * _CATEGORICAL_LIFT_SCALE
+        for value, group in grouped.items()
+    }
 
 
 def _is_numeric_column(rows: list[dict[str, Any]], column: str) -> bool:

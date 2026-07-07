@@ -11,6 +11,10 @@ from churn_ml.domain.artifacts import ArtifactBundle, CleanedSplitArtifact
 _SAFE_NAME_PATTERN = re.compile(r"^[A-Za-z0-9_-]+\Z")
 
 
+class ArtifactNotFoundError(FileNotFoundError):
+    pass
+
+
 def _validate_run_id(run_id: str) -> None:
     if not run_id or not _SAFE_NAME_PATTERN.match(run_id):
         raise ValueError(
@@ -72,11 +76,14 @@ class FilesystemArtifactStore:
     def load_bundle(self, run_id: str) -> ArtifactBundle:
         _validate_run_id(run_id)
         metrics_dir = self._root / "metrics" / run_id
-        payload = json.loads((metrics_dir / "metrics.json").read_text(encoding="utf-8"))
-        return ArtifactBundle.from_json_dict(
-            payload,
-            prediction_samples=_read_prediction_samples(metrics_dir / "prediction_samples.csv"),
-        )
+        try:
+            payload = json.loads((metrics_dir / "metrics.json").read_text(encoding="utf-8"))
+            return ArtifactBundle.from_json_dict(
+                payload,
+                prediction_samples=_read_prediction_samples(metrics_dir / "prediction_samples.csv"),
+            )
+        except FileNotFoundError as exc:
+            raise ArtifactNotFoundError(f"Artifact bundle not found for run_id={run_id!r}") from exc
 
     def save_cleaned_split(self, split: CleanedSplitArtifact) -> None:
         _validate_run_id(split.run_id)
@@ -115,7 +122,10 @@ class FilesystemArtifactStore:
         _validate_run_id(run_id)
         import joblib  # transitive dep of scikit-learn; type already resolved by save_model_binary
 
-        return joblib.load(self._root / "models" / run_id / "model.joblib")
+        try:
+            return joblib.load(self._root / "models" / run_id / "model.joblib")
+        except FileNotFoundError as exc:
+            raise ArtifactNotFoundError(f"Model binary not found for run_id={run_id!r}") from exc
 
     def delete_processed_run(self, run_id: str) -> None:
         import shutil
