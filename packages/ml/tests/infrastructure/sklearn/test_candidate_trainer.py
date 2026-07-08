@@ -6,7 +6,10 @@ from churn_ml.application.pipelines.evaluate import EvaluationError, select_thre
 from churn_ml.application.pipelines.train import train_and_evaluate_model_candidate
 from churn_ml.application.ports.model_trainer import ProbabilityModel
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
-from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
+from churn_ml.infrastructure.sklearn.candidate import (
+    SklearnLogisticRegressionTrainer,
+    _FallbackModel,
+)
 
 FEATURE_COLUMNS = ("tenure", "MonthlyCharges", "Contract")
 
@@ -55,7 +58,8 @@ def test_training_evaluation_selects_threshold_with_documented_tradeoff() -> Non
         min_top_risk_capture=1.0,
     )
 
-    assert result.threshold.threshold == 0.6  # highest threshold satisfying min_recall=1.0 with random_state=7
+    # Highest threshold satisfying min_recall=1.0 with random_state=7.
+    assert result.threshold.threshold == 0.6
     assert "recall" in result.threshold.tradeoff
     assert "workload" in result.threshold.tradeoff
     assert 0 < result.metrics.workload_at_threshold <= 1
@@ -123,8 +127,6 @@ def _row(customer_id: str, tenure: int, charges: int, contract: str, churn: str)
 
 def test_fallback_model_used_when_sklearn_import_fails() -> None:
     """When sklearn import raises ModuleNotFoundError, _FallbackModel must be used."""
-    from churn_ml.infrastructure.sklearn.candidate import _FallbackModel
-
     rows = [
         {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
         {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
@@ -150,8 +152,6 @@ def test_fallback_model_used_when_sklearn_import_fails() -> None:
 
 def test_fallback_model_predictions_are_valid_probabilities() -> None:
     """_FallbackModel must return floats in [0, 1] for every row."""
-    from churn_ml.infrastructure.sklearn.candidate import _FallbackModel
-
     rows = [
         {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
         {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
