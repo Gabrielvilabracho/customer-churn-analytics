@@ -1,158 +1,142 @@
-# Verify Report: customer-churn-analytics-platform (PR1B-B)
+# Verify Report: customer-churn-analytics-platform (Phase 4 blocker re-verification)
 
 ## Change
-customer-churn-analytics-platform — Phase 2B tasks 2B.5 and 2B.6
+customer-churn-analytics-platform — Phase 4 dashboard blocker fix batch after prior verification failure.
 
 ## Branch
-feat/phase-2b-pr1b-b-entrypoint
+Working tree re-verification after delegated Phase 4 blocker fixes.
 
 ## Mode
-Strict TDD / Full artifacts (proposal + specs + design + tasks + apply-progress)
+Strict TDD / OpenSpec artifacts / fallback-path skill resolution.
 
 ## Verdict
-**PASS** — 0 CRITICAL, 1 WARNING, 1 SUGGESTION
+**PASS WITH WARNINGS** — 0 CRITICAL, 2 WARNING, 0 SUGGESTION after the pre-PR blocker fix batch.
+
+The previously identified CRITICAL blockers are resolved: dashboard Playwright specs execute real browser flows, the empty prediction state has runtime coverage, sortable risk table headers expose `aria-sort`, SSR degraded artifact reasons survive hydration, and the E2E mock server no longer uses process-global scenario state. The slice is not archive-ready because Phase 5 verification/documentation remains pending and the current working tree still needs review-budget slicing.
 
 ---
 
 ## Completeness Table
 
-| Task | Checkbox | Status |
-|------|----------|--------|
-| 2B.5 RED/GREEN: training entrypoint + run_training.py + __main__.py | [x] | COMPLETE |
-| 2B.6 REFACTOR: save_model_binary/load_model_binary + API adapter contract | [x] | COMPLETE |
-| Phase 4 tasks 4.1–4.4 | [ ] | PENDING (not in scope) |
-| Phase 5 tasks 5.1–5.3 | [ ] | PENDING (not in scope) |
+| Task | Checkbox | Verification |
+|------|----------|--------------|
+| 4.1 Dashboard page and typed API client/contracts | [x] | COMPLETE — `fetchDashboardAnalytics()` maps `/analytics/dashboard` wire fields into typed dashboard data, and the dashboard route renders through the Next.js App Router. |
+| 4.2 KPI cards, cohort visualization, risk table, driver summary | [x] | COMPLETE FOR PHASE 4 — components render KPI/cohort/risk/driver content, and `RiskTable` now has sortable header buttons plus `aria-sort` state. |
+| 4.3 Loading, error, empty, degraded, and data states | [x] | COMPLETE FOR PHASE 4 — source includes loading/error/degraded/empty/data states, and Playwright now covers the empty prediction-samples UI path. |
+| 4.4 Component/page tests and Playwright happy/degraded specs | [x] | COMPLETE FOR PHASE 4 — Vitest passes and Playwright now runs 4 real browser tests covering tooling smoke, populated dashboard, empty predictions, and degraded artifacts. |
+| Phase 5 verification/documentation tasks 5.1-5.3 | [ ] | PENDING — correctly unchecked; warning for full-change archive readiness, not a Phase 4 blocker. |
 
 ---
 
-## Gate 1: Test Suite
+## Build & Tests Execution
 
-```
-uv run --no-project --python 3.12 --with pytest --with pytest-cov --with fastapi --with httpx --with pandas --with scikit-learn pytest packages/ml/tests apps/api/tests -v
-```
-
-**Result: 53 passed, 0 failed** (2.54s)
-
-| Test File | Tests | Result |
-|-----------|-------|--------|
-| packages/ml/tests/integration/test_training_entrypoint.py | 4 | PASSED |
-| packages/ml/tests/application/test_real_training_pipeline.py | 4 | PASSED |
-| packages/ml/tests/infrastructure/sklearn/test_candidate_trainer.py | 3 | PASSED |
-| packages/ml/tests/test_ml_artifact_contracts.py | 6 | PASSED |
-| packages/ml/tests/test_ml_evaluation_pipeline.py | 7 | PASSED |
-| packages/ml/tests/test_dataset_acquisition.py | 6 | PASSED |
-| packages/ml/tests/test_dataset_profile.py | 5 | PASSED |
-| packages/ml/tests/test_ml_tooling_bootstrap.py | 1 | PASSED |
-| apps/api/tests/adapters/test_filesystem_snapshot_reader.py | 2 | PASSED |
-| apps/api/tests/test_analytics_api.py | 12 | PASSED |
-| apps/api/tests/test_api_tooling_bootstrap.py | 1 | PASSED |
-
-Overall coverage: 84% (772 stmts / 124 missed)
+| Command | Result | Evidence |
+|---------|--------|----------|
+| `pnpm --dir apps/web typecheck` | ✅ PASS | `tsc --noEmit` exited 0. |
+| `pnpm --dir apps/web test` | ✅ PASS | 4 files passed, 12 tests passed: project metadata, API client, dashboard model, dashboard page. |
+| `pnpm --dir apps/web test:e2e` | ✅ PASS | 4 Playwright browser tests passed: tooling smoke, populated dashboard, empty predictions, degraded artifacts. |
+| `pnpm --dir apps/web build` | ✅ PASS | Next.js compiled, linted, type-checked, and generated routes; exit code 0. |
+| `pnpm --dir apps/web lint` | ✅ PASS | ESLint exited 0; the stale missing `eslint-plugin-react-hooks` blocker no longer applies. |
+| `pnpm --dir apps/web exec vitest run --coverage` | ⚠️ FAIL / COVERAGE UNAVAILABLE | Fails before coverage collection: `MISSING DEPENDENCY Cannot find dependency '@vitest/coverage-v8'`. |
 
 ---
 
-## Gate 2: Linter
+## TDD Compliance
 
-```
-uv run --no-project --python 3.12 --with ruff ruff check packages/ml apps/api
-```
+| Check | Result | Details |
+|-------|--------|---------|
+| TDD Evidence reported | ✅ | `apply-progress.md` includes the original Phase 4 TDD table and a dedicated blocker-fix TDD table. |
+| All scoped blocker tasks have tests | ✅ | `apps/web/e2e/dashboard.spec.ts` and `apps/web/e2e/tooling.spec.ts` exist and execute through Playwright browser fixtures. |
+| RED confirmed | ✅ | `apply-progress.md` records failing browser specs before client runtime/server config/sort implementation. |
+| GREEN confirmed | ✅ | Current execution confirms 12/12 Vitest and 4/4 Playwright tests pass. |
+| Triangulation adequate | ✅ | Browser coverage includes populated, empty, degraded, and sortable table flows. |
+| Safety Net for modified files | ✅ | `apply-progress.md` records baseline web Vitest/typecheck/Playwright checks before the fix batch. |
 
-**Result: All checks passed**
-
----
-
-## Gate 3: Type Checker
-
-```
-uv run --no-project --python 3.12 --with mypy --with fastapi mypy packages/ml/src apps/api/src
-```
-
-**Result: Success — no issues found in 38 source files**
+**TDD Compliance**: 6/6 scoped checks passed.
 
 ---
 
-## Strict TDD Evidence
+## Test Layer Distribution
 
-| Task | RED Evidence | GREEN Evidence | REFACTOR Evidence |
-|------|-------------|----------------|-------------------|
-| 2B.5 | ImportError for missing run_training module | 4 integration tests pass | Ruff/mypy clean |
-| 2B.6 | AttributeError for missing save_model_binary | 2+2 tests pass (artifact_contracts + api adapter) | joblib type-ignore scoped correctly |
+| Layer | Tests | Files | Tools |
+|-------|-------|-------|-------|
+| Unit/API mapping | 5 | `apps/web/lib/api/dashboard.test.ts` | Vitest |
+| Unit/model | 3 | `apps/web/components/features/churn/dashboard-model.test.ts` | Vitest |
+| RSC/static render | 2 | `apps/web/app/(dashboard)/page.test.ts` | Vitest + `renderToStaticMarkup` |
+| Browser E2E | 4 | `apps/web/e2e/dashboard.spec.ts`, `apps/web/e2e/tooling.spec.ts` | Playwright + Next.js web server |
+| **Total scoped web tests** | **16** | **6 files** | |
 
-TDD evidence sourced from apply-progress Engram observation #3690.
+---
+
+## Changed File Coverage
+
+Coverage analysis is unavailable because the web package does not include `@vitest/coverage-v8`. This is non-blocking under Strict TDD verify rules, but it prevents changed-file coverage reporting for the Phase 4 web files.
+
+---
+
+## Assertion Quality
+
+**Assertion quality**: ✅ No tautologies, ghost loops, production-code-free assertions, or CSS-class implementation-detail assertions were found in the scoped web tests.
+
+The former Playwright issue is resolved: `apps/web/e2e/dashboard.spec.ts` now uses the Playwright `page` fixture, per-request scenario URLs, `page.goto(...)`, role/text selectors, visible browser assertions, and explicit `aria-sort` checks. Sorting is verified by clicking the customer sort button and asserting ordered table cells.
 
 ---
 
 ## Spec Compliance Matrix
 
-Spec: `openspec/specs/churn-ml-artifacts/spec.md`
+| Requirement / Blocker | Covering Runtime Evidence | Result |
+|-----------------------|---------------------------|--------|
+| Playwright dashboard specs are real browser/E2E tests | `pnpm --dir apps/web test:e2e` passed 4/4; `dashboard.spec.ts` uses `page`, `page.goto(...)`, role/text selectors, and per-request scenario URLs; `playwright.config.ts` defines `baseURL` and Next.js `webServer`. | ✅ COMPLIANT |
+| Empty prediction dashboard UI scenario has runtime UI coverage | `dashboard empty predictions state explains the next modeling step` passed in Playwright and asserts empty cohort, KPI detail, and risk-row copy in the browser. | ✅ COMPLIANT |
+| Risk table supports sortable behavior with accessible state | `RiskTable` exposes sortable `Customer` and `Risk` header buttons with `aria-sort`; Playwright clicks customer sorting and asserts row order changes to `C-003`, `C-002`, `C-001`. | ✅ COMPLIANT |
+| Degraded analytics path stays actionable | Playwright degraded test requests the mock degraded scenario and asserts the artifact failure reason plus remediation copy. | ✅ COMPLIANT |
+| Populated dashboard consumes enriched prediction samples | Playwright populated test requests the mock happy scenario and asserts artifact version plus customer risk rows in the browser. | ✅ COMPLIANT |
+| E2E mock scenarios are deterministic across workers | Mock API reads `scenario` from the current `/analytics/dashboard` request query instead of shared mutable process state. | ✅ COMPLIANT |
+| Risk labels follow the artifact threshold contract | API exposes `threshold`, web client maps it, dashboard model uses it with a named fallback, and unit tests cover threshold-based labels. | ✅ COMPLIANT |
 
-| Spec Scenario | Covering Test | Result |
-|---------------|---------------|--------|
-| Cleaning pipeline completes: writes cleaned splits + deterministic output | test_run_training_writes_processed_splits_and_versioned_artifact_bundle | PASS |
-| Invalid input schema: fail with schema error and write no training artifacts | test_run_training_writes_no_artifacts_when_schema_screening_fails | PASS |
-| Model evaluated for churn usefulness: reports PR-AUC, ROC-AUC, precision, recall, top-risk capture, threshold | test_run_training_writes_processed_splits_and_versioned_artifact_bundle (checks metrics + threshold) | PASS |
-| Accuracy is misleading: flag model as unsuitable | test_training_evaluation_rejects_misleading_accuracy_for_candidate (from 2B.3 suite) | PASS |
-| Versioned artifact layout under artifacts/models/<run_id>/ and artifacts/metrics/<run_id>/ | test_run_training_writes_processed_splits_and_versioned_artifact_bundle | PASS |
-
----
-
-## Architecture Constraint Check
-
-Design constraint: Domain/application layers MUST NOT import pandas, sklearn, FastAPI, or filesystem clients directly.
-
-```
-grep -rn "import pandas|import sklearn|from pandas|from sklearn|import fastapi|from fastapi" packages/ml/src/churn_ml/application/ packages/ml/src/churn_ml/domain/
-```
-
-**Result: No matches** — constraint satisfied.
-
-| Layer | File | Forbidden Import | Result |
-|-------|------|------------------|--------|
-| application/pipelines/run_training.py | Ports + domain imports only | None | CLEAN |
-| application/pipelines/train.py | Evaluate + ports + domain only | None | CLEAN |
-| application/pipelines/features.py | csv + stdlib + ports + domain only | None | CLEAN |
-| __main__.py (composition root) | infrastructure imports | Allowed — composition root | CLEAN |
-| infrastructure/sklearn/candidate.py | sklearn via importlib | Expected — infrastructure layer | CLEAN |
-| infrastructure/filesystem/artifact_store.py | joblib via lazy import | Expected — infrastructure layer | CLEAN |
+**Compliance summary**: 5/5 scoped blocker scenarios compliant.
 
 ---
 
-## Checklist Verification
+## Correctness (Static Evidence)
 
-| Item | Result |
-|------|--------|
-| Tests exist for every new behavior | PASS — 4 integration + 2 store + 2 API adapter |
-| RED-first cycle documented | PASS — apply-progress confirms ImportError / AttributeError RED states |
-| Versioned artifact layout (models/<run_id>/, metrics/<run_id>/) | PASS — asserted in integration test |
-| Misleading-accuracy rejection intact | PASS — test_training_evaluation_rejects_misleading_accuracy_for_candidate passes |
-| Threshold tradeoffs preserved | PASS — test_training_evaluation_selects_threshold_with_documented_tradeoff passes |
-| Real sklearn assertion (not _FallbackModel) | PASS — test_run_training_uses_real_sklearn_estimator_not_fallback_model asserts not isinstance(result.trained_candidate.estimator, _FallbackModel) |
-| Zero artifact writes on schema failure | PASS — assert list(tmp_path.iterdir()) == [] passes |
-| API adapter contract: manifest{run_id,dataset_id,model_name,created_at_utc,feature_schema}, metrics, threshold, prediction_samples | PASS — both contract tests pass with full bundle shape check |
-| python -m churn_ml --help does not crash | PASS — help text rendered correctly |
-| Tasks 2B.5/2B.6 marked [x] | PASS — confirmed in tasks.md |
-| No other tasks touched | PASS — only 2B.5 and 2B.6 changed from [ ] to [x] |
-| pandas>=2.0, scikit-learn>=1.3, joblib>=1.3 declared in pyproject.toml | PASS |
-| CI workflow includes --with pandas --with scikit-learn | PASS |
+| Requirement | Status | Evidence |
+|------------|--------|----------|
+| Runtime dashboard fetch can be exercised deterministically by Playwright | ✅ Implemented | `DashboardPage` preserves server fetch and forwards a per-request scenario query for the local E2E mock; `DashboardClient` no longer overwrites server-rendered degraded errors during hydration. |
+| Playwright is configured as E2E, not unit-style runner only | ✅ Implemented | `apps/web/playwright.config.ts` sets `baseURL` and `webServer`; E2E specs use `page` and browser navigation. |
+| Empty prediction UI is user-visible | ✅ Implemented | `CohortChart`, KPI card detail, `DriverSummary`, and `RiskTable` expose empty-state copy; Playwright asserts the key user-facing copy. |
+| Risk table sorting and accessible state | ✅ Implemented | `RiskTable` tracks sort state, sorts with `toSorted`, renders header buttons, sets `aria-sort`, and E2E asserts `aria-sort` before and after sorting. |
+| Task/progress accuracy | ✅ Updated | `apply-progress.md` records the fix batch and now accurately describes 4/4 Playwright browser verification. |
+| Verify-report accuracy | ✅ Updated | This report supersedes the previous failed verification report after fresh execution evidence. |
+| Lint blocker | ✅ Resolved | `pnpm --dir apps/web lint` exits 0; `apps/web/package.json` now includes `eslint-plugin-react-hooks`. |
+| Review budget | ⚠️ Over budget in current working tree | Tracked diff is 276 insertions / 137 deletions across 12 files; untracked files add 969 lines. Total current uncommitted review surface exceeds the 800-line budget before this report update is considered. |
 
 ---
 
-## Issues
+## Design Coherence
+
+| Design Decision | Followed? | Notes |
+|-----------------|-----------|-------|
+| ML/data -> API -> dashboard/docs delivery order | ✅ Yes | Dashboard consumes the enriched Phase 3B analytics contract. |
+| Clean architecture boundary | ✅ Yes | UI consumes typed API DTOs and dashboard view models; ML/API internals remain outside web components. |
+| Next.js App Router | ✅ Yes | `(dashboard)/page.tsx`, `loading.tsx`, and `error.tsx` follow App Router conventions; the client component is isolated for runtime fetch/interactivity. |
+| Strict TDD | ✅ For scoped fix batch | Fix batch has reported RED/GREEN evidence and current passing tests. |
+| Enterprise accessibility | ✅ Mostly | Semantic table, sortable buttons, and `aria-sort` exist. A direct E2E assertion on `aria-sort` would strengthen the accessibility regression net. |
+| English-only artifacts | ✅ Yes | Code, tests, UI copy, and OpenSpec artifacts are English. |
+
+---
+
+## Issues Found
 
 ### CRITICAL
 None.
 
 ### WARNING
-**W1 — `__main__.py` has 0% automated test coverage (35 statements, lines 1–110)**
-
-The CLI composition root is not exercised by the integration test suite. The tests call `run_training()` directly. The `main()` function includes a `save_model_binary` call that has no covering automated test. Verified non-crash via `python -m churn_ml --help`, but the full execution path through `main()` is not covered.
-
-Remediation: Add a subprocess-based integration test or a direct call to `main()` with CLI args to cover the composition root, or explicitly document the manual verification path.
+1. **Current working tree exceeds the review budget** — split/chained PR boundaries are still needed.
+2. **Phase 5 remains pending** — verification/documentation tasks 5.1-5.3 are correctly unchecked, so the overall OpenSpec change is not archive-ready yet.
 
 ### SUGGESTION
-**S1 — httpx/starlette deprecation warning**
-
-`fastapi.testclient` emits a `StarletteDeprecationWarning` recommending `httpx2` over `httpx`. This is cosmetic and does not affect test results, but may become a failure in future FastAPI versions.
+None.
 
 ---
 
@@ -160,19 +144,27 @@ Remediation: Add a subprocess-based integration test or a direct call to `main()
 
 | File | Status |
 |------|--------|
-| packages/ml/tests/integration/test_training_entrypoint.py | VERIFIED — 4 tests pass |
-| packages/ml/src/churn_ml/application/pipelines/run_training.py | VERIFIED — 95% coverage, clean imports |
-| packages/ml/src/churn_ml/__main__.py | VERIFIED — correct CLI wiring, 0% coverage (WARNING W1) |
-| packages/ml/src/churn_ml/application/pipelines/train.py | VERIFIED — trained_candidate field added correctly |
-| packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py | VERIFIED — save_model_binary/load_model_binary correct, 98% coverage |
-| apps/api/tests/adapters/test_filesystem_snapshot_reader.py | VERIFIED — 2 contract tests covering full bundle shape |
-| packages/ml/pyproject.toml | VERIFIED — pandas/scikit-learn/joblib declared |
-| .github/workflows/ci.yml | VERIFIED — --with pandas --with scikit-learn in ML test step |
+| `apps/web/playwright.config.ts` | VERIFIED — base URL and Next.js web server are configured. |
+| `apps/web/e2e/dashboard.spec.ts` | VERIFIED — real browser tests cover populated, empty, degraded, sortable dashboard behavior, per-request mock scenarios, and explicit `aria-sort` state. |
+| `apps/web/e2e/tooling.spec.ts` | VERIFIED — browser smoke test loads the dashboard route through Playwright. |
+| `apps/web/app/(dashboard)/dashboard-client.tsx` | VERIFIED — client runtime fetch/render path preserves `initialError` during hydration. |
+| `apps/web/app/(dashboard)/page.tsx` | VERIFIED — server fetch remains, with graceful error/client fallback. |
+| `apps/web/app/(dashboard)/page.test.ts` | VERIFIED — RSC render tests pass for populated/degraded states. |
+| `apps/web/components/features/churn/risk-table.tsx` | VERIFIED — sortable buttons, sort state, ordered rows, and `aria-sort` exist. |
+| `apps/web/components/features/churn/cohort-chart.tsx` | VERIFIED — empty prediction-sample copy is aligned with runtime E2E assertions. |
+| `apps/web/components/features/churn/dashboard-model.ts` | VERIFIED — derives KPI, cohort, top-risk models, and threshold-driven risk labels from enriched prediction samples. |
+| `apps/web/components/features/churn/dashboard-model.test.ts` | VERIFIED — model tests pass. |
+| `apps/web/lib/api/client.ts` | VERIFIED — maps dashboard API wire payloads, optional threshold, per-request scenario query, and degraded responses. |
+| `apps/web/lib/api/dashboard.test.ts` | VERIFIED — API client tests pass. |
+| `apps/web/lib/api/types.ts` | VERIFIED — typed dashboard contract includes enriched prediction sample fields. |
+| `apps/web/package.json` | VERIFIED — includes `eslint-plugin-react-hooks`; lint passes. |
+| `apps/web/eslint.config.mjs` | VERIFIED — unchanged in current diff; extends Next lint config that requires the missing plugin. |
+| `openspec/changes/customer-churn-analytics-platform/tasks.md` | VERIFIED — Phase 4 tasks are checked; Phase 5 remains pending. |
+| `openspec/changes/customer-churn-analytics-platform/apply-progress.md` | VERIFIED — blocker fix batch evidence matches current test execution. |
+| `openspec/changes/customer-churn-analytics-platform/verify-report.md` | UPDATED — fresh re-verification report persisted. |
 
 ---
 
-## Archive Readiness
+## Archive / Next Phase Readiness
 
-No CRITICAL issues. One WARNING (W1: __main__.py coverage gap) is non-blocking for archive.
-
-**Recommendation: sdd-archive**
+Phase 4 blocker re-verification passes with warnings. The next recommended step is Phase 5 documentation/verification. Keep PR boundaries chained/split because the current working tree exceeds the configured review budget.

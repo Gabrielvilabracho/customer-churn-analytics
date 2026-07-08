@@ -62,12 +62,17 @@ Chain strategy: stacked-to-main
 - [x] 3.3 Add `apps/api/src/churn_api/adapters/` filesystem/model loaders that map versioned artifacts into API DTOs with freshness metadata.
 - [x] 3.4 Write failing API tests for valid prediction, invalid payload, dashboard analytics, and degraded health before completing 3.1-3.3.
 
+## Phase 3B: Dashboard Data Contract Enrichment
+
+- [x] 3B.1 RED/GREEN: Enrich ML `prediction_samples.csv` rows with dashboard cohort fields (`Contract`, `tenure`, `PaymentMethod`, `MonthlyCharges`, `InternetService`) sourced from raw test rows.
+- [x] 3B.2 RED/GREEN: Expose enriched prediction samples through `GET /analytics/dashboard` so Phase 4 visualizations can consume API-backed cohort data.
+
 ## Phase 4: Executive Dashboard
 
-- [ ] 4.1 Create `apps/web/app/(dashboard)/page.tsx` and `apps/web/lib/api/{client.ts,types.ts}` for server-side analytics fetches and typed endpoint contracts.
-- [ ] 4.2 Build `apps/web/components/features/churn/{kpi-cards.tsx,cohort-chart.tsx,risk-table.tsx,driver-summary.tsx}` using shadcn primitives, semantic Tailwind tokens, and sortable accessible tables.
-- [ ] 4.3 Add loading, error, empty, and data states in `apps/web/app/(dashboard)/{loading.tsx,error.tsx}` and feature components for missing-artifact and no-prediction scenarios.
-- [ ] 4.4 Write failing component tests and Playwright happy/degraded path specs before completing 4.1-4.3.
+- [x] 4.1 Create `apps/web/app/(dashboard)/page.tsx` and `apps/web/lib/api/{client.ts,types.ts}` for server-side analytics fetches and typed endpoint contracts.
+- [x] 4.2 Build `apps/web/components/features/churn/{kpi-cards.tsx,cohort-chart.tsx,risk-table.tsx,driver-summary.tsx}` using shadcn primitives, semantic Tailwind tokens, and sortable accessible tables.
+- [x] 4.3 Add loading, error, empty, and data states in `apps/web/app/(dashboard)/{loading.tsx,error.tsx}` and feature components for missing-artifact and no-prediction scenarios.
+- [x] 4.4 Write failing component tests and Playwright happy/degraded path specs before completing 4.1-4.3.
 
 ## Phase 5: Verification and Documentation
 
