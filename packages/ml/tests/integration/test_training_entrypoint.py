@@ -50,7 +50,8 @@ def test_run_training_writes_processed_splits_and_versioned_artifact_bundle(
     # Result contains meaningful evaluation data
     assert result.comparison.baseline_model_name == "baseline_churn_rate"
     assert result.comparison.candidate_model_name == "candidate_logistic_regression"
-    assert result.metrics.recall >= 0.95  # deterministic with random_state=42 and the committed fixture
+    # Deterministic with random_state=42 and the committed fixture.
+    assert result.metrics.recall >= 0.95
     assert result.threshold.threshold > 0.0
     assert result.trained_candidate is not None
 
