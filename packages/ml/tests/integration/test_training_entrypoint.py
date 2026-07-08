@@ -3,7 +3,11 @@ from unittest.mock import patch
 
 import pytest
 from churn_ml.application.pipelines.profile import DatasetProfileError
-from churn_ml.application.pipelines.run_training import _build_prediction_samples, run_training
+from churn_ml.application.pipelines.run_training import (
+    PREDICTION_SAMPLE_COHORT_FIELDS,
+    _build_prediction_samples,
+    run_training,
+)
 from churn_ml.application.pipelines.train import ModelComparison, TrainingEvaluationResult
 from churn_ml.domain.artifacts import ClassificationMetricSet, ThresholdSelection
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
@@ -213,6 +217,52 @@ def test_run_training_prediction_samples_include_customer_key_field(
     assert len(loaded.prediction_samples) > 0
     for sample in loaded.prediction_samples:
         assert "customerID" in sample, f"customerID missing from sample: {sample}"
+
+
+def test_run_training_prediction_samples_include_dashboard_cohort_fields(
+    tmp_path: Path,
+) -> None:
+    """Prediction samples must carry cohort fields needed by the dashboard."""
+    store = FilesystemArtifactStore(root=tmp_path)
+
+    run_training(
+        FIXTURE_DIR / "telco_churn_sample.csv",
+        artifact_store=store,
+        run_id="entrypoint-dashboard-cohorts-001",
+        dataset_id="telco-sample",
+        customer_key="customerID",
+        target_column="Churn",
+        baseline_trainer=BaselineChurnRateTrainer(),
+        candidate_trainer=SklearnLogisticRegressionTrainer(
+            model_name="candidate_logistic_regression",
+            feature_columns=FEATURE_COLUMNS,
+            random_state=42,
+        ),
+    )
+
+    loaded = store.load_bundle("entrypoint-dashboard-cohorts-001")
+    assert len(loaded.prediction_samples) > 0
+    first_sample = loaded.prediction_samples[0]
+    assert first_sample["Contract"] in {"Month-to-month", "One year", "Two year"}
+    assert first_sample["PaymentMethod"] in {
+        "Bank transfer",
+        "Credit card",
+        "Electronic check",
+        "Mailed check",
+    }
+    assert first_sample["InternetService"] in {"DSL", "Fiber optic", "No"}
+    assert int(first_sample["tenure"]) >= 0
+    assert float(first_sample["MonthlyCharges"]) > 0
+
+
+def test_prediction_sample_cohort_fields_match_public_api_contract() -> None:
+    from churn_api.application.dashboard_contract import PUBLIC_PREDICTION_SAMPLE_FIELDS
+
+    assert tuple(PREDICTION_SAMPLE_COHORT_FIELDS) == tuple(
+        field
+        for field in PUBLIC_PREDICTION_SAMPLE_FIELDS
+        if field != "churn_probability"
+    )
 
 
 # ---------------------------------------------------------------------------

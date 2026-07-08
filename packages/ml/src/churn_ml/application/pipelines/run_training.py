@@ -13,6 +13,14 @@ from churn_ml.domain.artifacts import ArtifactBundle, ArtifactManifest
 
 logger = logging.getLogger(__name__)
 
+PREDICTION_SAMPLE_COHORT_FIELDS = (
+    "Contract",
+    "tenure",
+    "PaymentMethod",
+    "MonthlyCharges",
+    "InternetService",
+)
+
 
 def run_training(
     csv_path: Path,
@@ -120,6 +128,15 @@ def _build_prediction_samples(
             customer_key: str(row[customer_key]),
             "churn_probability": f"{prob:.4f}",
             "actual_churn": str(row[target_column]),
+            **_prediction_sample_cohort_fields(row),
         }
         for row, prob in zip(raw_test_rows, probabilities, strict=True)
     )
+
+
+def _prediction_sample_cohort_fields(row: dict[str, str]) -> dict[str, str]:
+    return {
+        column: str(row[column])
+        for column in PREDICTION_SAMPLE_COHORT_FIELDS
+        if column in row
+    }

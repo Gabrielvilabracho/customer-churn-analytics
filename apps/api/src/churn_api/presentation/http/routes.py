@@ -6,8 +6,8 @@ from fastapi.responses import JSONResponse
 from churn_api.application.services import (
     AnalyticsService,
     PredictionService,
-    PredictionValidationError,
 )
+from churn_api.domain.predictions import PredictionValidationError
 from churn_api.presentation.http.schemas import PredictionRequest
 
 

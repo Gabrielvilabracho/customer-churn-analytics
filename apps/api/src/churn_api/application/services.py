@@ -1,41 +1,13 @@
-from dataclasses import dataclass
 from typing import Any
 
-
-@dataclass(frozen=True)
-class ModelMetadata:
-    run_id: str
-    dataset_id: str
-    model_name: str
-    created_at_utc: str
-    feature_schema: dict[str, str]
-
-
-@dataclass(frozen=True)
-class ArtifactSnapshot:
-    model: ModelMetadata
-    metrics: dict[str, float]
-    threshold: float
-    prediction_samples: tuple[dict[str, str], ...]
-    freshness: dict[str, str]
-
-
-@dataclass(frozen=True)
-class PredictionResult:
-    churn_probability: float
-    risk_segment: str
-    retention_priority: str
-    top_drivers: tuple[str, ...]
-
-
-class PredictionValidationError(ValueError):
-    def __init__(self, details: list[str]) -> None:
-        super().__init__("Invalid prediction request.")
-        self.details = details
+from churn_api.application.dashboard_contract import to_public_prediction_sample_dtos
+from churn_api.application.ports.artifacts import ArtifactSnapshotReader
+from churn_api.application.ports.scoring import ChurnScorer
+from churn_api.domain.predictions import PredictionValidationError
 
 
 class AnalyticsService:
-    def __init__(self, artifact_reader: Any) -> None:
+    def __init__(self, artifact_reader: ArtifactSnapshotReader) -> None:
         self._artifact_reader = artifact_reader
 
     def health(self) -> dict[str, Any]:
@@ -63,6 +35,10 @@ class AnalyticsService:
             "artifact_version": snapshot.model.run_id,
             "freshness": snapshot.freshness,
             "kpis": snapshot.metrics,
+            "threshold": snapshot.threshold,
+            "prediction_samples": to_public_prediction_sample_dtos(
+                snapshot.prediction_samples
+            ),
             "risk_distribution": _risk_distribution(
                 snapshot.prediction_samples,
                 snapshot.threshold,
@@ -71,7 +47,7 @@ class AnalyticsService:
 
 
 class PredictionService:
-    def __init__(self, artifact_reader: Any, scorer: Any) -> None:
+    def __init__(self, artifact_reader: ArtifactSnapshotReader, scorer: ChurnScorer) -> None:
         self._artifact_reader = artifact_reader
         self._scorer = scorer
 

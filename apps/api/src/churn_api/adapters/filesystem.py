@@ -2,7 +2,7 @@ from pathlib import Path
 
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
 
-from churn_api.application.services import ArtifactSnapshot, ModelMetadata
+from churn_api.domain.artifacts import ArtifactSnapshot, ModelMetadata
 
 
 class FilesystemArtifactSnapshotReader:

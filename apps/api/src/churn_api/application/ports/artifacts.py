@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from churn_api.application.services import ArtifactSnapshot
+from churn_api.domain.artifacts import ArtifactSnapshot
 
 
 class ArtifactSnapshotReader(Protocol):
