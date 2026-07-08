@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-import { PROJECT_METADATA } from "../lib/project-metadata";
+test("tooling smoke test loads the dashboard route in a browser", async ({ page }) => {
+  await page.goto("/");
 
-test("tooling metadata keeps the E2E runner scoped to the PR0 slice", () => {
-  expect(PROJECT_METADATA.deliveryMode).toBe("stacked-to-main");
+  await expect(page).toHaveTitle("Customer Churn Analytics");
+  await expect(page.getByRole("heading", { name: "Executive churn command center" })).toBeVisible();
 });
