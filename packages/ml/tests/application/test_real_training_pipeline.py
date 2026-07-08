@@ -24,7 +24,15 @@ def test_real_telco_csv_loads_and_excludes_customer_id_from_model_features(
         seed=7,
     )
 
-    assert result.feature_columns == ("gender", "SeniorCitizen", "tenure", "MonthlyCharges")
+    assert result.feature_columns == (
+        "gender",
+        "SeniorCitizen",
+        "tenure",
+        "MonthlyCharges",
+        "Contract",
+        "PaymentMethod",
+        "InternetService",
+    )
     assert "customerID" not in result.train_fit_metadata["feature_columns"]
     assert (tmp_path / "processed" / "real-telco-001" / "train.csv").is_file()
     assert (tmp_path / "processed" / "real-telco-001" / "test.csv").is_file()

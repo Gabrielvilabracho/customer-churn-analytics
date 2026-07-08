@@ -1,8 +1,8 @@
-from churn_api.application.services import PredictionResult
+from churn_api.domain.predictions import PredictionResult
 
 
 class StubChurnScorer:
-    def score(self, features: dict[str, float | str]) -> PredictionResult:
+    def score(self, features: dict[str, float | str | bool]) -> PredictionResult:
         tenure_value = features.get("tenure_months", 0)
         tenure_months = float(tenure_value) if isinstance(tenure_value, int | float) else 0.0
         probability = 0.78 if tenure_months < 12 else 0.31

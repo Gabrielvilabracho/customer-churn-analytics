@@ -5,7 +5,8 @@ from typing import Any
 
 from churn_api.adapters.filesystem import FilesystemArtifactSnapshotReader
 from churn_api.adapters.scoring import StubChurnScorer
-from churn_api.application.services import ArtifactSnapshot, ModelMetadata, PredictionResult
+from churn_api.domain.artifacts import ArtifactSnapshot, ModelMetadata
+from churn_api.domain.predictions import PredictionResult
 from churn_api.main import create_app
 from churn_ml.domain.artifacts import (
     ArtifactBundle,
@@ -45,8 +46,26 @@ class _ReadyArtifacts:
             metrics={"recall": 0.81, "precision": 0.64, "pr_auc": 0.72},
             threshold=0.42,
             prediction_samples=(
-                {"customer_id": "C001", "churn_probability": "0.82", "actual_churn": "Yes"},
-                {"customer_id": "C002", "churn_probability": "0.18", "actual_churn": "No"},
+                {
+                    "customer_id": "C001",
+                    "churn_probability": "0.82",
+                    "actual_churn": "Yes",
+                    "Contract": "Month-to-month",
+                    "tenure": "3",
+                    "PaymentMethod": "Electronic check",
+                    "MonthlyCharges": "88.20",
+                    "InternetService": "Fiber optic",
+                },
+                {
+                    "customer_id": "C002",
+                    "churn_probability": "0.18",
+                    "actual_churn": "No",
+                    "Contract": "Two year",
+                    "tenure": "40",
+                    "PaymentMethod": "Credit card",
+                    "MonthlyCharges": "49.10",
+                    "InternetService": "DSL",
+                },
             ),
             freshness={"metrics_created_at_utc": "2026-07-02T00:00:00Z"},
         )
@@ -171,7 +190,53 @@ def test_model_metadata_and_dashboard_analytics_are_artifact_backed() -> None:
     assert dashboard.status_code == 200
     assert dashboard.json()["artifact_version"] == "run-2026-07-02"
     assert dashboard.json()["kpis"] == {"recall": 0.81, "precision": 0.64, "pr_auc": 0.72}
+    assert dashboard.json()["threshold"] == 0.42
     assert dashboard.json()["risk_distribution"] == {"high": 1, "low": 1}
+
+
+def test_dashboard_exposes_sanitized_prediction_samples_for_cohort_visualizations() -> None:
+    client, _ = _client()
+
+    response = client.get("/analytics/dashboard")
+
+    assert response.status_code == 200
+    samples = response.json()["prediction_samples"]
+    assert samples == [
+        {
+            "sample_id": "sample-001",
+            "display_reference": "Sample 001",
+            "churn_probability": "0.82",
+            "Contract": "Month-to-month",
+            "tenure": "3",
+            "PaymentMethod": "Electronic check",
+            "MonthlyCharges": "88.20",
+            "InternetService": "Fiber optic",
+        },
+        {
+            "sample_id": "sample-002",
+            "display_reference": "Sample 002",
+            "churn_probability": "0.18",
+            "Contract": "Two year",
+            "tenure": "40",
+            "PaymentMethod": "Credit card",
+            "MonthlyCharges": "49.10",
+            "InternetService": "DSL",
+        },
+    ]
+
+
+def test_dashboard_sample_sanitization_removes_raw_identifiers_and_actual_churn() -> None:
+    client, _ = _client()
+
+    response = client.get("/analytics/dashboard")
+
+    assert response.status_code == 200
+    first_sample = response.json()["prediction_samples"][0]
+    assert "customer_id" not in first_sample
+    assert "customerID" not in first_sample
+    assert "actual_churn" not in first_sample
+    assert first_sample["sample_id"] == "sample-001"
+    assert first_sample["display_reference"] == "Sample 001"
 
 
 def test_prediction_contract_returns_risk_decision_and_driver_payload() -> None:
