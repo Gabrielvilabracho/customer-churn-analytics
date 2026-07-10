@@ -469,3 +469,41 @@ sdd-verify focused on archive readiness; do not archive until verification passe
 - Current work unit: delivery metadata guardrail follow-up only.
 - Boundary: PR metadata enforcement, workflow permission hardening, and artifact truth cleanup; no ML/API/dashboard product behavior changes.
 - Estimated review budget impact: aggregate working tree remains over the 400-line slice budget; PR/archive readiness depends on splitting into work-unit PRs.
+
+---
+
+## Final 4R Review Guardrail Remediation
+
+### Completed Fixes
+- [x] Replaced direct shell interpolation of `origin/${{ github.base_ref }}` with a `BASE_REF` environment variable and quoted shell variable usage.
+- [x] Strengthened workflow runtime marker validation so `apps/web test:e2e` no longer satisfies the web unit-test marker.
+- [x] Required an explicit `pnpm --dir apps/web build` workflow marker for the web job.
+- [x] Corrected `verify-report.md` to document the intended `chore/delivery-guardrail-cli...test/delivery-metadata-budget` stacked base, current slice counts, and current whole-stack count.
+
+### TDD Cycle Evidence — Final 4R Guardrail Remediation
+| Task | Test File | Layer | Safety Net | RED | GREEN | TRIANGULATE | REFACTOR |
+|------|-----------|-------|------------|-----|-------|-------------|----------|
+| Final 4R workflow guardrails | `packages/ml/tests/test_delivery_workflow_guardrails.py` | Repository governance unit | ✅ Existing workflow guardrail suite: 12/12 passed before edits | ✅ Added failing tests for unsafe direct base-ref interpolation, web unit/e2e substring false positive, and missing web build marker | ✅ Focused workflow guardrail suite: 15/15 passed; focused guardrail suite: 30/30 passed | ✅ Covers safe current workflow plus three negative workflow mutations | ✅ Extracted exact run-command marker helper and delivery guardrail CLI status |
+| Final 4R report correction | `openspec/changes/customer-churn-analytics-platform/verify-report.md` | Documentation | ✅ Existing report and current stack counts read before edits | ➖ Documentation correction; no production behavior | ✅ OpenSpec strict validation passed after update | ✅ Corrected slice base, top slice count, and whole-stack count | ✅ Reframed single-PR whole-stack failure as expected under stacked review |
+
+### Verification Results
+- ✅ Safety net: `uv run --no-project --python 3.12 --with pytest --with pytest-cov --with fastapi --with httpx --with pandas --with scikit-learn pytest packages/ml/tests/test_delivery_workflow_guardrails.py` → 12 passed before edits.
+- ✅ RED: same focused workflow command after adding tests → 4 failed, 11 passed before implementation.
+- ✅ GREEN: same focused workflow command after implementation/test fixture update → 15 passed.
+- ✅ Focused guardrail regression: `uv run --no-project --python 3.12 --with pytest --with pytest-cov --with fastapi --with httpx --with pandas --with scikit-learn pytest packages/ml/tests/test_delivery_metadata_guardrails.py packages/ml/tests/test_delivery_workflow_guardrails.py packages/ml/tests/test_delivery_budget_guardrails.py packages/ml/tests/test_delivery_documentation_guardrails.py packages/ml/tests/test_delivery_cli_guardrails.py` → 30 passed.
+- ✅ Quality: `uv run --with ruff ruff check scripts packages/ml/tests/test_delivery_metadata_guardrails.py packages/ml/tests/test_delivery_workflow_guardrails.py packages/ml/tests/test_delivery_budget_guardrails.py packages/ml/tests/test_delivery_documentation_guardrails.py packages/ml/tests/test_delivery_cli_guardrails.py packages/ml/tests/conftest.py` → passed.
+- ✅ OpenSpec validation: `pnpm dlx @fission-ai/openspec@latest validate --all --strict` → 7 passed, 0 failed.
+- ✅ Current slice guardrail: `uv run --no-project --python 3.12 python scripts/delivery_guardrails.py --root . --base-ref docs/openspec-apply-progress --budget 400` → PASS with committed `HEAD` at `changed_lines: 210`; `git diff --numstat docs/openspec-apply-progress` shows the current working-tree top slice at 398 changed lines.
+- ⚠️ Whole-stack single-PR guardrail: `uv run --no-project --python 3.12 python scripts/delivery_guardrails.py --root . --base-ref main --budget 400` → expected FAIL with committed `HEAD` at `changed_lines: 2087`; `git diff --numstat main` shows the current working tree at 2251 changed lines.
+
+### Files Changed
+- `.github/workflows/ci.yml` — passes the base ref through `BASE_REF` and invokes the guardrail with `--base-ref "$BASE_REF"`.
+- `scripts/delivery_guardrails_lib/workflow.py` — validates safe base-ref env usage, exact web unit/e2e/build run commands, and reports `unsafe_base_ref` for direct base-ref interpolation.
+- `packages/ml/tests/test_delivery_workflow_guardrails.py` — adds regression coverage for safe base-ref handling, web unit/e2e marker precision, and required web build.
+- `openspec/changes/customer-churn-analytics-platform/verify-report.md` — corrects stack bases/counts and final readiness status.
+
+### Workload / PR Boundary
+- Mode: stacked PR slice.
+- Current work unit: final 4R guardrail/report remediation only.
+- Boundary: CI workflow safety, delivery guardrail validation, and verification report correction; no ML/API/dashboard product behavior changes.
+- Estimated review budget impact: current top slice remains within the 400-line budget at 398 working-tree changed lines against `docs/openspec-apply-progress`.

@@ -23,7 +23,9 @@ jobs:
         run: python scripts/delivery_guardrails.py --check pr-metadata
       - name: Run delivery guardrails
         if: github.event_name == 'pull_request'
-        run: python scripts/delivery_guardrails.py --base-ref "origin/${{ github.base_ref }}"
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+        run: python scripts/delivery_guardrails.py --base-ref "$BASE_REF"
 
   python:
     runs-on: ubuntu-latest

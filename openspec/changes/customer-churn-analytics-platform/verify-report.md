@@ -7,9 +7,9 @@
 
 ## Verdict
 
-**PASS WITH WARNINGS for behavior/spec verification; ARCHIVE BLOCKED for delivery readiness.**
+**PASS WITH WARNINGS for behavior/spec verification and stacked delivery readiness.**
 
-Runtime/product behavior remains verified from prior green evidence, OpenSpec strict validation is green, and the current top branch passes the delivery guardrail against its previous stack branch. The remaining blocker is review readiness for the local stack: one earlier slice exceeds the 400-line budget and needs another split or an explicit size exception before PR/archive readiness.
+Runtime/product behavior remains verified from prior green evidence, OpenSpec strict validation is green, and the current top branch passes the delivery guardrail against its previous stack branch. The local stack is reviewable as chained PRs: every current slice is below the 400-line budget when audited against its intended stacked base. The whole stack is still not single-PR ready, which is expected under the approved stacked-to-main strategy.
 
 ## Current Gate Summary
 
@@ -17,34 +17,37 @@ Runtime/product behavior remains verified from prior green evidence, OpenSpec st
 |------|--------|----------|
 | Persisted tasks | ✅ PASS | `tasks.md` has 31/31 tasks complete. |
 | Strict TDD evidence | ✅ PASS with distribution warning | `apply-progress.md` contains RED/GREEN evidence; recent guardrail split tests pass at runtime. Historical evidence for early product phases is distributed across batches. |
-| Focused delivery guardrail tests | ✅ PASS | `pytest ... test_delivery_metadata_guardrails.py ... test_delivery_cli_guardrails.py` → 27 passed. |
+| Focused delivery guardrail tests | ✅ PASS | `pytest ... test_delivery_metadata_guardrails.py ... test_delivery_cli_guardrails.py` → 30 passed. |
 | Ruff for touched scripts/tests | ✅ PASS | `ruff check scripts packages/ml/tests/test_delivery_*_guardrails.py packages/ml/tests/conftest.py` → passed. |
 | OpenSpec strict validation | ✅ PASS | `pnpm dlx @fission-ai/openspec@latest validate --all --strict` → 7 passed, 0 failed. |
-| Current top branch review budget | ✅ PASS | Guardrail base-ref smoke against `docs/openspec-apply-progress` → 206 committed changed lines; updated working-copy report diff remains 210 changed lines. |
-| Whole stack review budget | ❌ BLOCKED | Guardrail base-ref smoke against `main` → 2083 changed lines; local stack slice audit shows one child slice at 577 changed lines. |
+| Current top branch review budget | ✅ PASS | Guardrail base-ref smoke against committed `HEAD` → 210 changed lines; current working tree remediation diff against `docs/openspec-apply-progress` → 398 changed lines. |
+| Stacked slice review budget | ✅ PASS | Current slice audit uses the intended stacked bases; every slice is below 400 changed lines. |
+| Whole stack review budget | ⚠️ EXPECTED FAIL FOR SINGLE PR | Guardrail base-ref smoke against committed `HEAD` → 2087 changed lines; current working tree against `main` → 2251 changed lines. This is not the intended PR boundary. |
 
 ## Fresh Verification Evidence
 
 | Command | Result |
 |---------|--------|
-| `uv run --no-project --python 3.12 --with pytest --with pytest-cov --with fastapi --with httpx --with pandas --with scikit-learn pytest packages/ml/tests/test_delivery_metadata_guardrails.py packages/ml/tests/test_delivery_workflow_guardrails.py packages/ml/tests/test_delivery_budget_guardrails.py packages/ml/tests/test_delivery_documentation_guardrails.py packages/ml/tests/test_delivery_cli_guardrails.py` | ✅ 27 passed. Coverage warning is expected because these tests exercise governance scripts outside the configured product coverage roots. |
+| `uv run --no-project --python 3.12 --with pytest --with pytest-cov --with fastapi --with httpx --with pandas --with scikit-learn pytest packages/ml/tests/test_delivery_metadata_guardrails.py packages/ml/tests/test_delivery_workflow_guardrails.py packages/ml/tests/test_delivery_budget_guardrails.py packages/ml/tests/test_delivery_documentation_guardrails.py packages/ml/tests/test_delivery_cli_guardrails.py` | ✅ 30 passed. Coverage warning is expected because these tests exercise governance scripts outside the configured product coverage roots. |
 | `uv run --with ruff ruff check scripts packages/ml/tests/test_delivery_metadata_guardrails.py packages/ml/tests/test_delivery_workflow_guardrails.py packages/ml/tests/test_delivery_budget_guardrails.py packages/ml/tests/test_delivery_documentation_guardrails.py packages/ml/tests/test_delivery_cli_guardrails.py packages/ml/tests/conftest.py` | ✅ Passed. |
 | `pnpm dlx @fission-ai/openspec@latest validate --all --strict` | ✅ 7 passed, 0 failed. |
-| `uv run --no-project --python 3.12 python scripts/delivery_guardrails.py --root . --base-ref docs/openspec-apply-progress --budget 400` | ✅ PASS — `changed_lines: 206`. |
-| `git diff --numstat docs/openspec-apply-progress -- openspec/changes/customer-churn-analytics-platform/verify-report.md` | ✅ Working-copy report update remains within budget — 210 changed lines. |
-| `uv run --no-project --python 3.12 python scripts/delivery_guardrails.py --root . --base-ref main --budget 400` | ❌ Expected stack-level FAIL — `changed_lines: 2083`. |
+| `uv run --no-project --python 3.12 python scripts/delivery_guardrails.py --root . --base-ref docs/openspec-apply-progress --budget 400` | ✅ PASS — `changed_lines: 210`. |
+| `git diff --numstat docs/openspec-apply-progress` | ✅ Current working-tree top slice remains within budget — 398 changed lines. |
+| `uv run --no-project --python 3.12 python scripts/delivery_guardrails.py --root . --base-ref main --budget 400` | ⚠️ Expected single-PR stack-level FAIL — `changed_lines: 2087`. |
+| `git diff --numstat main` | ⚠️ Current working-tree whole stack is 2251 changed lines; this is intentionally not the review boundary. |
 
 ## Stack Slice Budget Notes
 
 | Slice | Result | Changed lines |
 |-------|--------|---------------|
 | `main...chore/delivery-guardrail-core` | ✅ PASS | 202 |
-| `chore/delivery-guardrail-core...test/delivery-metadata-budget` | ❌ FAIL | 577 |
+| `chore/delivery-guardrail-core...chore/delivery-guardrail-cli` | ✅ PASS | 354 |
+| `chore/delivery-guardrail-cli...test/delivery-metadata-budget` | ✅ PASS | 223 |
 | `test/delivery-metadata-budget...ci/delivery-workflow-guardrails` | ✅ PASS | 206 |
 | `ci/delivery-workflow-guardrails...docs/portfolio-review-guides` | ✅ PASS | 312 |
 | `docs/portfolio-review-guides...docs/openspec-delta-specs` | ✅ PASS | 216 |
 | `docs/openspec-delta-specs...docs/openspec-apply-progress` | ✅ PASS | 364 |
-| `docs/openspec-apply-progress...docs/openspec-verify-report` | ✅ PASS | 206 committed / 210 with this report update |
+| `docs/openspec-apply-progress...docs/openspec-verify-report` | ✅ PASS | 210 committed / 398 current working tree |
 
 ## Preserved Product Runtime Evidence
 
@@ -66,19 +69,18 @@ Product suites were not rerun in this final pass because the current top branch 
 | Churn analytics API | ✅ Prior API regression evidence remains applicable; no product source drift. |
 | Executive dashboard | ✅ Prior web regression evidence remains applicable; no product source drift. |
 | Portfolio documentation | ✅ Documentation guardrail passes and docs preserve artifact-backed/no-fabrication policy. |
-| Chained review readiness | ⚠️ Partially ready — the current top branch is within budget, but `test/delivery-metadata-budget` remains over budget. |
+| Chained review readiness | ✅ Ready as stacked PRs — all current slices are within the 400-line budget against their intended bases. |
 
 ## Current Blockers
 
-1. **`test/delivery-metadata-budget` exceeds the 400-line slice budget** at 577 changed lines. Split that slice further or record an explicit size exception before opening the chain for review.
-2. **Whole-stack diff is not single-PR ready** at 2083 changed lines against `main`; this is expected under the chained PR decision but still blocks archive/readiness as a single change.
+None for stacked PR review. The committed whole-stack diff is **2087 changed lines against `main`** and the current working tree is **2251 changed lines against `main`**, so it remains intentionally unsuitable for a single PR; reviewers should use the documented stacked bases above.
 
 ## PR / Archive Readiness
 
 - **Current top branch PR readiness**: ready against `docs/openspec-apply-progress` from a guardrail perspective.
-- **Full stacked PR chain readiness**: blocked until the 577-line `test/delivery-metadata-budget` slice is split or explicitly accepted.
-- **Archive readiness**: blocked until the stack is review-ready and merged/accepted; do not archive the OpenSpec change yet.
+- **Full stacked PR chain readiness**: ready as stacked PRs; all current slices are within budget against their intended bases.
+- **Archive readiness**: wait until the stacked chain is reviewed and merged/accepted; do not treat `main...HEAD` as a single review unit.
 
 ## Final Verdict
 
-**Behavior/spec verification passes. Delivery readiness is blocked by one oversized stack slice.**
+**Behavior/spec verification passes. Stacked delivery readiness passes with the expected warning that the full stack is not a single-PR diff.**
