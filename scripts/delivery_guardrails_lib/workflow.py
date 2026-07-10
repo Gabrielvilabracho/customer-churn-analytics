@@ -8,6 +8,7 @@ from scripts.delivery_guardrails_lib.result import GuardrailResult
 PR_TITLE_EXPRESSION = "${{ github.event.pull_request.title }}"
 PR_BODY_EXPRESSION = "${{ github.event.pull_request.body }}"
 PR_BASE_REF_EXPRESSION = "${{ github.base_ref }}"
+BASE_REF_ENV_MARKER = "BASE_REF: origin/${{ github.base_ref }}"
 REQUIRED_JOBS = frozenset({"pr-validation", "python", "web", "web-e2e"})
 
 
@@ -17,6 +18,10 @@ def active_lines(text: str) -> list[str]:
 
 def has_active_marker(lines: Sequence[str], marker: str) -> bool:
     return any(marker in line for line in lines)
+
+
+def has_active_run_command(lines: Sequence[str], command: str) -> bool:
+    return any(line.strip() == f"run: {command}" for line in lines)
 
 
 def indent_width(line: str) -> int:
@@ -133,45 +138,63 @@ def _job_has_disabled_if(job: str, block: Sequence[str]) -> bool:
 
 def _workflow_state(lines: Sequence[str]) -> dict[str, object]:
     has_metadata, has_unsafe_metadata = safe_pr_metadata_validation(lines)
+    delivery_guardrails_cli = _delivery_guardrails_cli_status(lines)
     return {
         "has_pull_request": has_active_marker(lines, "pull_request:"),
         "has_pr_validation_job": has_active_marker(lines, "pr-validation:"),
         "has_metadata": has_metadata,
         "has_unsafe_metadata": has_unsafe_metadata,
         "has_disabled_metadata": metadata_validation_is_disabled(lines),
-        "has_guardrail_cli": _has_guardrail_cli(lines),
+        "delivery_guardrails_cli": delivery_guardrails_cli,
+        "has_guardrail_cli": delivery_guardrails_cli == "present",
         "missing_jobs": _missing_runtime_jobs(lines),
         "disabled_checks": disabled_required_checks(lines),
     }
 
 
-def _has_guardrail_cli(lines: Sequence[str]) -> bool:
-    return (
-        has_active_marker(lines, "python scripts/delivery_guardrails.py")
-        and has_active_marker(lines, "--base-ref")
-        and has_active_marker(lines, PR_BASE_REF_EXPRESSION)
-    )
+def _delivery_guardrails_cli_status(lines: Sequence[str]) -> str:
+    guardrail_lines = [line for line in lines if "python scripts/delivery_guardrails.py" in line]
+    if not guardrail_lines or not any("--base-ref" in line for line in guardrail_lines):
+        return "missing"
+    if any(PR_BASE_REF_EXPRESSION in line for line in guardrail_lines):
+        return "unsafe_base_ref"
+    if not has_active_marker(lines, BASE_REF_ENV_MARKER):
+        return "missing"
+    if not any('--base-ref "$BASE_REF"' in line for line in guardrail_lines):
+        return "missing"
+    return "present"
 
 
 def _missing_runtime_jobs(lines: Sequence[str]) -> list[str]:
     job_markers = {
         "ml": ("python:", "packages/ml/tests"),
         "api": ("python:", "apps/api/tests"),
-        "web": ("web:", "apps/web test", "apps/web typecheck"),
-        "e2e": ("web-e2e:", "apps/web test:e2e"),
+        "web": (
+            "web:",
+            "pnpm --dir apps/web test",
+            "pnpm --dir apps/web typecheck",
+            "pnpm --dir apps/web build",
+        ),
+        "e2e": ("web-e2e:", "pnpm --dir apps/web test:e2e"),
     }
     return [
         job
         for job, markers in job_markers.items()
-        if not all(has_active_marker(lines, marker) for marker in markers)
+        if not all(_has_required_runtime_marker(lines, marker) for marker in markers)
     ]
+
+
+def _has_required_runtime_marker(lines: Sequence[str], marker: str) -> bool:
+    if marker.startswith("pnpm --dir"):
+        return has_active_run_command(lines, marker)
+    return has_active_marker(lines, marker)
 
 
 def _workflow_details(state: dict[str, object]) -> dict[str, str]:
     details = {
         "pull_request_trigger": "present" if state["has_pull_request"] else "missing",
         "metadata_validation": _metadata_status(state),
-        "delivery_guardrails_cli": "present" if state["has_guardrail_cli"] else "missing",
+        "delivery_guardrails_cli": str(state["delivery_guardrails_cli"]),
         "runtime_checks": "ml,api,web,e2e"
         if not state["missing_jobs"]
         else ",".join(state["missing_jobs"]),
