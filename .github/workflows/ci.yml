@@ -25,7 +25,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           BASE_REF: origin/${{ github.base_ref }}
-        run: python scripts/delivery_guardrails.py --base-ref "$BASE_REF"
+        run: python scripts/delivery_guardrails.py --check pr-workflow --check review-budget --base-ref "$BASE_REF"
 
   python:
     runs-on: ubuntu-latest
