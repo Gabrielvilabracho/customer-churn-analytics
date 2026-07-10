@@ -50,7 +50,8 @@ def test_workflow_guardrail_rejects_direct_base_ref_shell_interpolation(
         workflow.replace(
             "        env:\n"
             "          BASE_REF: origin/${{ github.base_ref }}\n"
-            "        run: python scripts/delivery_guardrails.py --base-ref \"$BASE_REF\"",
+            "        run: python scripts/delivery_guardrails.py "
+            "--check pr-workflow --check review-budget --base-ref \"$BASE_REF\"",
             "        run: python scripts/delivery_guardrails.py "
             "--base-ref \"origin/${{ github.base_ref }}\"",
             1,
