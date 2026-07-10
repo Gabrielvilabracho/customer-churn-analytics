@@ -26,6 +26,9 @@ def test_ci_workflow_runs_delivery_guardrail_cli_as_executable_gate(
 
     assert "python scripts/delivery_guardrails.py" in workflow
     assert "--base-ref" in workflow
+    assert "BASE_REF: origin/${{ github.base_ref }}" in workflow
+    assert '--base-ref "$BASE_REF"' in workflow
+    assert '--base-ref "origin/${{ github.base_ref }}"' not in workflow
     assert "--check pr-metadata" in workflow
     assert "PR_TITLE: ${{ github.event.pull_request.title }}" in workflow
     assert "PR_BODY: ${{ github.event.pull_request.body }}" in workflow
@@ -33,6 +36,78 @@ def test_ci_workflow_runs_delivery_guardrail_cli_as_executable_gate(
     assert 'test -n "$PR_BODY"' not in workflow
     assert 'test -n "${{ github.event.pull_request.title }}"' not in workflow
     assert 'test -n "${{ github.event.pull_request.body }}"' not in workflow
+
+
+def test_workflow_guardrail_rejects_direct_base_ref_shell_interpolation(
+    tmp_path: Path,
+    project_root: Path,
+) -> None:
+    workflow_path = tmp_path / "ci.yml"
+    workflow = (project_root / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    workflow_path.write_text(
+        workflow.replace(
+            "        env:\n"
+            "          BASE_REF: origin/${{ github.base_ref }}\n"
+            "        run: python scripts/delivery_guardrails.py --base-ref \"$BASE_REF\"",
+            "        run: python scripts/delivery_guardrails.py "
+            "--base-ref \"origin/${{ github.base_ref }}\"",
+            1,
+        ),
+        encoding="utf-8",
+    )
+
+    result = check_pull_request_workflow(workflow_path)
+
+    assert result.passed is False
+    assert result.details["delivery_guardrails_cli"] == "unsafe_base_ref"
+
+
+def test_workflow_guardrail_rejects_web_e2e_as_web_unit_substring(
+    tmp_path: Path,
+    project_root: Path,
+) -> None:
+    workflow_path = tmp_path / "ci.yml"
+    workflow = (project_root / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    workflow_path.write_text(
+        workflow.replace(
+            "      - name: Run web tests\n        run: pnpm --dir apps/web test\n",
+            "",
+            1,
+        ),
+        encoding="utf-8",
+    )
+
+    result = check_pull_request_workflow(workflow_path)
+
+    assert result.passed is False
+    assert result.details["runtime_checks"] == "web"
+
+
+def test_workflow_guardrail_requires_web_build(
+    tmp_path: Path,
+    project_root: Path,
+) -> None:
+    workflow_path = tmp_path / "ci.yml"
+    workflow = (project_root / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    workflow_path.write_text(
+        workflow.replace(
+            "      - name: Run web build\n        run: pnpm --dir apps/web build\n",
+            "",
+            1,
+        ),
+        encoding="utf-8",
+    )
+
+    result = check_pull_request_workflow(workflow_path)
+
+    assert result.passed is False
+    assert result.details["runtime_checks"] == "web"
 
 
 def test_workflow_guardrail_rejects_commented_or_unsafe_markers(tmp_path: Path) -> None:
@@ -176,9 +251,13 @@ def test_workflow_guardrail_rejects_disabled_delivery_guardrail_step(
         workflow.replace(
             "      - name: Run delivery guardrails\n"
             "        if: github.event_name == 'pull_request'\n"
+            "        env:\n"
+            "          BASE_REF: origin/${{ github.base_ref }}\n"
             "        run: python scripts/delivery_guardrails.py",
             "      - name: Run delivery guardrails\n"
             f"        {disabled_if}\n"
+            "        env:\n"
+            "          BASE_REF: origin/${{ github.base_ref }}\n"
             "        run: python scripts/delivery_guardrails.py",
             1,
         ),
