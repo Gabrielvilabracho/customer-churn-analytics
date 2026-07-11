@@ -1,5 +1,9 @@
 # Proposal: Customer Churn Analytics Platform
 
+## Why
+
+This change exists to turn the churn analytics work into a credible portfolio-grade product rather than a notebook demo. The platform needs reproducible data acquisition, verified ML artifacts, an artifact-backed API, and an executive dashboard so reviewers can validate both analytical credibility and engineering discipline.
+
 ## Intent
 
 Build a premium portfolio-grade churn analytics product: Kaggle dataset acquisition, reproducible ML artifacts, FastAPI serving, and a B2B SaaS executive dashboard. This must prove product thinking and engineering quality, not become a notebook demo.
