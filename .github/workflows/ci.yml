@@ -5,16 +5,27 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   pr-validation:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Validate PR metadata
         if: github.event_name == 'pull_request'
-        run: |
-          test -n "${{ github.event.pull_request.title }}"
-          test -n "${{ github.event.pull_request.body }}"
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python scripts/delivery_guardrails.py --check pr-metadata
+      - name: Run delivery guardrails
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: origin/${{ github.base_ref }}
+        run: python scripts/delivery_guardrails.py --check pr-workflow --check review-budget --base-ref "$BASE_REF"
 
   python:
     runs-on: ubuntu-latest
