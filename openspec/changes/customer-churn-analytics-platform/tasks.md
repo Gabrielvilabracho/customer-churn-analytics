@@ -76,6 +76,7 @@ Chain strategy: stacked-to-main
 
 ## Phase 5: Verification and Documentation
 
-- [ ] 5.1 Verify ML pytest coverage for CSV fixture loading, identifier exclusion, deterministic splits, misleading-accuracy rejection, and model/artifact persistence paths.
-- [ ] 5.2 Verify API adapter/route tests for artifact compatibility, valid prediction, invalid payload, and degraded health when artifacts are missing.
-- [ ] 5.3 Verify frontend tests and add `README.md`, `docs/{modeling-report.md,architecture.md,api-contract.md}` to document setup, artifact flow, guarantees, and reviewer verification commands.
+- [x] 5.1 Verify ML pytest coverage for CSV fixture loading, identifier exclusion, deterministic splits, misleading-accuracy rejection, and model/artifact persistence paths.
+- [x] 5.2 Verify API adapter/route tests for artifact compatibility, valid prediction, invalid payload, and degraded health when artifacts are missing.
+- [x] 5.3 Verify frontend tests and add `README.md`, `docs/{modeling-report.md,architecture.md,api-contract.md}` to document setup, artifact flow, guarantees, and reviewer verification commands.
+- [x] 5.4 Add resilient executable delivery guardrail checks for PR workflow coverage, base-ref 400-line budget enforcement, documentation anti-shortcut acceptance, CLI output, and malformed-input handling.
