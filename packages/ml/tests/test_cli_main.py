@@ -28,6 +28,8 @@ def test_main_happy_path_writes_model_binary_and_metrics(
             "--dataset-id", "telco-sample",
             "--run-id", run_id,
             "--artifact-root", str(tmp_path),
+            "--customer-key", "customerID",
+            "--target-column", "Churn",
         ],
     )
     # Fixture CSV only has 4 feature columns; patch the default to match.
@@ -35,6 +37,12 @@ def test_main_happy_path_writes_model_binary_and_metrics(
         cli_module,
         "_DEFAULT_FEATURE_COLUMNS",
         ("gender", "SeniorCitizen", "tenure", "MonthlyCharges"),
+    )
+    # Telco churn uses "Yes" as positive label — override edu default.
+    monkeypatch.setattr(
+        cli_module,
+        "_POSITIVE_LABELS",
+        frozenset({"Yes"}),
     )
 
     main()

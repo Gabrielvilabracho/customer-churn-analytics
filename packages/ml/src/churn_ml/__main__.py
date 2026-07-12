@@ -4,34 +4,31 @@ import uuid
 from pathlib import Path
 
 from churn_ml.application.pipelines.run_training import run_training
+from churn_ml.domain.model import POSITIVE_LABELS as _POSITIVE_LABELS
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
 
 logger = logging.getLogger(__name__)
 
-# Telco Customer Churn dataset columns; see packages/ml/tests/fixtures/ for the committed CSV
-# schema.
+_CUSTOMER_KEY_DEFAULT = "Student_ID"
+_TARGET_COLUMN_DEFAULT = "Burnout_Risk_Level"
+
+# AI Student Impact dataset columns (education burnout-risk domain).
+# Post_Semester_GPA and Skill_Retention_Score excluded as leakage per design.
 _DEFAULT_FEATURE_COLUMNS: tuple[str, ...] = (
-    "gender",
-    "SeniorCitizen",
-    "Partner",
-    "Dependents",
-    "tenure",
-    "PhoneService",
-    "MultipleLines",
-    "InternetService",
-    "OnlineSecurity",
-    "OnlineBackup",
-    "DeviceProtection",
-    "TechSupport",
-    "StreamingTV",
-    "StreamingMovies",
-    "Contract",
-    "PaperlessBilling",
-    "PaymentMethod",
-    "MonthlyCharges",
-    "TotalCharges",
+    "Major_Category",
+    "Year_of_Study",
+    "Pre_Semester_GPA",
+    "Weekly_GenAI_Hours",
+    "Primary_Use_Case",
+    "Prompt_Engineering_Skill",
+    "Tool_Diversity",
+    "Paid_Subscription",
+    "Traditional_Study_Hours",
+    "Perceived_AI_Dependency",
+    "Institutional_Policy",
+    "Anxiety_Level_During_Exams",
 )
 
 
@@ -53,13 +50,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--customer-key",
-        default="customerID",
+        default=_CUSTOMER_KEY_DEFAULT,
         help="Column name of the customer identifier to exclude from features.",
     )
     parser.add_argument(
         "--target-column",
-        default="Churn",
-        help="Column name of the binary churn target (default: Churn).",
+        default=_TARGET_COLUMN_DEFAULT,
+        help="Column name of the binary churn target (default: Burnout_Risk_Level).",
     )
     parser.add_argument(
         "--seed",
@@ -104,6 +101,7 @@ def main() -> None:
             ),
             test_fraction=args.test_fraction,
             seed=args.seed,
+            positive_labels=_POSITIVE_LABELS,
         )
     except Exception as exc:
         logger.error("Training pipeline failed: %s", exc)
