@@ -1,0 +1,9 @@
+Student_ID,Major_Category,Year_of_Study,Pre_Semester_GPA,Weekly_GenAI_Hours,Primary_Use_Case,Prompt_Engineering_Skill,Tool_Diversity,Paid_Subscription,Traditional_Study_Hours,Perceived_AI_Dependency,Institutional_Policy,Anxiety_Level_During_Exams,Post_Semester_GPA,Skill_Retention_Score,Burnout_Risk_Level
+S001,Humanities,Senior,2.418,23.31,Copywriting/Drafting,Beginner,1,True,8.13,5,Allowed_With_Citation,6,2.393,86.44,High
+S002,Medical,Junior,3.821,1.12,Ideation,Advanced,5,False,16.65,3,Allowed_With_Citation,9,3.696,69.39,Low
+S003,Engineering,Sophomore,2.910,18.45,Code_Generation,Intermediate,3,True,12.40,4,Not_Allowed,7,2.810,75.12,High
+S004,Business,Freshman,3.450,8.90,Research,Intermediate,2,True,14.20,2,Allowed_With_Citation,4,3.390,82.10,Low
+S005,Law,Senior,2.100,28.10,Copywriting/Drafting,Beginner,1,False,5.50,5,Not_Allowed,8,1.980,62.30,High
+S006,Arts,Junior,3.950,0.50,Ideation,Advanced,6,True,18.00,1,Allowed_With_Citation,3,3.920,95.10,Low
+S007,Science,Sophomore,2.670,15.20,Code_Generation,Intermediate,4,True,10.80,3,Not_Allowed,7,2.610,73.50,Medium
+S008,Education,Freshman,3.120,5.70,Research,Beginner,2,False,13.50,2,Allowed_With_Citation,5,3.050,79.30,Medium

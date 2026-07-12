@@ -7,7 +7,7 @@ from typing import Any
 from churn_ml.application.pipelines.profile import screen_dataset_profile
 from churn_ml.application.ports.artifact_store import ArtifactStore
 from churn_ml.domain.artifacts import CleanedSplitArtifact
-from churn_ml.domain.customer import FeatureDictionary
+from churn_ml.domain.customer import LEAKAGE_COLUMNS, FeatureDictionary
 
 
 @dataclass(frozen=True)
@@ -55,6 +55,7 @@ def prepare_training_splits_from_csv(
     target_column: str,
     test_fraction: float,
     seed: int,
+    excluded_feature_columns: frozenset[str] = LEAKAGE_COLUMNS,
 ) -> PreprocessingResult:
     rows = _read_csv_rows(csv_path)
     screen_dataset_profile(
@@ -66,6 +67,7 @@ def prepare_training_splits_from_csv(
         rows,
         customer_key=customer_key,
         target_column=target_column,
+        excluded_feature_columns=excluded_feature_columns,
     )
     feature_columns = tuple(feature.name for feature in dictionary.features)
     split = stratified_train_test_split(
@@ -141,11 +143,13 @@ def build_feature_dictionary(
     *,
     customer_key: str,
     target_column: str,
+    excluded_feature_columns: frozenset[str] = LEAKAGE_COLUMNS,
 ) -> FeatureDictionary:
     return FeatureDictionary.from_rows(
         rows,
         customer_key=customer_key,
         target_column=target_column,
+        excluded_feature_columns=excluded_feature_columns,
     )
 
 

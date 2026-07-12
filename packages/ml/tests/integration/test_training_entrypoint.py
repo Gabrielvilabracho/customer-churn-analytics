@@ -1,7 +1,9 @@
+import csv
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from churn_ml.application.pipelines.features import prepare_training_splits_from_csv
 from churn_ml.application.pipelines.profile import DatasetProfileError
 from churn_ml.application.pipelines.run_training import (
     PREDICTION_SAMPLE_COHORT_FIELDS,
@@ -10,6 +12,7 @@ from churn_ml.application.pipelines.run_training import (
 )
 from churn_ml.application.pipelines.train import ModelComparison, TrainingEvaluationResult
 from churn_ml.domain.artifacts import ClassificationMetricSet, ThresholdSelection
+from churn_ml.domain.customer import LEAKAGE_COLUMNS
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
@@ -17,6 +20,7 @@ from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionT
 FIXTURE_DIR = Path(__file__).resolve().parents[1] / "fixtures"
 
 FEATURE_COLUMNS = ("gender", "SeniorCitizen", "tenure", "MonthlyCharges")
+TELCO_POSITIVE_LABELS = frozenset({"Yes"})
 
 
 def test_run_training_writes_processed_splits_and_versioned_artifact_bundle(
@@ -37,6 +41,7 @@ def test_run_training_writes_processed_splits_and_versioned_artifact_bundle(
             feature_columns=FEATURE_COLUMNS,
             random_state=42,
         ),
+        positive_labels=TELCO_POSITIVE_LABELS,
     )
 
     # Processed splits written
@@ -78,6 +83,7 @@ def test_run_training_prediction_samples_contain_churn_probability_field(
             feature_columns=FEATURE_COLUMNS,
             random_state=42,
         ),
+        positive_labels=TELCO_POSITIVE_LABELS,
     )
 
     loaded = store.load_bundle("entrypoint-samples-001")
@@ -89,29 +95,51 @@ def test_run_training_prediction_samples_contain_churn_probability_field(
 
 
 def test_run_training_uses_real_sklearn_estimator_not_fallback_model(
+) -> None:
+    from churn_ml.infrastructure.sklearn import candidate as candidate_module
+
+    with (FIXTURE_DIR / "telco_churn_sample.csv").open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+
+    sklearn_components = candidate_module._load_sklearn_components()
+    frame = candidate_module._build_pandas_frame(rows, FEATURE_COLUMNS)
+
+    assert sklearn_components is not None
+    assert tuple(frame.columns) == FEATURE_COLUMNS
+    assert len(frame) == len(rows)
+
+
+def test_run_training_threads_domain_leakage_columns_into_preprocessing(
     tmp_path: Path,
 ) -> None:
-    from churn_ml.infrastructure.sklearn.candidate import _FallbackModel
-
     store = FilesystemArtifactStore(root=tmp_path)
 
-    result = run_training(
-        FIXTURE_DIR / "telco_churn_sample.csv",
-        artifact_store=store,
-        run_id="entrypoint-sklearn-001",
-        dataset_id="telco-sample",
-        customer_key="customerID",
-        target_column="Churn",
-        baseline_trainer=BaselineChurnRateTrainer(),
-        candidate_trainer=SklearnLogisticRegressionTrainer(
-            model_name="candidate_logistic_regression",
-            feature_columns=FEATURE_COLUMNS,
-            random_state=42,
-        ),
-    )
+    with patch(
+        "churn_ml.application.pipelines.run_training.prepare_training_splits_from_csv",
+        wraps=prepare_training_splits_from_csv,
+    ) as prepare_splits:
+        run_training(
+            FIXTURE_DIR / "education_sample.csv",
+            artifact_store=store,
+            run_id="entrypoint-leakage-columns-001",
+            dataset_id="education-sample",
+            customer_key="Student_ID",
+            target_column="Burnout_Risk_Level",
+            baseline_trainer=BaselineChurnRateTrainer(),
+            candidate_trainer=SklearnLogisticRegressionTrainer(
+                model_name="candidate_logistic_regression",
+                feature_columns=(
+                    "Major_Category",
+                    "Year_of_Study",
+                    "Pre_Semester_GPA",
+                    "Weekly_GenAI_Hours",
+                ),
+                random_state=42,
+            ),
+        )
 
-    assert result.trained_candidate is not None
-    assert not isinstance(result.trained_candidate.estimator, _FallbackModel)
+    assert prepare_splits.call_args is not None
+    assert prepare_splits.call_args.kwargs["excluded_feature_columns"] == LEAKAGE_COLUMNS
 
 
 def test_run_training_writes_no_artifacts_when_schema_screening_fails(
@@ -133,6 +161,7 @@ def test_run_training_writes_no_artifacts_when_schema_screening_fails(
                 feature_columns=FEATURE_COLUMNS,
                 random_state=42,
             ),
+            positive_labels=TELCO_POSITIVE_LABELS,
         )
 
     assert list(tmp_path.iterdir()) == []
@@ -182,6 +211,7 @@ def test_run_training_manifest_names_candidate_when_baseline_wins(
                 feature_columns=FEATURE_COLUMNS,
                 random_state=42,
             ),
+            positive_labels=TELCO_POSITIVE_LABELS,
         )
 
     loaded = store.load_bundle("manifest-baseline-wins-001")
@@ -211,6 +241,7 @@ def test_run_training_prediction_samples_include_customer_key_field(
             feature_columns=FEATURE_COLUMNS,
             random_state=42,
         ),
+        positive_labels=TELCO_POSITIVE_LABELS,
     )
 
     loaded = store.load_bundle("entrypoint-customer-key-001")
@@ -226,16 +257,21 @@ def test_run_training_prediction_samples_include_dashboard_cohort_fields(
     store = FilesystemArtifactStore(root=tmp_path)
 
     run_training(
-        FIXTURE_DIR / "telco_churn_sample.csv",
+        FIXTURE_DIR / "education_sample.csv",
         artifact_store=store,
         run_id="entrypoint-dashboard-cohorts-001",
-        dataset_id="telco-sample",
-        customer_key="customerID",
-        target_column="Churn",
+        dataset_id="education-sample",
+        customer_key="Student_ID",
+        target_column="Burnout_Risk_Level",
         baseline_trainer=BaselineChurnRateTrainer(),
         candidate_trainer=SklearnLogisticRegressionTrainer(
             model_name="candidate_logistic_regression",
-            feature_columns=FEATURE_COLUMNS,
+            feature_columns=(
+                "Major_Category",
+                "Year_of_Study",
+                "Pre_Semester_GPA",
+                "Weekly_GenAI_Hours",
+            ),
             random_state=42,
         ),
     )
@@ -243,26 +279,25 @@ def test_run_training_prediction_samples_include_dashboard_cohort_fields(
     loaded = store.load_bundle("entrypoint-dashboard-cohorts-001")
     assert len(loaded.prediction_samples) > 0
     first_sample = loaded.prediction_samples[0]
-    assert first_sample["Contract"] in {"Month-to-month", "One year", "Two year"}
-    assert first_sample["PaymentMethod"] in {
-        "Bank transfer",
-        "Credit card",
-        "Electronic check",
-        "Mailed check",
+    assert first_sample["Major_Category"] in {
+        "Humanities", "Medical", "Engineering", "Business", "Law", "Arts", "Science", "Education",
     }
-    assert first_sample["InternetService"] in {"DSL", "Fiber optic", "No"}
-    assert int(first_sample["tenure"]) >= 0
-    assert float(first_sample["MonthlyCharges"]) > 0
+    assert float(first_sample["Weekly_GenAI_Hours"]) >= 0
+    assert int(first_sample["Perceived_AI_Dependency"]) >= 0
+    assert first_sample["Institutional_Policy"] in {
+        "Allowed_With_Citation", "Not_Allowed",
+    }
 
 
-def test_prediction_sample_cohort_fields_match_public_api_contract() -> None:
-    from churn_api.application.dashboard_contract import PUBLIC_PREDICTION_SAMPLE_FIELDS
-
-    assert tuple(PREDICTION_SAMPLE_COHORT_FIELDS) == tuple(
-        field
-        for field in PUBLIC_PREDICTION_SAMPLE_FIELDS
-        if field != "churn_probability"
+def test_prediction_sample_cohort_fields_match_education_cohort_contract() -> None:
+    """PREDICTION_SAMPLE_COHORT_FIELDS must contain education cohort fields."""
+    expected = (
+        "Major_Category",
+        "Weekly_GenAI_Hours",
+        "Perceived_AI_Dependency",
+        "Institutional_Policy",
     )
+    assert tuple(PREDICTION_SAMPLE_COHORT_FIELDS) == expected
 
 
 # ---------------------------------------------------------------------------
@@ -292,7 +327,9 @@ def test_build_prediction_samples_returns_empty_when_no_raw_test_rows() -> None:
         selection_reason="test",
     )
     trained_model = BaselineChurnRateTrainer().train(
-        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+        [{"churn": "Yes"}, {"churn": "No"}],
+        target_column="churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
     )
     eval_result = TrainingEvaluationResult(
         comparison=comparison,

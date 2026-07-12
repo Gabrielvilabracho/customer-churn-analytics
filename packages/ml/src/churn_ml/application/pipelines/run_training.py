@@ -10,15 +10,16 @@ from churn_ml.application.pipelines.train import (
 from churn_ml.application.ports.artifact_store import ArtifactStore
 from churn_ml.application.ports.model_trainer import ModelTrainer
 from churn_ml.domain.artifacts import ArtifactBundle, ArtifactManifest
+from churn_ml.domain.customer import LEAKAGE_COLUMNS
+from churn_ml.domain.model import POSITIVE_LABELS
 
 logger = logging.getLogger(__name__)
 
 PREDICTION_SAMPLE_COHORT_FIELDS = (
-    "Contract",
-    "tenure",
-    "PaymentMethod",
-    "MonthlyCharges",
-    "InternetService",
+    "Major_Category",
+    "Weekly_GenAI_Hours",
+    "Perceived_AI_Dependency",
+    "Institutional_Policy",
 )
 
 
@@ -38,6 +39,8 @@ def run_training(
     min_recall: float = 0.7,
     min_top_risk_capture: float = 0.7,
     top_risk_fraction: float = 0.2,
+    positive_labels: frozenset[str] = POSITIVE_LABELS,
+    excluded_feature_columns: frozenset[str] = LEAKAGE_COLUMNS,
 ) -> TrainingEvaluationResult:
     """Orchestrate the full training pipeline from raw CSV to versioned artifacts.
 
@@ -56,6 +59,7 @@ def run_training(
         dataset_id=dataset_id,
         customer_key=customer_key,
         target_column=target_column,
+        excluded_feature_columns=excluded_feature_columns,
         test_fraction=test_fraction,
         seed=seed,
     )
@@ -72,6 +76,7 @@ def run_training(
             min_recall=min_recall,
             min_top_risk_capture=min_top_risk_capture,
             top_risk_fraction=top_risk_fraction,
+            positive_labels=positive_labels,
         )
     except Exception:
         logger.error("Training failed for run_id=%s — cleaning up partial splits", run_id)

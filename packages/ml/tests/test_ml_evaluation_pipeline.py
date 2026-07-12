@@ -133,7 +133,9 @@ def test_baseline_trainer_uses_training_churn_rate_without_sklearn_dependency() 
         {"customer_id": "C004", "churn": "No"},
     ]
 
-    model = BaselineChurnRateTrainer().train(rows, target_column="churn")
+    model = BaselineChurnRateTrainer().train(
+        rows, target_column="churn", positive_labels=frozenset({"Yes"})
+    )
 
     assert model.model_name == "baseline_churn_rate"
     assert model.predict_probabilities(rows) == (0.5, 0.5, 0.5, 0.5)
@@ -161,6 +163,7 @@ def test_model_candidate_comparison_selects_candidate_with_better_churn_usefulne
         target_column="churn",
         threshold=0.5,
         top_risk_fraction=0.5,
+        positive_labels=frozenset({"Yes"}),
     )
 
     assert comparison.baseline_model_name == "baseline_churn_rate"

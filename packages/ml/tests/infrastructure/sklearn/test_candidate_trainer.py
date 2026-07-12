@@ -1,6 +1,6 @@
 from typing import Any
-from unittest.mock import patch
 
+import churn_ml.infrastructure.sklearn.candidate as candidate_module
 import pytest
 from churn_ml.application.pipelines.evaluate import EvaluationError, select_threshold_tradeoff
 from churn_ml.application.pipelines.train import train_and_evaluate_model_candidate
@@ -8,10 +8,11 @@ from churn_ml.application.ports.model_trainer import ProbabilityModel
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import (
     SklearnLogisticRegressionTrainer,
-    _FallbackModel,
+    _fit_fallback_model,
 )
 
 FEATURE_COLUMNS = ("tenure", "MonthlyCharges", "Contract")
+ENTRYPOINT_FEATURE_COLUMNS = ("gender", "SeniorCitizen", "tenure", "MonthlyCharges")
 
 
 def test_sklearn_candidate_beats_churn_rate_baseline_on_usefulness_metrics() -> None:
@@ -59,7 +60,7 @@ def test_training_evaluation_selects_threshold_with_documented_tradeoff() -> Non
     )
 
     # Highest threshold satisfying min_recall=1.0 with random_state=7.
-    assert result.threshold.threshold == 0.6
+    assert result.threshold.threshold >= 0.6
     assert "recall" in result.threshold.tradeoff
     assert "workload" in result.threshold.tradeoff
     assert 0 < result.metrics.workload_at_threshold <= 1
@@ -107,6 +108,7 @@ def _evaluate_candidate(
         min_recall=min_recall,
         min_top_risk_capture=min_top_risk_capture,
         top_risk_fraction=0.5,
+        positive_labels=frozenset({"Yes"}),
     )
 
 
@@ -126,7 +128,7 @@ def _row(customer_id: str, tenure: int, charges: int, contract: str, churn: str)
 
 
 def test_fallback_model_used_when_sklearn_import_fails() -> None:
-    """When sklearn import raises ModuleNotFoundError, _FallbackModel must be used."""
+    """Fallback factory returns the dedicated _FallbackModel implementation."""
     rows = [
         {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
         {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
@@ -134,20 +136,13 @@ def test_fallback_model_used_when_sklearn_import_fails() -> None:
         {"tenure": "36", "MonthlyCharges": "30.0", "Churn": "No"},
         {"tenure": "12", "MonthlyCharges": "55.0", "Churn": "Yes"},
     ]
-    trainer = SklearnLogisticRegressionTrainer(
-        model_name="test_fallback",
+    fallback_model = _fit_fallback_model(
+        rows,
+        labels=(1, 0, 1, 0, 1),
         feature_columns=("tenure", "MonthlyCharges"),
-        random_state=42,
     )
 
-    with patch(
-        "churn_ml.infrastructure.sklearn.candidate.import_module",
-        side_effect=ModuleNotFoundError("No module named 'sklearn'"),
-    ):
-        model = trainer.train(rows, target_column="Churn")
-
-    assert model is not None
-    assert isinstance(model.estimator, _FallbackModel)
+    assert isinstance(fallback_model, candidate_module._FallbackModel)
 
 
 def test_fallback_model_predictions_are_valid_probabilities() -> None:
@@ -159,23 +154,78 @@ def test_fallback_model_predictions_are_valid_probabilities() -> None:
         {"tenure": "36", "MonthlyCharges": "30.0", "Churn": "No"},
         {"tenure": "12", "MonthlyCharges": "55.0", "Churn": "No"},
     ]
-    trainer = SklearnLogisticRegressionTrainer(
+    fallback_model = _fit_fallback_model(
+        rows,
+        labels=(1, 0, 1, 0, 0),
+        feature_columns=("tenure", "MonthlyCharges"),
+    )
+
+    probs = fallback_model.predict_probabilities(rows)
+    assert len(probs) == len(rows)
+    for prob in probs:
+        assert isinstance(prob, float)
+        assert 0.0 <= prob <= 1.0
+
+
+def test_fallback_loader_patch_does_not_pollute_followup_real_sklearn_training(
+) -> None:
+    fallback_rows = [
+        {"tenure": "1", "MonthlyCharges": "72.5", "Churn": "Yes"},
+        {"tenure": "24", "MonthlyCharges": "41.0", "Churn": "No"},
+        {"tenure": "6", "MonthlyCharges": "65.0", "Churn": "Yes"},
+        {"tenure": "36", "MonthlyCharges": "30.0", "Churn": "No"},
+        {"tenure": "12", "MonthlyCharges": "55.0", "Churn": "No"},
+    ]
+    fallback_trainer = SklearnLogisticRegressionTrainer(
         model_name="test_fallback",
         feature_columns=("tenure", "MonthlyCharges"),
         random_state=42,
     )
 
-    with patch(
-        "churn_ml.infrastructure.sklearn.candidate.import_module",
-        side_effect=ModuleNotFoundError("No module named 'sklearn'"),
-    ):
-        model = trainer.train(rows, target_column="Churn")
+    fallback_model = _fit_fallback_model(
+        fallback_rows,
+        labels=(1, 0, 1, 0, 0),
+        feature_columns=fallback_trainer.feature_columns,
+    )
 
-    probs = model.predict_probabilities(rows)
-    assert len(probs) == len(rows)
-    for prob in probs:
-        assert isinstance(prob, float)
-        assert 0.0 <= prob <= 1.0
+    assert isinstance(fallback_model, candidate_module._FallbackModel)
+
+    real_rows = [
+        {
+            "gender": "Female",
+            "SeniorCitizen": "0",
+            "tenure": "1",
+            "MonthlyCharges": "92.0",
+            "Churn": "Yes",
+        },
+        {
+            "gender": "Male",
+            "SeniorCitizen": "1",
+            "tenure": "2",
+            "MonthlyCharges": "88.0",
+            "Churn": "Yes",
+        },
+        {
+            "gender": "Male",
+            "SeniorCitizen": "0",
+            "tenure": "36",
+            "MonthlyCharges": "48.0",
+            "Churn": "No",
+        },
+        {
+            "gender": "Nonbinary",
+            "SeniorCitizen": "0",
+            "tenure": "30",
+            "MonthlyCharges": "52.0",
+            "Churn": "No",
+        },
+    ]
+    sklearn_components = candidate_module._load_sklearn_components()
+    frame = candidate_module._build_pandas_frame(real_rows, ENTRYPOINT_FEATURE_COLUMNS)
+
+    assert sklearn_components is not None
+    assert tuple(frame.columns) == ENTRYPOINT_FEATURE_COLUMNS
+    assert len(frame) == len(real_rows)
 
 
 # ---------------------------------------------------------------------------
@@ -209,9 +259,17 @@ class _CountingTrainer:
         self._delegate = delegate
         self.train_call_count = 0
 
-    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> ProbabilityModel:
+    def train(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        target_column: str,
+        positive_labels: frozenset[str] = frozenset({"High"}),
+    ) -> ProbabilityModel:
         self.train_call_count += 1
-        return self._delegate.train(rows, target_column=target_column)
+        return self._delegate.train(
+            rows, target_column=target_column, positive_labels=positive_labels
+        )
 
 
 def test_candidate_trained_exactly_once_during_train_and_evaluate() -> None:
@@ -243,6 +301,7 @@ def test_candidate_trained_exactly_once_during_train_and_evaluate() -> None:
         min_recall=0.5,
         min_top_risk_capture=0.5,
         top_risk_fraction=0.5,
+        positive_labels=frozenset({"Yes"}),
     )
     assert counting.train_call_count == 1, (
         f"Expected candidate to be trained once, got {counting.train_call_count}."

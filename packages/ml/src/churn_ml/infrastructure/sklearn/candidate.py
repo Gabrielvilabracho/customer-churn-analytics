@@ -4,12 +4,37 @@ from importlib import import_module
 from math import exp, log
 from typing import Any, cast
 
-from churn_ml.domain.model import label_to_int
+from churn_ml.domain.model import POSITIVE_LABELS, label_to_int
 
 logger = logging.getLogger(__name__)
 
 _NUMERIC_WEIGHT_SCALE = 4
 _CATEGORICAL_LIFT_SCALE = 3
+
+
+def _import_sklearn_components() -> tuple[Any, Any, Any, Any, Any] | None:
+    try:
+        ColumnTransformer = import_module("sklearn.compose").ColumnTransformer
+        LogisticRegression = import_module("sklearn.linear_model").LogisticRegression
+        Pipeline = import_module("sklearn.pipeline").Pipeline
+        preprocessing = import_module("sklearn.preprocessing")
+    except ModuleNotFoundError:
+        return None
+
+    return (
+        ColumnTransformer,
+        LogisticRegression,
+        Pipeline,
+        preprocessing.OneHotEncoder,
+        preprocessing.StandardScaler,
+    )
+
+
+_SKLEARN_COMPONENTS = _import_sklearn_components()
+
+
+def _load_sklearn_components() -> tuple[Any, Any, Any, Any, Any] | None:
+    return _SKLEARN_COMPONENTS
 
 
 @dataclass(frozen=True)
@@ -18,10 +43,18 @@ class SklearnLogisticRegressionTrainer:
     feature_columns: tuple[str, ...]
     random_state: int = 42
 
-    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> "SklearnProbabilityModel":
+    def train(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        target_column: str,
+        positive_labels: frozenset[str] = POSITIVE_LABELS,
+    ) -> "SklearnProbabilityModel":
         if len(rows) < 2:
             raise ValueError("At least two rows are required to train a candidate model.")
-        labels = tuple(label_to_int(row[target_column]) for row in rows)
+        labels = tuple(
+            label_to_int(row[target_column], positive_labels=positive_labels) for row in rows
+        )
         if len(set(labels)) < 2:
             raise ValueError("Candidate training requires both churn and non-churn examples.")
 
@@ -90,15 +123,12 @@ def _fit_sklearn_model(
     feature_columns: tuple[str, ...],
     random_state: int,
 ) -> Any | None:
-    try:
-        ColumnTransformer = import_module("sklearn.compose").ColumnTransformer
-        LogisticRegression = import_module("sklearn.linear_model").LogisticRegression
-        Pipeline = import_module("sklearn.pipeline").Pipeline
-        preprocessing = import_module("sklearn.preprocessing")
-        OneHotEncoder = preprocessing.OneHotEncoder
-        StandardScaler = preprocessing.StandardScaler
-    except ModuleNotFoundError:
+    sklearn_components = _load_sklearn_components()
+    if sklearn_components is None:
         return None
+    ColumnTransformer, LogisticRegression, Pipeline, OneHotEncoder, StandardScaler = (
+        sklearn_components
+    )
 
     try:
         frame = _build_pandas_frame(rows, feature_columns)
