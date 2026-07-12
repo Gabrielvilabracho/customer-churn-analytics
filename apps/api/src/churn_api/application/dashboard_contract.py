@@ -1,9 +1,8 @@
 PUBLIC_PREDICTION_SAMPLE_FIELDS = (
-    "Contract",
-    "tenure",
-    "PaymentMethod",
-    "MonthlyCharges",
-    "InternetService",
+    "Major_Category",
+    "Weekly_GenAI_Hours",
+    "Perceived_AI_Dependency",
+    "Institutional_Policy",
     "churn_probability",
 )
 

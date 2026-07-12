@@ -35,8 +35,8 @@ export function RiskTable({ customers }: RiskTableProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Top-risk customers</CardTitle>
-          <CardDescription>No customer risk rows are available.</CardDescription>
+          <CardTitle>Top-risk students</CardTitle>
+          <CardDescription>No student risk rows are available.</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -47,8 +47,8 @@ export function RiskTable({ customers }: RiskTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top-risk customers</CardTitle>
-        <CardDescription>Sorted by predicted churn probability.</CardDescription>
+        <CardTitle>Top-risk students</CardTitle>
+        <CardDescription>Sorted by predicted burnout risk probability.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -56,29 +56,31 @@ export function RiskTable({ customers }: RiskTableProps) {
             <thead>
               <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th scope="col" aria-sort={ariaSortFor(SORT_COLUMNS.CUSTOMER, sortState)} className="py-3 pr-4">
-                  <SortButton column={SORT_COLUMNS.CUSTOMER} sortState={sortState} onSort={setSortState}>Customer</SortButton>
+                  <SortButton column={SORT_COLUMNS.CUSTOMER} sortState={sortState} onSort={setSortState}>Student</SortButton>
                 </th>
-                <th scope="col" className="py-3 pr-4">Contract</th>
+                <th scope="col" className="py-3 pr-4">Major Category</th>
                 <th scope="col" aria-sort={ariaSortFor(SORT_COLUMNS.RISK, sortState)} className="py-3 pr-4">
                   <SortButton column={SORT_COLUMNS.RISK} sortState={sortState} onSort={setSortState}>Risk</SortButton>
                 </th>
-                <th scope="col" className="py-3 pr-4">Payment</th>
-                <th scope="col" className="py-3">Service</th>
+                <th scope="col" className="py-3 pr-4">GenAI Hours</th>
+                <th scope="col" className="py-3 pr-4">AI Dependency</th>
+                <th scope="col" className="py-3">Policy</th>
               </tr>
             </thead>
             <tbody>
               {sortedCustomers.map((customer) => (
                 <tr key={customer.sampleId} className="border-b last:border-b-0">
                   <td className="py-3 pr-4 font-medium">{customer.displayReference}</td>
-                  <td className="py-3 pr-4">{customer.contract}</td>
+                  <td className="py-3 pr-4">{customer.majorCategory}</td>
                   <td className="py-3 pr-4">
                     <span className="inline-flex items-center gap-2">
                       <Badge variant={customer.riskLabel === "High risk" ? "default" : "secondary"}>{customer.riskLabel}</Badge>
                       <span>{customer.churnProbability}</span>
                     </span>
                   </td>
-                  <td className="py-3 pr-4">{customer.paymentMethod}</td>
-                  <td className="py-3">{customer.internetService}</td>
+                  <td className="py-3 pr-4">{customer.weeklyGenAiHours}</td>
+                  <td className="py-3 pr-4">{customer.perceivedAiDependency}</td>
+                  <td className="py-3">{customer.institutionalPolicy}</td>
                 </tr>
               ))}
             </tbody>

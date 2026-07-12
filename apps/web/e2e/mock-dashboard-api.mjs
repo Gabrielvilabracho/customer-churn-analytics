@@ -44,15 +44,15 @@ function dashboardPayload() {
     risk_distribution: { high: 2, low: 1 },
     threshold: 0.5,
     prediction_samples: [
-      sample("sample-001", "Sample 001", "0.81", "Month-to-month", "Electronic check", "Fiber optic"),
-      sample("sample-002", "Sample 002", "0.43", "Month-to-month", "Mailed check", "DSL"),
-      sample("sample-003", "Sample 003", "0.16", "Two year", "Credit card", "DSL"),
+      sample("student-001", "Student 001", "0.81", "Engineering", "15", "High", "Restrictive"),
+      sample("student-002", "Student 002", "0.43", "Arts", "4", "Low", "Permissive"),
+      sample("student-003", "Student 003", "0.16", "Business", "2", "Low", "Permissive"),
     ],
   };
 }
 
-function sample(sample_id, display_reference, churn_probability, Contract, PaymentMethod, InternetService) {
-  return { sample_id, display_reference, churn_probability, Contract, PaymentMethod, InternetService, MonthlyCharges: "50", tenure: "12" };
+function sample(sample_id, display_reference, churn_probability, Major_Category, Weekly_GenAI_Hours, Perceived_AI_Dependency, Institutional_Policy) {
+  return { sample_id, display_reference, churn_probability, Major_Category, Weekly_GenAI_Hours, Perceived_AI_Dependency, Institutional_Policy };
 }
 
 function sendJson(response, statusCode, payload) {

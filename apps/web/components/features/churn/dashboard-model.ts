@@ -8,28 +8,28 @@ export interface KpiCardModel {
   detail: string;
 }
 
-export interface ContractCohortModel {
-  contract: string;
+export interface MajorCategoryCohortModel {
+  majorCategory: string;
   customers: number;
   averageChurnProbability: string;
-  averageMonthlyCharges: string;
 }
 
 export interface TopRiskCustomerModel {
   sampleId: string;
   displayReference: string;
-  contract: string;
+  majorCategory: string;
   churnProbability: string;
   riskLabel: string;
-  paymentMethod: string;
-  internetService: string;
+  weeklyGenAiHours: string;
+  perceivedAiDependency: string;
+  institutionalPolicy: string;
 }
 
 export interface ExecutiveDashboardModel {
   artifactVersion: string;
   freshnessLabel: string;
   kpiCards: KpiCardModel[];
-  contractCohorts: ContractCohortModel[];
+  majorCategoryCohorts: MajorCategoryCohortModel[];
   topRiskCustomers: TopRiskCustomerModel[];
 }
 
@@ -39,7 +39,7 @@ export function buildExecutiveDashboardModel(analytics: DashboardAnalytics): Exe
     artifactVersion: analytics.artifactVersion,
     freshnessLabel: analytics.freshness.metrics_created_at_utc ?? "Freshness unavailable",
     kpiCards: buildKpiCards(analytics),
-    contractCohorts: buildContractCohorts(samples),
+    majorCategoryCohorts: buildMajorCategoryCohorts(samples),
     topRiskCustomers: buildTopRiskCustomers(samples, analytics.threshold ?? DEFAULT_RISK_LABEL_THRESHOLD),
   };
 }
@@ -58,7 +58,7 @@ function buildKpiCards(analytics: DashboardAnalytics): KpiCardModel[] {
       detail: "At selected threshold",
     },
     {
-      label: "High-risk customers",
+      label: "High-risk students",
       value: String(analytics.riskDistribution.high ?? 0),
       detail: "From prediction samples",
     },
@@ -69,33 +69,32 @@ function buildKpiCards(analytics: DashboardAnalytics): KpiCardModel[] {
 function buildAverageRiskCard(samples: PredictionSample[]): KpiCardModel {
   if (samples.length === 0) {
     return {
-      label: "Average churn risk",
+      label: "Average burnout risk",
       value: "No samples",
       detail: "Run the training pipeline to publish prediction rows",
     };
   }
 
   return {
-    label: "Average churn risk",
+    label: "Average burnout risk",
     value: formatPercent(average(samples.map((sample) => sample.churnProbability))),
-    detail: `${samples.length} sampled customers`,
+    detail: `${samples.length} sampled students`,
   };
 }
 
-function buildContractCohorts(samples: PredictionSample[]): ContractCohortModel[] {
+function buildMajorCategoryCohorts(samples: PredictionSample[]): MajorCategoryCohortModel[] {
   const cohorts = new Map<string, PredictionSample[]>();
   for (const sample of samples) {
-    cohorts.set(sample.contract, [...(cohorts.get(sample.contract) ?? []), sample]);
+    cohorts.set(sample.majorCategory, [...(cohorts.get(sample.majorCategory) ?? []), sample]);
   }
 
   return [...cohorts.entries()]
-    .map(([contract, rows]) => ({
-      contract,
+    .map(([majorCategory, rows]) => ({
+      majorCategory,
       customers: rows.length,
       averageChurnProbability: formatPercent(average(rows.map((row) => row.churnProbability))),
-      averageMonthlyCharges: formatCurrency(average(rows.map((row) => row.monthlyCharges))),
     }))
-    .toSorted((left, right) => right.customers - left.customers || left.contract.localeCompare(right.contract));
+    .toSorted((left, right) => right.customers - left.customers || left.majorCategory.localeCompare(right.majorCategory));
 }
 
 function buildTopRiskCustomers(samples: PredictionSample[], threshold: number): TopRiskCustomerModel[] {
@@ -105,11 +104,12 @@ function buildTopRiskCustomers(samples: PredictionSample[], threshold: number): 
     .map((sample) => ({
       sampleId: sample.sampleId,
       displayReference: sample.displayReference,
-      contract: sample.contract,
+      majorCategory: sample.majorCategory,
       churnProbability: formatPercent(sample.churnProbability),
       riskLabel: sample.churnProbability >= threshold ? "High risk" : "Monitor",
-      paymentMethod: sample.paymentMethod,
-      internetService: sample.internetService,
+      weeklyGenAiHours: String(sample.weeklyGenAiHours),
+      perceivedAiDependency: String(sample.perceivedAiDependency),
+      institutionalPolicy: sample.institutionalPolicy,
     }));
 }
 
@@ -126,12 +126,4 @@ function formatDecimal(value: number | undefined): string {
 
 function formatPercent(value: number | undefined): string {
   return value === undefined ? "N/A" : `${Math.round(value * 100)}%`;
-}
-
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 2,
-  }).format(value);
 }

@@ -21,11 +21,10 @@ export interface PredictionSample {
   sampleId: string;
   displayReference: string;
   churnProbability: number;
-  contract: string;
-  tenure: number;
-  paymentMethod: string;
-  monthlyCharges: number;
-  internetService: string;
+  majorCategory: string;
+  weeklyGenAiHours: number;
+  perceivedAiDependency: number | string;
+  institutionalPolicy: string;
 }
 
 export interface DashboardAnalytics {

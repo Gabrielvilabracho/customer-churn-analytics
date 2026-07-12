@@ -9,8 +9,8 @@ const dashboardPayload = {
   kpis: { pr_auc: 0.82, recall: 0.74, precision: 0.61 },
   risk_distribution: { high: 1, low: 1 },
   prediction_samples: [
-    sample("sample-001", "Sample 001", "0.81", "Month-to-month", "3", "Electronic check", "91.25", "Fiber optic"),
-    sample("sample-002", "Sample 002", "0.16", "Two year", "52", "Credit card", "42", "DSL"),
+    sample("student-001", "Student 001", "0.81", "Engineering", "15", "High", "Restrictive"),
+    sample("student-002", "Student 002", "0.16", "Business", "2", "Low", "Permissive"),
   ],
 };
 
@@ -29,7 +29,7 @@ describe("DashboardPage", () => {
     expect(html).toContain("Executive churn command center");
     expect(html).toContain("Model PR-AUC");
     expect(html).toContain("0.82");
-    expect(html).toContain("Month-to-month");
+    expect(html).toContain("Engineering");
     expect(html).toContain("High risk");
     expect(html).toContain("run-2026-07-02");
   });
@@ -46,6 +46,6 @@ describe("DashboardPage", () => {
   });
 });
 
-function sample(sample_id: string, display_reference: string, churn_probability: string, Contract: string, tenure: string, PaymentMethod: string, MonthlyCharges: string, InternetService: string) {
-  return { sample_id, display_reference, churn_probability, Contract, tenure, PaymentMethod, MonthlyCharges, InternetService };
+function sample(sample_id: string, display_reference: string, churn_probability: string, Major_Category: string, Weekly_GenAI_Hours: string, Perceived_AI_Dependency: string, Institutional_Policy: string) {
+  return { sample_id, display_reference, churn_probability, Major_Category, Weekly_GenAI_Hours, Perceived_AI_Dependency, Institutional_Policy };
 }

@@ -10,44 +10,53 @@ const analytics: DashboardAnalytics = {
   riskDistribution: { high: 2, low: 1 },
   threshold: 0.5,
   predictionSamples: [
-    sample("sample-001", "Sample 001", 0.81, "Month-to-month", 91.25, "Electronic check", "Fiber optic", 3),
-    sample("sample-002", "Sample 002", 0.43, "Month-to-month", 72.75, "Mailed check", "DSL", 9),
-    sample("sample-003", "Sample 003", 0.16, "Two year", 42, "Credit card", "DSL", 52),
+    sample("student-001", "Student 001", 0.81, "Engineering", 15, "High", "Restrictive"),
+    sample("student-002", "Student 002", 0.43, "Arts", 4, "Low", "Permissive"),
+    sample("student-003", "Student 003", 0.16, "Business", 2, "Low", "Permissive"),
   ],
 };
 
 describe("buildExecutiveDashboardModel", () => {
-  it("derives executive KPIs and contract cohorts from enriched prediction samples", () => {
+  it("derives executive KPIs and major category cohorts from enriched prediction samples", () => {
     const model = buildExecutiveDashboardModel(analytics);
 
     expect(model.kpiCards).toContainEqual({ label: "Model PR-AUC", value: "0.82", detail: "run-2026-07-02" });
-    expect(model.kpiCards).toContainEqual({ label: "Average churn risk", value: "47%", detail: "3 sampled customers" });
-    expect(model.contractCohorts).toEqual([
-      { contract: "Month-to-month", customers: 2, averageChurnProbability: "62%", averageMonthlyCharges: "$82.00" },
-      { contract: "Two year", customers: 1, averageChurnProbability: "16%", averageMonthlyCharges: "$42.00" },
+    expect(model.kpiCards).toContainEqual({ label: "Average burnout risk", value: "47%", detail: "3 sampled students" });
+    expect(model.majorCategoryCohorts).toEqual([
+      { majorCategory: "Arts", customers: 1, averageChurnProbability: "43%" },
+      { majorCategory: "Business", customers: 1, averageChurnProbability: "16%" },
+      { majorCategory: "Engineering", customers: 1, averageChurnProbability: "81%" },
     ]);
-    expect(model.topRiskCustomers[0]).toMatchObject({ displayReference: "Sample 001", riskLabel: "High risk", churnProbability: "81%" });
+    expect(model.topRiskCustomers[0]).toMatchObject({ displayReference: "Student 001", riskLabel: "High risk", churnProbability: "81%" });
   });
 
   it("returns an empty-state model when no prediction samples exist", () => {
     const model = buildExecutiveDashboardModel({ ...analytics, riskDistribution: {}, predictionSamples: [] });
 
     expect(model.kpiCards.at(-1)).toEqual({
-      label: "Average churn risk",
+      label: "Average burnout risk",
       value: "No samples",
       detail: "Run the training pipeline to publish prediction rows",
     });
-    expect(model.contractCohorts).toEqual([]);
+    expect(model.majorCategoryCohorts).toEqual([]);
     expect(model.topRiskCustomers).toEqual([]);
   });
 
-  it("labels customer risk from the artifact threshold when present", () => {
+  it("labels student risk from the artifact threshold when present", () => {
     const model = buildExecutiveDashboardModel({ ...analytics, threshold: 0.9 });
 
-    expect(model.topRiskCustomers[0]).toMatchObject({ displayReference: "Sample 001", riskLabel: "Monitor", churnProbability: "81%" });
+    expect(model.topRiskCustomers[0]).toMatchObject({ displayReference: "Student 001", riskLabel: "Monitor", churnProbability: "81%" });
   });
 });
 
-function sample(sampleId: string, displayReference: string, churnProbability: number, contract: string, monthlyCharges: number, paymentMethod: string, internetService: string, tenure: number) {
-  return { sampleId, displayReference, churnProbability, contract, monthlyCharges, paymentMethod, internetService, tenure };
+function sample(
+  sampleId: string,
+  displayReference: string,
+  churnProbability: number,
+  majorCategory: string,
+  weeklyGenAiHours: number,
+  perceivedAiDependency: string,
+  institutionalPolicy: string,
+) {
+  return { sampleId, displayReference, churnProbability, majorCategory, weeklyGenAiHours, perceivedAiDependency, institutionalPolicy };
 }

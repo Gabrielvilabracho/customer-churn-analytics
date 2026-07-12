@@ -84,7 +84,7 @@ function DashboardContent({ analytics }: { analytics: DashboardAnalytics }) {
         <KpiCards cards={model.kpiCards} />
 
         <section className="grid gap-6 xl:grid-cols-[1fr_1.15fr]">
-          <CohortChart cohorts={model.contractCohorts} />
+          <CohortChart cohorts={model.majorCategoryCohorts} />
           <DriverSummary model={model} />
         </section>
 

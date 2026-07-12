@@ -20,11 +20,10 @@ interface DashboardPredictionSampleWire {
   sample_id: string;
   display_reference: string;
   churn_probability: string | number;
-  Contract: string;
-  tenure: string | number;
-  PaymentMethod: string;
-  MonthlyCharges: string | number;
-  InternetService: string;
+  Major_Category: string;
+  Weekly_GenAI_Hours: string | number;
+  Perceived_AI_Dependency: string | number;
+  Institutional_Policy: string;
 }
 
 interface DegradedDashboardResponse {
@@ -93,11 +92,10 @@ function mapPredictionSample(sample: DashboardPredictionSampleWire): PredictionS
     sampleId: sample.sample_id,
     displayReference: sample.display_reference,
     churnProbability: Number(sample.churn_probability),
-    contract: sample.Contract,
-    tenure: Number(sample.tenure),
-    paymentMethod: sample.PaymentMethod,
-    monthlyCharges: Number(sample.MonthlyCharges),
-    internetService: sample.InternetService,
+    majorCategory: sample.Major_Category,
+    weeklyGenAiHours: Number(sample.Weekly_GenAI_Hours),
+    perceivedAiDependency: sample.Perceived_AI_Dependency,
+    institutionalPolicy: sample.Institutional_Policy,
   };
 }
 
@@ -123,11 +121,10 @@ function isDashboardPredictionSampleWire(sample: unknown): sample is DashboardPr
     typeof sample.sample_id === "string" &&
     typeof sample.display_reference === "string" &&
     isStringOrNumber(sample.churn_probability) &&
-    typeof sample.Contract === "string" &&
-    isStringOrNumber(sample.tenure) &&
-    typeof sample.PaymentMethod === "string" &&
-    isStringOrNumber(sample.MonthlyCharges) &&
-    typeof sample.InternetService === "string"
+    typeof sample.Major_Category === "string" &&
+    isStringOrNumber(sample.Weekly_GenAI_Hours) &&
+    isStringOrNumber(sample.Perceived_AI_Dependency) &&
+    typeof sample.Institutional_Policy === "string"
   );
 }
 

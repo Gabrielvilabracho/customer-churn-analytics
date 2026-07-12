@@ -4,7 +4,8 @@ strict_tdd: true
 
 context: |
   Project: customer-churn-analytics (repo root: personal-portafolio)
-  Intended product: Customer Churn Prediction portfolio.
+  Intended product: AI Student Impact / Burnout Risk Analytics portfolio — predicts academic burnout risk in students using GenAI usage patterns and behavioral features.
+  Dataset: Education dataset (16 columns), target Burnout_Risk_Level binarized to High=positive.
   Detected codebase: active monorepo with a Next.js web app, a FastAPI API package, and a Python ML package.
   Detected stack: TypeScript/React 19/Next.js 15 web app, Python 3.12+ packages, uv-managed Python workspace, pnpm-managed web app, pytest, pytest-cov, ruff, mypy, Vitest, Playwright, ESLint, and TypeScript.
   Architecture intent: Clean/Hexagonal, modular system, English artifacts.

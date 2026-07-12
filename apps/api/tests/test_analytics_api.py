@@ -38,7 +38,7 @@ class _ReadyArtifacts:
         self.snapshot = ArtifactSnapshot(
             model=ModelMetadata(
                 run_id="run-2026-07-02",
-                dataset_id="telco-churn",
+                dataset_id="education-burnout",
                 model_name="candidate_ranker",
                 created_at_utc="2026-07-02T00:00:00Z",
                 feature_schema={"tenure_months": "number", "contract_type": "string"},
@@ -47,24 +47,22 @@ class _ReadyArtifacts:
             threshold=0.42,
             prediction_samples=(
                 {
-                    "customer_id": "C001",
+                    "student_id": "S001",
                     "churn_probability": "0.82",
-                    "actual_churn": "Yes",
-                    "Contract": "Month-to-month",
-                    "tenure": "3",
-                    "PaymentMethod": "Electronic check",
-                    "MonthlyCharges": "88.20",
-                    "InternetService": "Fiber optic",
+                    "burnout_risk_level": "High",
+                    "Major_Category": "Computer Science",
+                    "Weekly_GenAI_Hours": "20",
+                    "Perceived_AI_Dependency": "3.5",
+                    "Institutional_Policy": "Permissive",
                 },
                 {
-                    "customer_id": "C002",
+                    "student_id": "S002",
                     "churn_probability": "0.18",
-                    "actual_churn": "No",
-                    "Contract": "Two year",
-                    "tenure": "40",
-                    "PaymentMethod": "Credit card",
-                    "MonthlyCharges": "49.10",
-                    "InternetService": "DSL",
+                    "burnout_risk_level": "Low",
+                    "Major_Category": "Humanities",
+                    "Weekly_GenAI_Hours": "5",
+                    "Perceived_AI_Dependency": "1.2",
+                    "Institutional_Policy": "Restrictive",
                 },
             ),
             freshness={"metrics_created_at_utc": "2026-07-02T00:00:00Z"},
@@ -157,22 +155,32 @@ def test_default_app_reports_degraded_without_configured_artifacts() -> None:
     }
 
 
-def test_stub_churn_scorer_marks_short_tenure_as_high_urgency() -> None:
-    prediction = StubChurnScorer().score({"tenure_months": 4, "contract_type": "month-to-month"})
+def test_stub_churn_scorer_marks_heavy_genai_usage_as_high_urgency() -> None:
+    prediction = StubChurnScorer().score(
+        {
+            "Weekly_GenAI_Hours": 18,
+            "Institutional_Policy": "Not_Allowed",
+        }
+    )
 
     assert prediction.churn_probability == 0.78
     assert prediction.risk_segment == "high"
     assert prediction.retention_priority == "urgent"
-    assert prediction.top_drivers == ("tenure_months",)
+    assert prediction.top_drivers == ("Weekly_GenAI_Hours",)
 
 
-def test_stub_churn_scorer_marks_established_tenure_as_low_monitoring() -> None:
-    prediction = StubChurnScorer().score({"tenure_months": 24, "contract_type": "annual"})
+def test_stub_churn_scorer_marks_light_genai_usage_as_low_monitoring() -> None:
+    prediction = StubChurnScorer().score(
+        {
+            "Weekly_GenAI_Hours": 4,
+            "Institutional_Policy": "Allowed_With_Citation",
+        }
+    )
 
     assert prediction.churn_probability == 0.31
     assert prediction.risk_segment == "low"
     assert prediction.retention_priority == "monitor"
-    assert prediction.top_drivers == ("tenure_months",)
+    assert prediction.top_drivers == ("Weekly_GenAI_Hours",)
 
 
 def test_model_metadata_and_dashboard_analytics_are_artifact_backed() -> None:
@@ -206,21 +214,19 @@ def test_dashboard_exposes_sanitized_prediction_samples_for_cohort_visualization
             "sample_id": "sample-001",
             "display_reference": "Sample 001",
             "churn_probability": "0.82",
-            "Contract": "Month-to-month",
-            "tenure": "3",
-            "PaymentMethod": "Electronic check",
-            "MonthlyCharges": "88.20",
-            "InternetService": "Fiber optic",
+            "Major_Category": "Computer Science",
+            "Weekly_GenAI_Hours": "20",
+            "Perceived_AI_Dependency": "3.5",
+            "Institutional_Policy": "Permissive",
         },
         {
             "sample_id": "sample-002",
             "display_reference": "Sample 002",
             "churn_probability": "0.18",
-            "Contract": "Two year",
-            "tenure": "40",
-            "PaymentMethod": "Credit card",
-            "MonthlyCharges": "49.10",
-            "InternetService": "DSL",
+            "Major_Category": "Humanities",
+            "Weekly_GenAI_Hours": "5",
+            "Perceived_AI_Dependency": "1.2",
+            "Institutional_Policy": "Restrictive",
         },
     ]
 
@@ -232,9 +238,9 @@ def test_dashboard_sample_sanitization_removes_raw_identifiers_and_actual_churn(
 
     assert response.status_code == 200
     first_sample = response.json()["prediction_samples"][0]
-    assert "customer_id" not in first_sample
-    assert "customerID" not in first_sample
-    assert "actual_churn" not in first_sample
+    assert "student_id" not in first_sample
+    assert "Student_ID" not in first_sample
+    assert "burnout_risk_level" not in first_sample
     assert first_sample["sample_id"] == "sample-001"
     assert first_sample["display_reference"] == "Sample 001"
 
