@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("dashboard happy path surfaces enriched cohort analytics in the browser", async ({ page }) => {
   await page.goto("/?dashboardScenario=happy");
 
-  await expect(page.getByRole("heading", { name: "Executive churn command center" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Student burnout-risk command center" })).toBeVisible();
   await expect(page.getByText("Artifact run-2026-07-02")).toBeVisible();
   await expect(page.getByRole("cell", { name: "Student 001" })).toBeVisible();
   await expect(page.getByRole("cell", { name: "Student 003" })).toBeVisible();

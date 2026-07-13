@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { PROJECT_METADATA } from "./project-metadata";
 
 describe("PROJECT_METADATA", () => {
-  it("identifies the churn analytics product", () => {
-    expect(PROJECT_METADATA.productName).toBe("Customer Churn Analytics");
+  it("identifies the student burnout risk product", () => {
+    expect(PROJECT_METADATA.productName).toBe("Student Burnout Risk Command Center");
   });
 
   it("records the stacked delivery mode", () => {

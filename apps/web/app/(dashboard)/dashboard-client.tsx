@@ -69,12 +69,12 @@ function DashboardContent({ analytics }: { analytics: DashboardAnalytics }) {
     <main className="min-h-screen bg-background px-6 py-8 text-foreground lg:px-10">
       <div className="mx-auto flex max-w-7xl flex-col gap-8">
         <header className="flex flex-col gap-3">
-          <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Customer retention intelligence</p>
+          <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Student retention intelligence</p>
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
             <div className="flex flex-col gap-3">
-              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight">Executive churn command center</h1>
+              <h1 className="max-w-3xl text-4xl font-semibold tracking-tight">Student burnout-risk command center</h1>
               <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                API-backed model outputs translated into retention priorities, cohort exposure, and customer-level risk.
+                API-backed model outputs translated into retention priorities, cohort exposure, and student-level risk.
               </p>
             </div>
             <p className="text-sm text-muted-foreground">Artifact {model.artifactVersion} · Freshness {model.freshnessLabel}</p>

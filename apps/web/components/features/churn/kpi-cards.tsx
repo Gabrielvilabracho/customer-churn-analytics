@@ -7,7 +7,7 @@ interface KpiCardsProps {
 
 export function KpiCards({ cards }: KpiCardsProps) {
   return (
-    <section aria-label="Executive churn KPIs" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section aria-label="Student burnout-risk KPIs" className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => (
         <Card key={card.label}>
           <CardHeader>

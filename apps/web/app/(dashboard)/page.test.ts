@@ -26,7 +26,8 @@ describe("DashboardPage", () => {
 
     const html = renderToStaticMarkup(await DashboardPage({}));
 
-    expect(html).toContain("Executive churn command center");
+    expect(html).toContain("Student burnout-risk command center");
+    expect(html).toContain("Student retention intelligence");
     expect(html).toContain("Model PR-AUC");
     expect(html).toContain("0.82");
     expect(html).toContain("Engineering");
