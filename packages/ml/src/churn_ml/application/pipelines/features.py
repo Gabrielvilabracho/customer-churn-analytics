@@ -55,6 +55,7 @@ def prepare_training_splits_from_csv(
     target_column: str,
     test_fraction: float,
     seed: int,
+    excluded_feature_columns: frozenset[str] = frozenset(),
 ) -> PreprocessingResult:
     rows = _read_csv_rows(csv_path)
     screen_dataset_profile(
@@ -66,6 +67,7 @@ def prepare_training_splits_from_csv(
         rows,
         customer_key=customer_key,
         target_column=target_column,
+        excluded_feature_columns=excluded_feature_columns,
     )
     feature_columns = tuple(feature.name for feature in dictionary.features)
     split = stratified_train_test_split(
@@ -74,8 +76,9 @@ def prepare_training_splits_from_csv(
         test_fraction=test_fraction,
         seed=seed,
     )
-    train_rows = [_stringify_row(row) for row in split.train_rows]
-    test_rows = [_stringify_row(row) for row in split.test_rows]
+    split_columns = (customer_key, target_column, *feature_columns)
+    train_rows = [_project_split_row(row, columns=split_columns) for row in split.train_rows]
+    test_rows = [_project_split_row(row, columns=split_columns) for row in split.test_rows]
 
     artifact_store.save_cleaned_split(
         CleanedSplitArtifact(
@@ -141,11 +144,13 @@ def build_feature_dictionary(
     *,
     customer_key: str,
     target_column: str,
+    excluded_feature_columns: frozenset[str] = frozenset(),
 ) -> FeatureDictionary:
     return FeatureDictionary.from_rows(
         rows,
         customer_key=customer_key,
         target_column=target_column,
+        excluded_feature_columns=excluded_feature_columns,
     )
 
 
@@ -154,8 +159,8 @@ def _read_csv_rows(csv_path: Path) -> list[dict[str, str]]:
         return [dict(row) for row in csv.DictReader(raw_file)]
 
 
-def _stringify_row(row: dict[str, Any]) -> dict[str, str]:
-    return {key: str(value) for key, value in row.items()}
+def _project_split_row(row: dict[str, Any], *, columns: tuple[str, ...]) -> dict[str, str]:
+    return {column: str(row[column]) for column in columns}
 
 
 def _build_train_fit_metadata(
