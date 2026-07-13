@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Any, Self
 
+LEAKAGE_COLUMNS: frozenset[str] = frozenset({"Post_Semester_GPA", "Skill_Retention_Score"})
+
 
 class FeatureSchemaError(ValueError):
     """Raised when rows cannot produce a safe modeling feature schema."""
@@ -25,6 +27,7 @@ class FeatureDictionary:
         *,
         customer_key: str,
         target_column: str,
+        excluded_feature_columns: frozenset[str] = frozenset(),
     ) -> Self:
         if not rows:
             raise FeatureSchemaError("Feature dictionary requires at least one row.")
@@ -39,8 +42,12 @@ class FeatureDictionary:
             if set(row) != columns:
                 raise FeatureSchemaError("Dataset rows must share an equivalent schema.")
 
+        effective_exclusions = LEAKAGE_COLUMNS | excluded_feature_columns
+
         feature_names = tuple(
-            column for column in rows[0] if column not in {customer_key, target_column}
+            column
+            for column in rows[0]
+            if column not in {customer_key, target_column} | effective_exclusions
         )
         if not feature_names:
             raise FeatureSchemaError("Dataset must include at least one model feature.")
