@@ -40,15 +40,9 @@ def run_training(
     min_top_risk_capture: float = 0.7,
     top_risk_fraction: float = 0.2,
     positive_labels: PositiveLabels = POSITIVE_LABELS,
+    excluded_feature_columns: frozenset[str] = frozenset(),
 ) -> TrainingEvaluationResult:
-    """Orchestrate the full training pipeline from raw CSV to versioned artifacts.
-
-    Raises DatasetProfileError if the input CSV fails schema screening.
-    No artifact writes occur when screening raises.
-    Model binary persistence is the caller's responsibility, using the
-    concrete store's save_model_binary (e.g. FilesystemArtifactStore),
-    via result.trained_candidate.
-    """
+    """Run training and persist versioned artifacts from a raw CSV."""
     logger.info("Pipeline started: run_id=%s dataset_id=%s", run_id, dataset_id)
 
     preprocessing = prepare_training_splits_from_csv(
@@ -60,6 +54,7 @@ def run_training(
         target_column=target_column,
         test_fraction=test_fraction,
         seed=seed,
+        excluded_feature_columns=excluded_feature_columns,
     )
     logger.info("Splits written: run_id=%s", run_id)
 

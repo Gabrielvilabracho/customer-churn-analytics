@@ -1,3 +1,4 @@
+import csv
 from pathlib import Path
 from unittest.mock import patch
 
@@ -143,10 +144,6 @@ def test_run_training_writes_no_artifacts_when_schema_screening_fails(
     assert list(tmp_path.iterdir()) == []
 
 
-# ---------------------------------------------------------------------------
-# F1 — manifest model_name must always be the candidate's name
-# ---------------------------------------------------------------------------
-
 def test_run_training_manifest_names_candidate_when_baseline_wins(
     tmp_path: Path,
 ) -> None:
@@ -193,10 +190,6 @@ def test_run_training_manifest_names_candidate_when_baseline_wins(
     loaded = store.load_bundle("manifest-baseline-wins-001")
     assert loaded.manifest.model_name == "candidate_logistic_regression"
 
-
-# ---------------------------------------------------------------------------
-# F6 — prediction samples must include customer_id from customer_key column
-# ---------------------------------------------------------------------------
 
 def test_run_training_prediction_samples_include_customer_key_field(
     tmp_path: Path,
@@ -273,9 +266,98 @@ def test_prediction_sample_cohort_fields_match_public_api_contract() -> None:
     )
 
 
-# ---------------------------------------------------------------------------
-# R3-W4 — empty raw_test_rows early-return path in _build_prediction_samples
-# ---------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    ("excluded_feature_columns", "excluded_column"),
+    [
+        (frozenset({"Contract"}), "Contract"),
+        (frozenset({"PaymentMethod"}), "PaymentMethod"),
+    ],
+)
+def test_run_training_excludes_requested_and_leakage_columns_from_artifact_schemas(
+    tmp_path: Path,
+    excluded_feature_columns: frozenset[str],
+    excluded_column: str,
+) -> None:
+    csv_path = _write_telco_csv_with_leakage_column(tmp_path / "telco_with_leakage.csv")
+    store = FilesystemArtifactStore(root=tmp_path / "artifacts")
+    with csv_path.open(newline="", encoding="utf-8") as raw_file:
+        source_columns = csv.DictReader(raw_file).fieldnames
+    assert source_columns is not None
+    excluded_columns = {excluded_column, "Post_Semester_GPA", "Skill_Retention_Score"}
+    expected_features = tuple(
+        column
+        for column in source_columns
+        if column not in {"customerID", "Churn"} | excluded_columns
+    )
+
+    run_training(
+        csv_path,
+        artifact_store=store,
+        run_id=f"excluded-{excluded_column}",
+        dataset_id="telco-sample",
+        customer_key="customerID",
+        target_column="Churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
+        excluded_feature_columns=excluded_feature_columns,
+        baseline_trainer=BaselineChurnRateTrainer(),
+        candidate_trainer=SklearnLogisticRegressionTrainer(
+            model_name="candidate_logistic_regression",
+            feature_columns=FEATURE_COLUMNS,
+            random_state=42,
+        ),
+    )
+
+    cleaned_train = store.load_cleaned_split(f"excluded-{excluded_column}", "train")
+    bundle = store.load_bundle(f"excluded-{excluded_column}")
+    expected_split_columns = {"customerID", "Churn", *expected_features}
+
+    assert set(cleaned_train.feature_columns) == set(expected_features)
+    assert not excluded_columns & set(cleaned_train.feature_columns)
+    assert set(bundle.manifest.feature_schema) == set(expected_features)
+    assert not excluded_columns & set(bundle.manifest.feature_schema)
+    for split_name in ("train", "test"):
+        persisted_csv = (
+            tmp_path
+            / "artifacts"
+            / "processed"
+            / f"excluded-{excluded_column}"
+            / f"{split_name}.csv"
+        )
+        with persisted_csv.open(newline="", encoding="utf-8") as raw_file:
+            reader = csv.DictReader(raw_file)
+            persisted_rows = list(reader)
+        assert set(reader.fieldnames or []) == expected_split_columns
+        assert all(set(row) == expected_split_columns for row in persisted_rows)
+
+    persisted_samples_path = (
+        tmp_path
+        / "artifacts"
+        / "metrics"
+        / f"excluded-{excluded_column}"
+        / "prediction_samples.csv"
+    )
+    with persisted_samples_path.open(newline="", encoding="utf-8") as raw_file:
+        reader = csv.DictReader(raw_file)
+        persisted_samples = list(reader)
+
+    assert persisted_samples
+    assert not excluded_columns & set(reader.fieldnames or [])
+    assert all(not excluded_columns & set(sample) for sample in persisted_samples)
+    assert bundle.prediction_samples
+    assert all(not excluded_columns & set(sample) for sample in bundle.prediction_samples)
+
+
+def _write_telco_csv_with_leakage_column(path: Path) -> Path:
+    with (FIXTURE_DIR / "telco_churn_sample.csv").open(newline="", encoding="utf-8") as raw_file:
+        rows = list(csv.DictReader(raw_file))
+    for row in rows:
+        row["Post_Semester_GPA"] = "4.0"
+        row["Skill_Retention_Score"] = "0.95"
+    with path.open("w", newline="", encoding="utf-8") as raw_file:
+        writer = csv.DictWriter(raw_file, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+    return path
 
 
 def test_build_prediction_samples_returns_empty_when_no_raw_test_rows() -> None:
