@@ -4,7 +4,7 @@ from importlib import import_module
 from math import exp, log
 from typing import Any, cast
 
-from churn_ml.domain.model import label_to_int
+from churn_ml.domain.model import POSITIVE_LABELS, PositiveLabels, label_to_int
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +18,18 @@ class SklearnLogisticRegressionTrainer:
     feature_columns: tuple[str, ...]
     random_state: int = 42
 
-    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> "SklearnProbabilityModel":
+    def train(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        target_column: str,
+        positive_labels: PositiveLabels = POSITIVE_LABELS,
+    ) -> "SklearnProbabilityModel":
         if len(rows) < 2:
             raise ValueError("At least two rows are required to train a candidate model.")
-        labels = tuple(label_to_int(row[target_column]) for row in rows)
+        labels = tuple(
+            label_to_int(row[target_column], positive_labels=positive_labels) for row in rows
+        )
         if len(set(labels)) < 2:
             raise ValueError("Candidate training requires both churn and non-churn examples.")
 

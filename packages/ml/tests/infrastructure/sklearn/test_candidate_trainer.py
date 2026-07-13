@@ -5,6 +5,7 @@ import pytest
 from churn_ml.application.pipelines.evaluate import EvaluationError, select_threshold_tradeoff
 from churn_ml.application.pipelines.train import train_and_evaluate_model_candidate
 from churn_ml.application.ports.model_trainer import ProbabilityModel
+from churn_ml.domain.model import TELCO_POSITIVE_LABELS
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import (
     SklearnLogisticRegressionTrainer,
@@ -107,6 +108,7 @@ def _evaluate_candidate(
         min_recall=min_recall,
         min_top_risk_capture=min_top_risk_capture,
         top_risk_fraction=0.5,
+        positive_labels=TELCO_POSITIVE_LABELS,
     )
 
 
@@ -144,7 +146,7 @@ def test_fallback_model_used_when_sklearn_import_fails() -> None:
         "churn_ml.infrastructure.sklearn.candidate.import_module",
         side_effect=ModuleNotFoundError("No module named 'sklearn'"),
     ):
-        model = trainer.train(rows, target_column="Churn")
+        model = trainer.train(rows, target_column="Churn", positive_labels=TELCO_POSITIVE_LABELS)
 
     assert model is not None
     assert isinstance(model.estimator, _FallbackModel)
@@ -169,7 +171,7 @@ def test_fallback_model_predictions_are_valid_probabilities() -> None:
         "churn_ml.infrastructure.sklearn.candidate.import_module",
         side_effect=ModuleNotFoundError("No module named 'sklearn'"),
     ):
-        model = trainer.train(rows, target_column="Churn")
+        model = trainer.train(rows, target_column="Churn", positive_labels=TELCO_POSITIVE_LABELS)
 
     probs = model.predict_probabilities(rows)
     assert len(probs) == len(rows)
@@ -209,9 +211,11 @@ class _CountingTrainer:
         self._delegate = delegate
         self.train_call_count = 0
 
-    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> ProbabilityModel:
+    def train(
+        self, rows: list[dict[str, Any]], *, target_column: str, **kwargs: Any
+    ) -> ProbabilityModel:
         self.train_call_count += 1
-        return self._delegate.train(rows, target_column=target_column)
+        return self._delegate.train(rows, target_column=target_column, **kwargs)
 
 
 def test_candidate_trained_exactly_once_during_train_and_evaluate() -> None:
@@ -243,6 +247,7 @@ def test_candidate_trained_exactly_once_during_train_and_evaluate() -> None:
         min_recall=0.5,
         min_top_risk_capture=0.5,
         top_risk_fraction=0.5,
+        positive_labels=TELCO_POSITIVE_LABELS,
     )
     assert counting.train_call_count == 1, (
         f"Expected candidate to be trained once, got {counting.train_call_count}."
