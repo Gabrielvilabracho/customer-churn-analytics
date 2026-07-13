@@ -74,7 +74,10 @@ def compare_model_candidates(
         pretrained_candidate
         if pretrained_candidate is not None
         else train_model_candidate(
-            candidate_trainer, train_rows, target_column=target_column, positive_labels=positive_labels
+            candidate_trainer,
+            train_rows,
+            target_column=target_column,
+            positive_labels=positive_labels,
         )
     )
     actual_labels = tuple(

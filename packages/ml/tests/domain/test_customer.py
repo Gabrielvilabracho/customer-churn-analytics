@@ -3,7 +3,7 @@
 import csv
 from pathlib import Path
 
-from churn_ml.domain.customer import LEAKAGE_COLUMNS, FeatureDictionary, FeatureSchemaError
+from churn_ml.domain.customer import LEAKAGE_COLUMNS, FeatureDictionary
 
 FIXTURE_DIR = Path(__file__).resolve().parents[1] / "fixtures"
 

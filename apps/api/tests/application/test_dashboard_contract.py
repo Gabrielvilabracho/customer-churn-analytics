@@ -11,7 +11,6 @@ Spec: churn-analytics-api – Scenario "Prediction sample cohort fields reflect
 from churn_api.application.dashboard_contract import PUBLIC_PREDICTION_SAMPLE_FIELDS
 from churn_api.application.services import _risk_distribution
 
-
 # ── 2.1: Cohort field allow-list ──────────────────────────────────────────
 
 def test_public_prediction_sample_fields_are_education_cohort_tuple() -> None:
