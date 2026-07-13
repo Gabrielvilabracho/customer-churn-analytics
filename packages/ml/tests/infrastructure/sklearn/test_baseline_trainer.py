@@ -1,5 +1,6 @@
 """Unit tests for BaselineChurnRateTrainer — shared positive-label set."""
 
+from churn_ml.application.ports.model_trainer import ModelTrainer
 from churn_ml.domain.model import POSITIVE_LABELS, label_to_int
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 
@@ -58,3 +59,20 @@ class TestBaselineTrainerPositiveLabels:
             positive_labels=frozenset({"Yes"}),
         )
         assert model.probability == 2 / 3
+
+    def test_model_trainer_protocol_includes_positive_labels(self) -> None:
+        """Regression: ModelTrainer protocol must declare positive_labels
+        kwarg so typed callers can pass it without mypy errors."""
+        trainer: ModelTrainer = BaselineChurnRateTrainer()
+        rows = [
+            {"target": "Yes"},
+            {"target": "No"},
+            {"target": "No"},
+        ]
+        model = trainer.train(
+            rows,
+            target_column="target",
+            positive_labels=frozenset({"Yes"}),
+        )
+        assert model.model_name == "baseline_churn_rate"
+        assert model.predict_probabilities(rows) == (1 / 3, 1 / 3, 1 / 3)

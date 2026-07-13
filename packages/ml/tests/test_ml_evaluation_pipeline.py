@@ -26,7 +26,13 @@ class _FixedTrainer:
         self._model_name = model_name
         self._probabilities = probabilities
 
-    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> _FixedProbabilityModel:
+    def train(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        target_column: str,
+        positive_labels: frozenset[str] = frozenset({"Churn"}),
+    ) -> _FixedProbabilityModel:
         return _FixedProbabilityModel(self._model_name, self._probabilities)
 
 

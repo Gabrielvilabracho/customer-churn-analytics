@@ -9,4 +9,10 @@ class ProbabilityModel(Protocol):
 
 
 class ModelTrainer(Protocol):
-    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> ProbabilityModel: ...
+    def train(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        target_column: str,
+        positive_labels: frozenset[str] = ...,
+    ) -> ProbabilityModel: ...
