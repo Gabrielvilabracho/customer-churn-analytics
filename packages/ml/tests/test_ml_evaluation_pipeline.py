@@ -8,7 +8,8 @@ from churn_ml.application.pipelines.evaluate import (
     select_threshold_tradeoff,
 )
 from churn_ml.application.pipelines.features import deterministic_train_test_split
-from churn_ml.application.pipelines.train import compare_model_candidates
+from churn_ml.application.pipelines.train import compare_model_candidates, train_model_candidate
+from churn_ml.domain.model import POSITIVE_LABELS, TELCO_POSITIVE_LABELS, PositiveLabels
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 
 
@@ -26,8 +27,62 @@ class _FixedTrainer:
         self._model_name = model_name
         self._probabilities = probabilities
 
-    def train(self, rows: list[dict[str, Any]], *, target_column: str) -> _FixedProbabilityModel:
+    def train(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        target_column: str,
+        positive_labels: frozenset[str | int] = POSITIVE_LABELS,
+    ) -> _FixedProbabilityModel:
         return _FixedProbabilityModel(self._model_name, self._probabilities)
+
+
+class _TypeErrorTrainer:
+    def train(
+        self, rows: list[dict[str, Any]], *, target_column: str, **kwargs: object
+    ) -> _FixedProbabilityModel:
+        if "positive_labels" in kwargs:
+            raise TypeError("trainer implementation error")
+        return _FixedProbabilityModel("fallback", (0.5,))
+
+
+class _CapturingTrainer:
+    def __init__(self) -> None:
+        self.received_positive_labels: PositiveLabels | None = None
+
+    def train(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        target_column: str,
+        positive_labels: PositiveLabels = POSITIVE_LABELS,
+    ) -> _FixedProbabilityModel:
+        self.received_positive_labels = positive_labels
+        return _FixedProbabilityModel("capturing", (0.5,))
+
+
+def test_train_model_candidate_surfaces_trainer_type_errors() -> None:
+    with pytest.raises(TypeError, match="trainer implementation error"):
+        train_model_candidate(
+            _TypeErrorTrainer(),
+            [{"churn": "Yes"}],
+            target_column="churn",
+            positive_labels=TELCO_POSITIVE_LABELS,
+        )
+
+
+def test_train_model_candidate_passes_positive_label_contract_to_trainer() -> None:
+    trainer = _CapturingTrainer()
+
+    candidate = train_model_candidate(
+        trainer,
+        [{"churn": "Yes"}],
+        target_column="churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
+    )
+
+    assert candidate.name == "capturing"
+    assert trainer.received_positive_labels == TELCO_POSITIVE_LABELS
 
 
 def test_deterministic_train_test_split_is_stable_for_same_seed() -> None:
@@ -133,7 +188,9 @@ def test_baseline_trainer_uses_training_churn_rate_without_sklearn_dependency() 
         {"customer_id": "C004", "churn": "No"},
     ]
 
-    model = BaselineChurnRateTrainer().train(rows, target_column="churn")
+    model = BaselineChurnRateTrainer().train(
+        rows, target_column="churn", positive_labels=TELCO_POSITIVE_LABELS
+    )
 
     assert model.model_name == "baseline_churn_rate"
     assert model.predict_probabilities(rows) == (0.5, 0.5, 0.5, 0.5)
@@ -161,6 +218,7 @@ def test_model_candidate_comparison_selects_candidate_with_better_churn_usefulne
         target_column="churn",
         threshold=0.5,
         top_risk_fraction=0.5,
+        positive_labels=TELCO_POSITIVE_LABELS,
     )
 
     assert comparison.baseline_model_name == "baseline_churn_rate"

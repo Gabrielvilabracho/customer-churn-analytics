@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from churn_ml.domain.model import TELCO_POSITIVE_LABELS
 
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
 
@@ -28,6 +29,8 @@ def test_main_happy_path_writes_model_binary_and_metrics(
             "--dataset-id", "telco-sample",
             "--run-id", run_id,
             "--artifact-root", str(tmp_path),
+            "--customer-key", "customerID",
+            "--target-column", "Churn",
         ],
     )
     # Fixture CSV only has 4 feature columns; patch the default to match.
@@ -36,6 +39,7 @@ def test_main_happy_path_writes_model_binary_and_metrics(
         "_DEFAULT_FEATURE_COLUMNS",
         ("gender", "SeniorCitizen", "tenure", "MonthlyCharges"),
     )
+    monkeypatch.setattr(cli_module, "_POSITIVE_LABELS", TELCO_POSITIVE_LABELS)
 
     main()
 

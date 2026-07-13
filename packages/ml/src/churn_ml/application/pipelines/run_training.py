@@ -10,6 +10,7 @@ from churn_ml.application.pipelines.train import (
 from churn_ml.application.ports.artifact_store import ArtifactStore
 from churn_ml.application.ports.model_trainer import ModelTrainer
 from churn_ml.domain.artifacts import ArtifactBundle, ArtifactManifest
+from churn_ml.domain.model import POSITIVE_LABELS, PositiveLabels
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ def run_training(
     min_recall: float = 0.7,
     min_top_risk_capture: float = 0.7,
     top_risk_fraction: float = 0.2,
+    positive_labels: PositiveLabels = POSITIVE_LABELS,
 ) -> TrainingEvaluationResult:
     """Orchestrate the full training pipeline from raw CSV to versioned artifacts.
 
@@ -72,6 +74,7 @@ def run_training(
             min_recall=min_recall,
             min_top_risk_capture=min_top_risk_capture,
             top_risk_fraction=top_risk_fraction,
+            positive_labels=positive_labels,
         )
     except Exception:
         logger.error("Training failed for run_id=%s — cleaning up partial splits", run_id)

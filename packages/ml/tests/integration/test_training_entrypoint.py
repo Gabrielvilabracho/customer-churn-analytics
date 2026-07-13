@@ -10,6 +10,7 @@ from churn_ml.application.pipelines.run_training import (
 )
 from churn_ml.application.pipelines.train import ModelComparison, TrainingEvaluationResult
 from churn_ml.domain.artifacts import ClassificationMetricSet, ThresholdSelection
+from churn_ml.domain.model import TELCO_POSITIVE_LABELS
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
@@ -31,6 +32,7 @@ def test_run_training_writes_processed_splits_and_versioned_artifact_bundle(
         dataset_id="telco-sample",
         customer_key="customerID",
         target_column="Churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
         baseline_trainer=BaselineChurnRateTrainer(),
         candidate_trainer=SklearnLogisticRegressionTrainer(
             model_name="candidate_logistic_regression",
@@ -72,6 +74,7 @@ def test_run_training_prediction_samples_contain_churn_probability_field(
         dataset_id="telco-sample",
         customer_key="customerID",
         target_column="Churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
         baseline_trainer=BaselineChurnRateTrainer(),
         candidate_trainer=SklearnLogisticRegressionTrainer(
             model_name="candidate_logistic_regression",
@@ -102,6 +105,7 @@ def test_run_training_uses_real_sklearn_estimator_not_fallback_model(
         dataset_id="telco-sample",
         customer_key="customerID",
         target_column="Churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
         baseline_trainer=BaselineChurnRateTrainer(),
         candidate_trainer=SklearnLogisticRegressionTrainer(
             model_name="candidate_logistic_regression",
@@ -127,6 +131,7 @@ def test_run_training_writes_no_artifacts_when_schema_screening_fails(
             dataset_id="telco-sample",
             customer_key="customerID",
             target_column="Churn",
+            positive_labels=TELCO_POSITIVE_LABELS,
             baseline_trainer=BaselineChurnRateTrainer(),
             candidate_trainer=SklearnLogisticRegressionTrainer(
                 model_name="candidate_logistic_regression",
@@ -176,6 +181,7 @@ def test_run_training_manifest_names_candidate_when_baseline_wins(
             dataset_id="telco-sample",
             customer_key="customerID",
             target_column="Churn",
+            positive_labels=TELCO_POSITIVE_LABELS,
             baseline_trainer=BaselineChurnRateTrainer(),
             candidate_trainer=SklearnLogisticRegressionTrainer(
                 model_name="candidate_logistic_regression",
@@ -205,6 +211,7 @@ def test_run_training_prediction_samples_include_customer_key_field(
         dataset_id="telco-sample",
         customer_key="customerID",
         target_column="Churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
         baseline_trainer=BaselineChurnRateTrainer(),
         candidate_trainer=SklearnLogisticRegressionTrainer(
             model_name="candidate_logistic_regression",
@@ -232,6 +239,7 @@ def test_run_training_prediction_samples_include_dashboard_cohort_fields(
         dataset_id="telco-sample",
         customer_key="customerID",
         target_column="Churn",
+        positive_labels=TELCO_POSITIVE_LABELS,
         baseline_trainer=BaselineChurnRateTrainer(),
         candidate_trainer=SklearnLogisticRegressionTrainer(
             model_name="candidate_logistic_regression",
