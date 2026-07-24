@@ -17,7 +17,14 @@ class GitCommand(Protocol):
 
 
 class RequiredDocsWriter(Protocol):
-    def __call__(self, root: Path, *, include_shortcut_policy: bool = True) -> None: ...
+    def __call__(
+        self,
+        root: Path,
+        *,
+        include_shortcut_policy: bool = True,
+        include_delivery_guardrails: bool = True,
+        include_dataset_limitations: bool = True,
+    ) -> None: ...
 
 
 @pytest.fixture
@@ -35,13 +42,20 @@ def git_cmd() -> GitCommand:
 
 @pytest.fixture
 def write_required_docs() -> RequiredDocsWriter:
-    def _write_required_docs(root: Path, *, include_shortcut_policy: bool = True) -> None:
+    def _write_required_docs(
+        root: Path,
+        *,
+        include_shortcut_policy: bool = True,
+        include_delivery_guardrails: bool = True,
+        include_dataset_limitations: bool = True,
+    ) -> None:
         (root / "docs").mkdir()
         (root / "README.md").write_text(
             "# Demo\n\n"
             "## Quick start\n\n"
             "Artifact-backed flow: dataset -> ML artifacts -> API -> dashboard.\n"
-            "Verification commands: pytest packages/ml/tests.\n",
+            "Verification commands: pytest packages/ml/tests.\n"
+            "Export CHURN_ARTIFACT_RUN_ID before starting the API.\n",
             encoding="utf-8",
         )
         shortcut_policy = (
@@ -53,13 +67,39 @@ def write_required_docs() -> RequiredDocsWriter:
         (root / "docs" / "architecture.md").write_text(
             "# Architecture\n\n"
             "Trace: dataset acquisition -> ML artifacts -> API adapters -> dashboard consumption.\n"
-            f"{shortcut_policy}",
+            f"{shortcut_policy}"
+            "A completion manifest defines the published artifact boundary.\n",
             encoding="utf-8",
         )
         (root / "docs" / "api-contract.md").write_text(
             "# API Contract\n\n"
             "The API returns degraded health instead of fabricated analytics "
             "when artifacts are missing.\n",
+            encoding="utf-8",
+        )
+        local_verification = (
+            "Use data/raw/ai-student-impact/ai_student_impact_dataset.csv.\n"
+            "Run --csv-path data/raw/ai-student-impact/ai_student_impact_dataset.csv.\n"
+            "Use a new run ID for immutable reruns.\n"
+            if include_delivery_guardrails
+            else "This fixture intentionally omits the canonical local workflow and "
+            "immutable rerun guarantees.\n"
+        )
+        (root / "docs" / "local-verification.md").write_text(
+            f"# Local Verification\n\n{local_verification}",
+            encoding="utf-8",
+        )
+        dataset_limitations = (
+            "## Dataset limitations\n\n"
+            "The dataset is limited and may be biased.\n\n"
+            "## Product impact\n\n"
+            "This dataset must not be used for automated decisions.\n"
+            "Do not commit raw data. Do not redistribute raw data.\n"
+            if include_dataset_limitations
+            else "# Dataset Card\n\nLicense status is unverified.\n"
+        )
+        (root / "docs" / "dataset-card.md").write_text(
+            dataset_limitations,
             encoding="utf-8",
         )
 
