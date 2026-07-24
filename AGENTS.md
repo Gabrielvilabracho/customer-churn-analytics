@@ -27,13 +27,12 @@ Build a premium portfolio-grade Customer Churn Prediction platform: an end-to-en
 ## SDD / OpenSpec Workflow
 
 - OpenSpec is the artifact store for this project.
-- Current change: `customer-churn-analytics-platform`.
+- Current change: `activate-local-education-dashboard`.
 - Read SDD artifacts before implementation:
-  - `openspec/changes/customer-churn-analytics-platform/exploration.md`
-  - `openspec/changes/customer-churn-analytics-platform/proposal.md`
-  - `openspec/changes/customer-churn-analytics-platform/design.md`
-  - `openspec/changes/customer-churn-analytics-platform/tasks.md`
-  - `openspec/specs/*/spec.md`
+  - `openspec/changes/activate-local-education-dashboard/exploration.md`
+  - `openspec/changes/activate-local-education-dashboard/proposal.md`
+  - `openspec/changes/activate-local-education-dashboard/specs/*/spec.md`
+- Design and task artifacts are optional until they are added to this change.
 - Do not implement outside the planned task slices unless the SDD artifacts are updated first.
 
 ## Dataset Rules
