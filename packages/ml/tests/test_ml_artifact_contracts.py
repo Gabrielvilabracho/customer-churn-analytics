@@ -13,6 +13,8 @@ from churn_ml.domain.artifacts import (
 from churn_ml.domain.customer import FeatureDictionary, FeatureSchemaError
 from churn_ml.infrastructure.filesystem.artifact_store import (
     FilesystemArtifactStore,
+    IntegrityError,
+    LeaseConflictError,
     PublicationError,
 )
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
@@ -386,6 +388,145 @@ def test_filesystem_artifact_store_round_trips_model_binary(
     loaded_probs = loaded_model.predict_probabilities([{"churn": "Yes"}])
     assert original_probs == loaded_probs
 
+
+# ---------------------------------------------------------------------------
+# F6 — Lease: one publisher per run
+# ---------------------------------------------------------------------------
+
+class TestLease:
+    def test_acquire_lease_writes_lease_file(self, tmp_path: Path) -> None:
+        store = FilesystemArtifactStore(root=tmp_path)
+
+        store.acquire_lease("run-lease-001", owner="publisher-a")
+
+        lease_path = tmp_path / "models" / "run-lease-001" / ".lease"
+        assert lease_path.is_file()
+        assert json.loads(lease_path.read_text(encoding="utf-8")) == {
+            "run_id": "run-lease-001",
+            "owner": "publisher-a",
+        }
+
+    def test_acquire_lease_same_owner_is_idempotent(self, tmp_path: Path) -> None:
+        store = FilesystemArtifactStore(root=tmp_path)
+        store.acquire_lease("run-lease-002", owner="publisher-a")
+
+        store.acquire_lease("run-lease-002", owner="publisher-a")  # no raise
+
+    def test_acquire_lease_other_owner_is_rejected(self, tmp_path: Path) -> None:
+        store = FilesystemArtifactStore(root=tmp_path)
+        store.acquire_lease("run-lease-003", owner="publisher-a")
+
+        with pytest.raises(LeaseConflictError, match="held by"):
+            store.acquire_lease("run-lease-003", owner="publisher-b")
+
+    def test_acquire_lease_requires_nonempty_owner(self, tmp_path: Path) -> None:
+        store = FilesystemArtifactStore(root=tmp_path)
+
+        with pytest.raises(ValueError, match="owner"):
+            store.acquire_lease("run-lease-004", owner="")
+
+    def test_release_lease_removes_lease_file(self, tmp_path: Path) -> None:
+        store = FilesystemArtifactStore(root=tmp_path)
+        store.acquire_lease("run-lease-005", owner="publisher-a")
+
+        store.release_lease("run-lease-005", owner="publisher-a")
+
+        lease_path = tmp_path / "models" / "run-lease-005" / ".lease"
+        assert not lease_path.exists()
+
+    def test_release_lease_other_owner_is_rejected(self, tmp_path: Path) -> None:
+        store = FilesystemArtifactStore(root=tmp_path)
+        store.acquire_lease("run-lease-006", owner="publisher-a")
+
+        with pytest.raises(LeaseConflictError, match="held by"):
+            store.release_lease("run-lease-006", owner="publisher-b")
+
+    def test_release_lease_without_lease_is_noop(self, tmp_path: Path) -> None:
+        store = FilesystemArtifactStore(root=tmp_path)
+
+        store.release_lease("run-lease-007", owner="publisher-a")  # no raise
+
+
+# ---------------------------------------------------------------------------
+# F7 — Integrity: exact-byte validation against the completion manifest
+# ---------------------------------------------------------------------------
+
+def _ready_run(tmp_path: Path, run_id: str = "int-001") -> None:
+    store = FilesystemArtifactStore(root=tmp_path)
+    model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    store.save_bundle(_minimal_bundle(run_id))
+    store.save_model_binary(model, run_id=run_id)
+
+
+def _write_completion_manifest(tmp_path: Path, run_id: str) -> None:
+    """Write a completion manifest with the real on-disk member checksums."""
+    member_paths = {
+        "metrics.json": tmp_path / "metrics" / run_id / "metrics.json",
+        "prediction_samples.csv": tmp_path / "metrics" / run_id / "prediction_samples.csv",
+        "model_metadata.json": tmp_path / "models" / run_id / "model_metadata.json",
+        "model.joblib": tmp_path / "models" / run_id / "model.joblib",
+        "model.joblib.sha256": tmp_path / "models" / run_id / "model.joblib.sha256",
+    }
+    manifest = {
+        "run_id": run_id,
+        "members": {
+            str(path.relative_to(tmp_path)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in member_paths.values()
+        },
+    }
+    completion_path = tmp_path / "models" / run_id / "completion.json"
+    completion_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+
+class TestVerifyRunIntegrity:
+    def test_verify_passes_for_intact_published_run(self, tmp_path: Path) -> None:
+        _ready_run(tmp_path)
+        _write_completion_manifest(tmp_path, "int-001")
+        store = FilesystemArtifactStore(root=tmp_path)
+
+        verified = store.verify_run_integrity("int-001")
+
+        assert len(verified) == 5
+        assert "models/int-001/model.joblib" in verified
+
+    def test_verify_rejects_altered_member(self, tmp_path: Path) -> None:
+        """A re-written member after publication is a mixed generation."""
+        _ready_run(tmp_path)
+        _write_completion_manifest(tmp_path, "int-001")
+        store = FilesystemArtifactStore(root=tmp_path)
+        # Tamper: replace the CSV member bytes after publication
+        samples = tmp_path / "metrics" / "int-001" / "prediction_samples.csv"
+        samples.write_text("customer_id,risk_level\nC999,HIGH\n", encoding="utf-8")
+
+        with pytest.raises(IntegrityError, match="altered"):
+            store.verify_run_integrity("int-001")
+
+    def test_verify_rejects_missing_member(self, tmp_path: Path) -> None:
+        _ready_run(tmp_path)
+        _write_completion_manifest(tmp_path, "int-001")
+        store = FilesystemArtifactStore(root=tmp_path)
+        (tmp_path / "models" / "int-001" / "model.joblib").unlink()
+
+        with pytest.raises(IntegrityError, match="missing"):
+            store.verify_run_integrity("int-001")
+
+    def test_verify_rejects_unpublished_run(self, tmp_path: Path) -> None:
+        _ready_run(tmp_path)
+        store = FilesystemArtifactStore(root=tmp_path)
+
+        with pytest.raises(IntegrityError, match="not published"):
+            store.verify_run_integrity("int-001")
+
+    def test_verify_rejects_manifest_without_members(self, tmp_path: Path) -> None:
+        _ready_run(tmp_path)
+        completion_path = tmp_path / "models" / "int-001" / "completion.json"
+        completion_path.write_text('{"run_id": "int-001"}', encoding="utf-8")
+        store = FilesystemArtifactStore(root=tmp_path)
+
+        with pytest.raises(IntegrityError, match="no members"):
+            store.verify_run_integrity("int-001")
 # F5 — Publish: manifest-last publication and overwrite rejection
 # ---------------------------------------------------------------------------
 

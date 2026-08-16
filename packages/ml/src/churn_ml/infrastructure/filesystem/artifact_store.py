@@ -15,6 +15,14 @@ class ArtifactNotFoundError(FileNotFoundError):
     pass
 
 
+class LeaseConflictError(RuntimeError):
+    """Raised when a run's write lease is held by another owner."""
+
+
+class IntegrityError(RuntimeError):
+    """Raised when a published run fails exact-byte validation."""
+
+
 class PublicationError(RuntimeError):
     """Raised when a run is already published or cannot be published."""
 
@@ -98,6 +106,45 @@ class FilesystemArtifactStore:
         except FileNotFoundError as exc:
             raise ArtifactNotFoundError(f"Artifact bundle not found for run_id={run_id!r}") from exc
 
+    def acquire_lease(self, run_id: str, owner: str) -> None:
+        """Acquire a per-run write lease.
+
+        A run can have at most one publisher at a time. Re-acquiring the lease
+        with the same owner is idempotent; a different owner is rejected.
+        """
+        _validate_run_id(run_id)
+        if not owner:
+            raise ValueError("Lease owner must not be empty")
+
+        lease_path = self._root / "models" / run_id / ".lease"
+        if lease_path.exists():
+            current = json.loads(lease_path.read_text(encoding="utf-8"))
+            if current.get("owner") != owner:
+                raise LeaseConflictError(
+                    f"Run {run_id!r} lease is held by {current.get('owner')!r}"
+                )
+            return
+
+        lease_path.parent.mkdir(parents=True, exist_ok=True)
+        lease_path.write_text(
+            json.dumps({"run_id": run_id, "owner": owner}, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
+
+    def release_lease(self, run_id: str, owner: str) -> None:
+        """Release the write lease; only the current owner may release it."""
+        _validate_run_id(run_id)
+        lease_path = self._root / "models" / run_id / ".lease"
+        if not lease_path.exists():
+            return
+
+        current = json.loads(lease_path.read_text(encoding="utf-8"))
+        if current.get("owner") != owner:
+            raise LeaseConflictError(
+                f"Run {run_id!r} lease is held by {current.get('owner')!r}"
+            )
+        lease_path.unlink()
+
     def publish_run(self, run_id: str) -> dict[str, str]:
         """Publish an immutable run by writing its completion manifest LAST.
 
@@ -134,6 +181,40 @@ class FilesystemArtifactStore:
             json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
         )
         return checksums
+
+    def verify_run_integrity(self, run_id: str) -> dict[str, str]:
+        """Validate a published run byte-for-byte against its completion manifest.
+
+        Every member checksum recorded at publication must match the bytes on
+        disk. An altered, missing, or mixed-generation member raises
+        IntegrityError. Returns the verified member checksums.
+        """
+        _validate_run_id(run_id)
+        completion_path = self._root / "models" / run_id / "completion.json"
+        if not completion_path.is_file():
+            raise IntegrityError(f"Run {run_id!r} is not published")
+
+        manifest = json.loads(completion_path.read_text(encoding="utf-8"))
+        members = manifest.get("members", {})
+        if not isinstance(members, dict) or not members:
+            raise IntegrityError(
+                f"Run {run_id!r} completion manifest has no members"
+            )
+
+        verified: dict[str, str] = {}
+        for member, expected in members.items():
+            member_path = self._root / member
+            if not member_path.is_file():
+                raise IntegrityError(
+                    f"Member {member} missing for run {run_id!r}"
+                )
+            checksum = _sha256_hex(member_path)
+            if checksum != expected:
+                raise IntegrityError(
+                    f"Member {member} altered for run {run_id!r}: checksum mismatch"
+                )
+            verified[member] = checksum
+        return verified
 
     def save_cleaned_split(self, split: CleanedSplitArtifact) -> None:
         _validate_run_id(split.run_id)
