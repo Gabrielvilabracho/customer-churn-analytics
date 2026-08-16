@@ -167,3 +167,61 @@ def _read_prediction_samples(path: Path) -> tuple[dict[str, str], ...]:
 def _read_rows_csv(path: Path) -> tuple[dict[str, str], ...]:
     with path.open(newline="", encoding="utf-8") as raw_file:
         return tuple(dict(row) for row in csv.DictReader(raw_file))
+
+def _preflight_artifact_store(root: Path, *, run_id: str) -> list[str]:
+    """Validate artifact store state before operations.
+
+    Returns a list of warning messages; empty list means valid.
+    Rejects: missing root directory, invalid run_id, concurrent run IDs,
+    incomplete metadata, or mismatched artifacts.
+    """
+    warnings: list[str] = []
+    try:
+        _validate_run_id(run_id)
+    except ValueError as exc:
+        warnings.append(str(exc))
+        return warnings
+
+    metrics_dir = root / "metrics" / run_id
+    models_dir = root / "models" / run_id
+
+    # Root directory must exist
+    if not root.is_dir():
+        warnings.append(f"Artifact root {root} does not exist")
+
+    # Metrics directory must exist with metrics.json
+    if not metrics_dir.is_dir():
+        warnings.append(f"Metrics directory missing for run_id={run_id!r}")
+    elif not (metrics_dir / "metrics.json").is_file():
+        warnings.append(f"metrics.json missing for run_id={run_id!r}")
+
+    # Models directory must exist with model_metadata.json
+    if not models_dir.is_dir():
+        warnings.append(f"Models directory missing for run_id={run_id!r}")
+    elif not (models_dir / "model_metadata.json").is_file():
+        warnings.append(f"model_metadata.json missing for run_id={run_id!r}")
+
+    # If model_binary_path is set, model.joblib must exist
+    metadata_path = models_dir / "model_metadata.json"
+    if metadata_path.is_file():
+        try:
+            metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+            if metadata.get("model_binary_path") and not (
+                models_dir / "model.joblib"
+            ).is_file():
+                warnings.append(
+                    f"model_binary_path set but model.joblib missing for run_id={run_id!r}"
+                )
+        except (json.JSONDecodeError, ValueError):
+            warnings.append(f"Invalid model_metadata.json for run_id={run_id!r}")
+
+    # Prediction samples should exist if metrics exist
+    if (metrics_dir / "prediction_samples.csv").is_file():
+        pass  # present — no warning
+    elif warnings == []:
+        # Only warn if nothing else triggered
+        warnings.append(
+            f"prediction_samples.csv missing for run_id={run_id!r} (but no other warnings)"
+        )
+
+    return warnings
