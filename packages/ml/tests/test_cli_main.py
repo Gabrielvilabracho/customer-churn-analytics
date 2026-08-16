@@ -1,9 +1,11 @@
 import hashlib
+import json
 import sys
 from pathlib import Path
 
 import pytest
 from churn_ml.domain.model import TELCO_POSITIVE_LABELS
+from churn_ml.infrastructure.filesystem.artifact_store import PublicationError
 
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures"
 FIXTURE_CSV = FIXTURE_DIR / "telco_churn_sample.csv"
@@ -218,3 +220,72 @@ def test_main_rejects_unsafe_run_id_before_any_write(
 
     assert exc_info.value.code != 0
     assert not (tmp_path / "artifacts").exists()
+
+
+# ---------------------------------------------------------------------------
+# PR 8 — CLI publication: lease, publish, and cleanup
+# ---------------------------------------------------------------------------
+
+
+def _completion_path(tmp_path: Path, run_id: str = "cli-prov-001") -> Path:
+    return tmp_path / "artifacts" / "models" / run_id / "completion.json"
+
+
+def _lease_path(tmp_path: Path, run_id: str = "cli-prov-001") -> Path:
+    return tmp_path / "artifacts" / "models" / run_id / ".lease"
+
+
+def test_main_publishes_run_and_releases_lease(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A successful run must be published and its lease released."""
+    csv_rel, _, metadata = _setup_canonical_fixture(tmp_path, monkeypatch)
+    metadata_path = _write_metadata(tmp_path, metadata)
+
+    _run_main(monkeypatch, _argv_for(tmp_path, csv_rel, metadata_path))
+
+    completion_path = _completion_path(tmp_path)
+    assert completion_path.is_file(), "completion.json must exist after publish"
+    manifest = json.loads(completion_path.read_text(encoding="utf-8"))
+    assert manifest["run_id"] == "cli-prov-001"
+    assert len(manifest["members"]) == 5
+    assert not _lease_path(tmp_path).exists(), "lease must be released after success"
+
+
+def test_main_releases_lease_on_training_failure(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A failing training run must still release its lease (no dangling lock)."""
+    import churn_ml.__main__ as cli_module
+
+    csv_rel, _, metadata = _setup_canonical_fixture(tmp_path, monkeypatch)
+    metadata_path = _write_metadata(tmp_path, metadata)
+
+    def _boom(*_args: object, **_kwargs: object) -> object:
+        raise RuntimeError("training exploded")
+
+    monkeypatch.setattr(cli_module, "run_training", _boom)
+
+    with pytest.raises(RuntimeError, match="training exploded"):
+        _run_main(monkeypatch, _argv_for(tmp_path, csv_rel, metadata_path))
+
+    assert not _lease_path(tmp_path).exists(), "lease must be released on failure"
+    assert not _completion_path(tmp_path).exists(), "no manifest on failure"
+
+
+def test_main_rejects_republication_of_same_run(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A second run with the same ID must fail: published runs are immutable."""
+    csv_rel, _, metadata = _setup_canonical_fixture(tmp_path, monkeypatch)
+    metadata_path = _write_metadata(tmp_path, metadata)
+
+    _run_main(monkeypatch, _argv_for(tmp_path, csv_rel, metadata_path))
+
+    with pytest.raises(PublicationError, match="already published"):
+        _run_main(monkeypatch, _argv_for(tmp_path, csv_rel, metadata_path))
+
+    assert not _lease_path(tmp_path).exists(), "lease must be released even on failure"

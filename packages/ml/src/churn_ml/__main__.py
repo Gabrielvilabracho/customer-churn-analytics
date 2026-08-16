@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 _CUSTOMER_KEY_DEFAULT = "Student_ID"
 _TARGET_COLUMN_DEFAULT = "Burnout_Risk_Level"
 
+# Lease owner used by the CLI; one publisher per run is enforced by the store.
+_LEASE_OWNER = "cli"
+
 # run_id becomes part of artifact paths; only safe characters are allowed.
 _RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
@@ -144,6 +147,8 @@ def main() -> None:
     artifact_root = Path(args.artifact_root)
     store = FilesystemArtifactStore(root=artifact_root)
 
+    # One publisher per run: the lease is released in all paths below.
+    store.acquire_lease(run_id, owner=_LEASE_OWNER)
     logger.info("Training started: run_id=%s", run_id)
     try:
         result = run_training(
@@ -163,23 +168,26 @@ def main() -> None:
             seed=args.seed,
             positive_labels=_POSITIVE_LABELS,
         )
+        if result.trained_candidate is not None:
+            try:
+                store.save_model_binary(result.trained_candidate, run_id=run_id)
+                logger.info("Model binary saved: run_id=%s", run_id)
+            except Exception as exc:
+                logger.error(
+                    "Model binary save failed for run_id=%s; metrics bundle is on disk but "
+                    "model.joblib is missing. Re-run with the same run_id to retry.",
+                    run_id,
+                    exc_info=exc,
+                )
+                raise
+            print(f"Model binary saved: {artifact_root}/models/{run_id}/model.joblib")
+        store.publish_run(run_id)
+        logger.info("Run published: run_id=%s", run_id)
     except Exception as exc:
         logger.error("Training pipeline failed: %s", exc)
         raise
-
-    if result.trained_candidate is not None:
-        try:
-            store.save_model_binary(result.trained_candidate, run_id=run_id)
-            logger.info("Model binary saved: run_id=%s", run_id)
-        except Exception as exc:
-            logger.error(
-                "Model binary save failed for run_id=%s; metrics bundle is on disk but "
-                "model.joblib is missing. Re-run with the same run_id to retry.",
-                run_id,
-                exc_info=exc,
-            )
-            raise
-        print(f"Model binary saved: {artifact_root}/models/{run_id}/model.joblib")
+    finally:
+        store.release_lease(run_id, owner=_LEASE_OWNER)
 
     print(f"Run ID:          {run_id}")
     print(f"Selected model:  {result.comparison.selected_model_name}")
