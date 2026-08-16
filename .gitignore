@@ -31,6 +31,9 @@ data/processed/*
 !data/raw/.gitkeep
 !data/processed/
 !data/processed/.gitkeep
+# Local education dataset: license unrecorded, never commit raw CSV or metadata
+data/raw/ai-student-impact/**
+!data/raw/ai-student-impact/
 !artifacts/
 !artifacts/models/
 artifacts/models/**
