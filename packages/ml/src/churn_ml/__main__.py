@@ -1,11 +1,17 @@
 import argparse
+import json
 import logging
+import re
 import uuid
 from pathlib import Path
 
 from churn_ml.application.pipelines.run_training import run_training
 from churn_ml.domain.model import POSITIVE_LABELS as _POSITIVE_LABELS
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
+from churn_ml.infrastructure.filesystem.provenance import (
+    validate_provenance_metadata,
+    verify_checksum,
+)
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from churn_ml.infrastructure.sklearn.candidate import SklearnLogisticRegressionTrainer
 
@@ -13,6 +19,9 @@ logger = logging.getLogger(__name__)
 
 _CUSTOMER_KEY_DEFAULT = "Student_ID"
 _TARGET_COLUMN_DEFAULT = "Burnout_Risk_Level"
+
+# run_id becomes part of artifact paths; only safe characters are allowed.
+_RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 # AI Student Impact dataset columns (education burnout-risk domain).
 # Post_Semester_GPA and Skill_Retention_Score excluded as leakage per design.
@@ -30,6 +39,35 @@ _DEFAULT_FEATURE_COLUMNS: tuple[str, ...] = (
     "Institutional_Policy",
     "Anxiety_Level_During_Exams",
 )
+
+
+def _validate_local_provenance(csv_path: Path, metadata_path: Path) -> list[str]:
+    """Validate local provenance metadata before any artifact write.
+
+    Returns an empty list when the record is coherent with the CSV, otherwise
+    one human-readable message per problem.
+    """
+    try:
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        return [f"Unable to read provenance metadata {metadata_path}: {exc}"]
+
+    errors = validate_provenance_metadata(metadata)
+
+    recorded_path = Path(metadata.get("raw_file_path", ""))
+    if csv_path.resolve() != recorded_path.resolve():
+        errors.append(
+            f"raw_file_path {str(recorded_path)!r} does not match csv-path {csv_path}"
+        )
+
+    try:
+        csv_bytes = csv_path.read_bytes()
+    except OSError as exc:
+        errors.append(f"Unable to read CSV {csv_path}: {exc}")
+    else:
+        errors.extend(verify_checksum(metadata, csv_bytes))
+
+    return errors
 
 
 def main() -> None:
@@ -59,6 +97,13 @@ def main() -> None:
         help="Column name of the binary churn target (default: Burnout_Risk_Level).",
     )
     parser.add_argument(
+        "--provenance-json",
+        default=None,
+        help="Path to the local source-metadata.json record; when set, the "
+        "provenance record and CSV checksum are validated before any artifact "
+        "is written.",
+    )
+    parser.add_argument(
         "--seed",
         type=int,
         default=42,
@@ -77,11 +122,26 @@ def main() -> None:
     if not csv_path.is_file():
         parser.error(f"CSV not found: {csv_path}")
 
+    run_id: str = args.run_id or str(uuid.uuid4())[:8]
+    if not _RUN_ID_PATTERN.fullmatch(run_id):
+        parser.error(
+            f"Unsafe run_id {run_id!r}: only letters, digits, '-' and '_' "
+            "are allowed"
+        )
+
+    if args.provenance_json:
+        provenance_errors = _validate_local_provenance(
+            csv_path, Path(args.provenance_json)
+        )
+        if provenance_errors:
+            parser.error(
+                "Provenance validation failed before any write:\n- "
+                + "\n- ".join(provenance_errors)
+            )
+
     logger.info("CSV loaded: %s", csv_path)
 
     artifact_root = Path(args.artifact_root)
-    run_id: str = args.run_id or str(uuid.uuid4())[:8]
-
     store = FilesystemArtifactStore(root=artifact_root)
 
     logger.info("Training started: run_id=%s", run_id)
