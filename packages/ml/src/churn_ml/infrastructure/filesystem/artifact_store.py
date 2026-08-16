@@ -15,6 +15,19 @@ class ArtifactNotFoundError(FileNotFoundError):
     pass
 
 
+class PublicationError(RuntimeError):
+    """Raised when a run is already published or cannot be published."""
+
+
+_PUBLISHED_RUN_MEMBERS = (
+    "metrics.json",
+    "prediction_samples.csv",
+    "model_metadata.json",
+    "model.joblib",
+    "model.joblib.sha256",
+)
+
+
 def _validate_run_id(run_id: str) -> None:
     if not run_id or not _SAFE_NAME_PATTERN.match(run_id):
         raise ValueError(
@@ -84,6 +97,43 @@ class FilesystemArtifactStore:
             )
         except FileNotFoundError as exc:
             raise ArtifactNotFoundError(f"Artifact bundle not found for run_id={run_id!r}") from exc
+
+    def publish_run(self, run_id: str) -> dict[str, str]:
+        """Publish an immutable run by writing its completion manifest LAST.
+
+        The completion manifest records the run ID and the SHA-256 checksum of
+        every required member. Once written, a run is immutable: calling this
+        again for the same run rejects the overwrite.
+
+        Returns the member checksums recorded in the completion manifest.
+        """
+        _validate_run_id(run_id)
+        completion_path = self._root / "models" / run_id / "completion.json"
+        if completion_path.exists():
+            raise PublicationError(
+                f"Run {run_id!r} is already published; published runs are immutable"
+            )
+
+        member_paths = [
+            self._root / "metrics" / run_id / member
+            for member in ("metrics.json", "prediction_samples.csv")
+        ] + [
+            self._root / "models" / run_id / member
+            for member in ("model_metadata.json", "model.joblib", "model.joblib.sha256")
+        ]
+        missing = [str(path) for path in member_paths if not path.is_file()]
+        if missing:
+            raise PublicationError(
+                f"Cannot publish run {run_id!r}: missing members {missing}"
+            )
+
+        checksums = {str(path): _sha256_hex(path) for path in member_paths}
+        manifest = {"run_id": run_id, "members": checksums}
+        completion_path.parent.mkdir(parents=True, exist_ok=True)
+        completion_path.write_text(
+            json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
+        )
+        return checksums
 
     def save_cleaned_split(self, split: CleanedSplitArtifact) -> None:
         _validate_run_id(split.run_id)
@@ -167,6 +217,11 @@ def _read_prediction_samples(path: Path) -> tuple[dict[str, str], ...]:
 def _read_rows_csv(path: Path) -> tuple[dict[str, str], ...]:
     with path.open(newline="", encoding="utf-8") as raw_file:
         return tuple(dict(row) for row in csv.DictReader(raw_file))
+
+
+def _sha256_hex(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
 
 def _preflight_artifact_store(root: Path, *, run_id: str) -> list[str]:
     """Validate artifact store state before operations.

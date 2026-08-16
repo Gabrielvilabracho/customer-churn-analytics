@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -10,7 +11,10 @@ from churn_ml.domain.artifacts import (
     ThresholdSelection,
 )
 from churn_ml.domain.customer import FeatureDictionary, FeatureSchemaError
-from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
+from churn_ml.infrastructure.filesystem.artifact_store import (
+    FilesystemArtifactStore,
+    PublicationError,
+)
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 
 # ---------------------------------------------------------------------------
@@ -381,3 +385,84 @@ def test_filesystem_artifact_store_round_trips_model_binary(
     original_probs = original_model.predict_probabilities([{"churn": "Yes"}])
     loaded_probs = loaded_model.predict_probabilities([{"churn": "Yes"}])
     assert original_probs == loaded_probs
+
+# F5 — Publish: manifest-last publication and overwrite rejection
+# ---------------------------------------------------------------------------
+
+def _publish_ready_run(tmp_path: Path, run_id: str = "pub-001") -> None:
+    """Arrange a complete, unpublished run: bundle + model binary."""
+    store = FilesystemArtifactStore(root=tmp_path)
+    model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    store.save_bundle(_minimal_bundle(run_id))
+    store.save_model_binary(model, run_id=run_id)
+
+
+def test_publish_run_writes_completion_manifest_last(tmp_path: Path) -> None:
+    _publish_ready_run(tmp_path)
+
+    store = FilesystemArtifactStore(root=tmp_path)
+    checksums = store.publish_run("pub-001")
+
+    completion_path = tmp_path / "models" / "pub-001" / "completion.json"
+    assert completion_path.is_file(), "completion.json must be written on publish"
+    manifest = json.loads(completion_path.read_text(encoding="utf-8"))
+    assert manifest["run_id"] == "pub-001"
+    assert set(manifest["members"]) == set(checksums)
+    assert set(manifest["members"]) == {
+        str(tmp_path / "metrics" / "pub-001" / "metrics.json"),
+        str(tmp_path / "metrics" / "pub-001" / "prediction_samples.csv"),
+        str(tmp_path / "models" / "pub-001" / "model_metadata.json"),
+        str(tmp_path / "models" / "pub-001" / "model.joblib"),
+        str(tmp_path / "models" / "pub-001" / "model.joblib.sha256"),
+    }
+
+
+def test_publish_run_rejects_overwrite(tmp_path: Path) -> None:
+    _publish_ready_run(tmp_path)
+
+    store = FilesystemArtifactStore(root=tmp_path)
+    store.publish_run("pub-001")
+
+    with pytest.raises(PublicationError, match="already published"):
+        store.publish_run("pub-001")
+
+
+def test_publish_run_rejects_missing_members(tmp_path: Path) -> None:
+    store = FilesystemArtifactStore(root=tmp_path)
+    store.save_bundle(_minimal_bundle("pub-002"))
+    # model binary intentionally never saved
+
+    with pytest.raises(PublicationError, match="missing members"):
+        store.publish_run("pub-002")
+    assert not (tmp_path / "models" / "pub-002" / "completion.json").exists()
+
+
+def test_publish_run_records_member_checksums(tmp_path: Path) -> None:
+    _publish_ready_run(tmp_path)
+
+    store = FilesystemArtifactStore(root=tmp_path)
+    checksums = store.publish_run("pub-001")
+
+    metrics_json = tmp_path / "metrics" / "pub-001" / "metrics.json"
+    expected = hashlib.sha256(metrics_json.read_bytes()).hexdigest()
+    assert checksums[str(metrics_json)] == expected
+
+
+def test_publish_run_manifest_last_no_completion_on_failure(tmp_path: Path) -> None:
+    """A failed publication must not leave a completion manifest behind."""
+    store = FilesystemArtifactStore(root=tmp_path)
+    store.save_bundle(_minimal_bundle("pub-003"))
+
+    with pytest.raises(PublicationError):
+        store.publish_run("pub-003")
+
+    assert not (tmp_path / "models" / "pub-003" / "completion.json").exists()
+
+
+def test_publish_run_requires_safe_run_id(tmp_path: Path) -> None:
+    store = FilesystemArtifactStore(root=tmp_path)
+
+    with pytest.raises(ValueError, match="Invalid run_id"):
+        store.publish_run("../unsafe")
