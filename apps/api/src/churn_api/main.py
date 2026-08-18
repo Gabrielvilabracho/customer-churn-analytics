@@ -4,7 +4,7 @@ from churn_api.adapters.scoring import StubChurnScorer
 from churn_api.application.ports.artifacts import ArtifactSnapshotReader
 from churn_api.application.ports.scoring import ChurnScorer
 from churn_api.application.services import AnalyticsService, PredictionService
-from churn_api.domain.artifacts import ArtifactSnapshot
+from churn_api.domain.artifacts import ArtifactSnapshot, ArtifactUnavailableError
 from churn_api.presentation.http.routes import create_router
 
 
@@ -29,5 +29,7 @@ def create_app(
 
 
 class _UnavailableArtifactReader:
+    selected_run_id: str | None = None
+
     def load_current_snapshot(self) -> ArtifactSnapshot:
-        raise FileNotFoundError("No artifact reader configured")
+        raise ArtifactUnavailableError("No artifact reader configured")

@@ -1,11 +1,15 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 from churn_api.adapters.filesystem import FilesystemArtifactSnapshotReader
 from churn_api.adapters.scoring import StubChurnScorer
-from churn_api.domain.artifacts import ArtifactSnapshot, ModelMetadata
+from churn_api.application.ports.artifacts import ArtifactSnapshotReader
+from churn_api.domain.artifacts import (
+    ArtifactSnapshot,
+    ArtifactUnavailableError,
+    ModelMetadata,
+)
 from churn_api.domain.predictions import PredictionResult
 from churn_api.main import create_app
 from churn_ml.domain.artifacts import (
@@ -15,6 +19,7 @@ from churn_ml.domain.artifacts import (
     ThresholdSelection,
 )
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
+from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
 from fastapi.testclient import TestClient
 
 
@@ -34,6 +39,8 @@ class _RecordingScorer:
 
 
 class _ReadyArtifacts:
+    selected_run_id: str = "run-2026-07-02"
+
     def __init__(self) -> None:
         self.snapshot = ArtifactSnapshot(
             model=ModelMetadata(
@@ -75,17 +82,24 @@ class _ReadyArtifacts:
 
 
 class _MissingArtifacts:
+    selected_run_id: str | None = "run-2026-07-02"
+
     def load_current_snapshot(self) -> ArtifactSnapshot:
-        raise FileNotFoundError("metrics artifact is missing")
+        raise ArtifactUnavailableError("metrics artifact is missing")
 
 
 def _client(
     *,
-    artifacts: Any | None = None,
+    artifacts: ArtifactSnapshotReader | None = None,
     scorer: _RecordingScorer | None = None,
 ) -> tuple[TestClient, _RecordingScorer]:
     active_scorer = scorer or _RecordingScorer()
-    app = create_app(artifact_reader=artifacts or _ReadyArtifacts(), scorer=active_scorer)
+    active_reader: ArtifactSnapshotReader
+    if artifacts is not None:
+        active_reader = artifacts
+    else:
+        active_reader = _ReadyArtifacts()
+    app = create_app(artifact_reader=active_reader, scorer=active_scorer)
     return TestClient(app), active_scorer
 
 
@@ -294,6 +308,15 @@ def test_boolean_feature_value_is_rejected_for_numeric_schema_without_scoring() 
     assert scorer.calls == 0
 
 
+def _publish_bundle(store: FilesystemArtifactStore, bundle: ArtifactBundle) -> None:
+    store.save_bundle(bundle)
+    model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    store.save_model_binary(model, run_id=bundle.manifest.run_id)
+    store.publish_run(bundle.manifest.run_id)
+
+
 def test_filesystem_artifact_reader_maps_versioned_metrics_into_api_snapshot(
     tmp_path: Path,
 ) -> None:
@@ -321,7 +344,8 @@ def test_filesystem_artifact_reader_maps_versioned_metrics_into_api_snapshot(
             {"customer_id": "C001", "churn_probability": "0.82", "actual_churn": "Yes"},
         ),
     )
-    FilesystemArtifactStore(root=tmp_path).save_bundle(bundle)
+    store = FilesystemArtifactStore(root=tmp_path)
+    _publish_bundle(store, bundle)
 
     snapshot = FilesystemArtifactSnapshotReader(
         root=tmp_path,
@@ -364,7 +388,8 @@ def test_filesystem_artifact_reader_maps_persisted_feature_schema_into_api_snaps
         ),
     )
 
-    FilesystemArtifactStore(root=tmp_path).save_bundle(bundle)
+    store = FilesystemArtifactStore(root=tmp_path)
+    _publish_bundle(store, bundle)
     model_metadata_path = tmp_path / "models" / "run-2026-07-02" / "model_metadata.json"
     assert json.loads(model_metadata_path.read_text(encoding="utf-8"))["feature_schema"] == {
         "tenure_months": "number",

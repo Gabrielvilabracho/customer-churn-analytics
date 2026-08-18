@@ -1,6 +1,10 @@
+import hashlib
+import json
 from pathlib import Path
 
+import pytest
 from churn_api.adapters.filesystem import FilesystemArtifactSnapshotReader
+from churn_api.domain.artifacts import ArtifactUnavailableError
 from churn_ml.domain.artifacts import (
     ArtifactBundle,
     ArtifactManifest,
@@ -40,11 +44,26 @@ def _make_bundle(run_id: str) -> ArtifactBundle:
     )
 
 
-def test_snapshot_reader_loads_bundle_shape_from_store_without_model_binary(
+def _publish_run(store: FilesystemArtifactStore, bundle: ArtifactBundle) -> None:
+    store.save_bundle(bundle)
+    model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    store.save_model_binary(model, run_id=bundle.manifest.run_id)
+    store.publish_run(bundle.manifest.run_id)
+
+
+def test_reader_exposes_selected_run_id(tmp_path: Path) -> None:
+    reader = FilesystemArtifactSnapshotReader(root=tmp_path, run_id="run-api-001")
+
+    assert reader.selected_run_id == "run-api-001"
+
+
+def test_snapshot_reader_loads_published_bundle_shape_from_store(
     tmp_path: Path,
 ) -> None:
     store = FilesystemArtifactStore(root=tmp_path)
-    store.save_bundle(_make_bundle("run-api-001"))
+    _publish_run(store, _make_bundle("run-api-001"))
 
     snapshot = FilesystemArtifactSnapshotReader(
         root=tmp_path, run_id="run-api-001"
@@ -62,23 +81,56 @@ def test_snapshot_reader_loads_bundle_shape_from_store_without_model_binary(
     assert snapshot.prediction_samples[0]["churn_probability"] == "0.82"
 
 
-def test_snapshot_reader_bundle_shape_is_unchanged_after_model_binary_is_saved(
+def test_snapshot_reader_rejects_unpublished_run(tmp_path: Path) -> None:
+    store = FilesystemArtifactStore(root=tmp_path)
+    store.save_bundle(_make_bundle("run-api-002"))
+
+    with pytest.raises(ArtifactUnavailableError, match="not published"):
+        FilesystemArtifactSnapshotReader(
+            root=tmp_path, run_id="run-api-002"
+        ).load_current_snapshot()
+
+
+def test_snapshot_reader_rejects_absent_run(tmp_path: Path) -> None:
+    with pytest.raises(ArtifactUnavailableError, match="not published"):
+        FilesystemArtifactSnapshotReader(
+            root=tmp_path, run_id="run-api-absent"
+        ).load_current_snapshot()
+
+
+def test_snapshot_reader_rejects_tampered_member_after_publication(
     tmp_path: Path,
 ) -> None:
     store = FilesystemArtifactStore(root=tmp_path)
-    bundle = _make_bundle("run-api-002")
-    store.save_bundle(bundle)
+    _publish_run(store, _make_bundle("run-api-003"))
+    metrics_path = tmp_path / "metrics" / "run-api-003" / "metrics.json"
+    metrics_path.write_text(metrics_path.read_text(encoding="utf-8") + " ")
 
-    model = BaselineChurnRateTrainer().train(
-        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    with pytest.raises(ArtifactUnavailableError, match="checksum mismatch"):
+        FilesystemArtifactSnapshotReader(
+            root=tmp_path, run_id="run-api-003"
+        ).load_current_snapshot()
+
+
+def test_snapshot_reader_rejects_manifest_identity_mismatch(
+    tmp_path: Path,
+) -> None:
+    store = FilesystemArtifactStore(root=tmp_path)
+    _publish_run(store, _make_bundle("run-api-004"))
+    metrics_path = tmp_path / "metrics" / "run-api-004" / "metrics.json"
+    payload = json.loads(metrics_path.read_text(encoding="utf-8"))
+    payload["manifest"]["run_id"] = "run-api-other"
+    metrics_path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    completion_path = tmp_path / "models" / "run-api-004" / "completion.json"
+    completion = json.loads(completion_path.read_text(encoding="utf-8"))
+    completion["members"][str(metrics_path)] = hashlib.sha256(
+        metrics_path.read_bytes()
+    ).hexdigest()
+    completion_path.write_text(
+        json.dumps(completion, indent=2, sort_keys=True), encoding="utf-8"
     )
-    store.save_model_binary(model, run_id="run-api-002")
 
-    snapshot = FilesystemArtifactSnapshotReader(
-        root=tmp_path, run_id="run-api-002"
-    ).load_current_snapshot()
-
-    assert snapshot.model.run_id == "run-api-002"
-    assert snapshot.metrics["recall"] == 0.81
-    assert snapshot.threshold == 0.42
-    assert len(snapshot.prediction_samples) == 2
+    with pytest.raises(ArtifactUnavailableError, match="identity does not match"):
+        FilesystemArtifactSnapshotReader(
+            root=tmp_path, run_id="run-api-004"
+        ).load_current_snapshot()

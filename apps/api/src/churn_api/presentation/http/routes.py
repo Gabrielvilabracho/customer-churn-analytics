@@ -7,6 +7,7 @@ from churn_api.application.services import (
     AnalyticsService,
     PredictionService,
 )
+from churn_api.domain.artifacts import ArtifactUnavailableError
 from churn_api.domain.predictions import PredictionValidationError
 from churn_api.presentation.http.schemas import PredictionRequest
 
@@ -22,7 +23,7 @@ def create_router(
     def health() -> Any:
         try:
             return analytics_service.health()
-        except FileNotFoundError as error:
+        except ArtifactUnavailableError as error:
             return JSONResponse(
                 status_code=503,
                 content={"status": "degraded", "reason": str(error)},
@@ -32,7 +33,7 @@ def create_router(
     def model_metadata() -> Any:
         try:
             return analytics_service.model_metadata()
-        except FileNotFoundError as error:
+        except ArtifactUnavailableError as error:
             return JSONResponse(
                 status_code=503,
                 content={"status": "degraded", "reason": str(error)},
@@ -42,7 +43,7 @@ def create_router(
     def dashboard() -> Any:
         try:
             return analytics_service.dashboard()
-        except FileNotFoundError as error:
+        except ArtifactUnavailableError as error:
             return JSONResponse(
                 status_code=503,
                 content={"status": "degraded", "reason": str(error)},
@@ -52,7 +53,7 @@ def create_router(
     def predict(request: PredictionRequest) -> Any:
         try:
             return prediction_service.predict(request.customer_features)
-        except FileNotFoundError as error:
+        except ArtifactUnavailableError as error:
             return JSONResponse(
                 status_code=503,
                 content={"status": "degraded", "reason": str(error)},
