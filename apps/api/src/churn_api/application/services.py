@@ -10,6 +10,10 @@ class AnalyticsService:
     def __init__(self, artifact_reader: ArtifactSnapshotReader) -> None:
         self._artifact_reader = artifact_reader
 
+    @property
+    def selected_run_id(self) -> str | None:
+        return self._artifact_reader.selected_run_id
+
     def health(self) -> dict[str, Any]:
         snapshot = self._artifact_reader.load_current_snapshot()
         return {
@@ -43,6 +47,8 @@ class AnalyticsService:
                 snapshot.prediction_samples,
                 snapshot.threshold,
             ),
+            "decision_support_only": True,
+            "qualified_human_review_required": True,
         }
 
 
@@ -50,6 +56,10 @@ class PredictionService:
     def __init__(self, artifact_reader: ArtifactSnapshotReader, scorer: ChurnScorer) -> None:
         self._artifact_reader = artifact_reader
         self._scorer = scorer
+
+    @property
+    def selected_run_id(self) -> str | None:
+        return self._artifact_reader.selected_run_id
 
     def predict(self, customer_features: dict[str, float | str | bool]) -> dict[str, Any]:
         snapshot = self._artifact_reader.load_current_snapshot()
@@ -65,6 +75,8 @@ class PredictionService:
             "retention_priority": prediction.retention_priority,
             "model_version": snapshot.model.run_id,
             "top_drivers": list(prediction.top_drivers),
+            "decision_support_only": True,
+            "qualified_human_review_required": True,
         }
 
 

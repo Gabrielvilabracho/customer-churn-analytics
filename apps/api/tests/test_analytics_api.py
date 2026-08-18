@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -20,7 +21,9 @@ from churn_ml.domain.artifacts import (
 )
 from churn_ml.infrastructure.filesystem.artifact_store import FilesystemArtifactStore
 from churn_ml.infrastructure.sklearn.baseline import BaselineChurnRateTrainer
+from fastapi.routing import APIRoute
 from fastapi.testclient import TestClient
+from pytest import LogCaptureFixture
 
 
 @dataclass
@@ -86,6 +89,27 @@ class _MissingArtifacts:
 
     def load_current_snapshot(self) -> ArtifactSnapshot:
         raise ArtifactUnavailableError("metrics artifact is missing")
+
+
+class _InvalidSamplesArtifacts:
+    selected_run_id: str = "run-2026-07-02"
+
+    def load_current_snapshot(self) -> ArtifactSnapshot:
+        return ArtifactSnapshot(
+            model=ModelMetadata(
+                run_id="run-2026-07-02",
+                dataset_id="telco-churn",
+                model_name="candidate_ranker",
+                created_at_utc="2026-07-02T00:00:00Z",
+                feature_schema={"tenure_months": "number", "contract_type": "string"},
+            ),
+            metrics={"recall": 0.81, "precision": 0.64, "pr_auc": 0.72},
+            threshold=0.42,
+            prediction_samples=(
+                {"customer_id": "C001", "churn_probability": "0.82", "actual_churn": "Yes"},
+            ),
+            freshness={"metrics_created_at_utc": "2026-07-02T00:00:00Z"},
+        )
 
 
 def _client(
@@ -269,6 +293,8 @@ def test_prediction_contract_returns_risk_decision_and_driver_payload() -> None:
         "retention_priority": "urgent",
         "model_version": "run-2026-07-02",
         "top_drivers": ["contract_type", "tenure_months"],
+        "decision_support_only": True,
+        "qualified_human_review_required": True,
     }
     assert scorer.calls == 1
 
@@ -405,3 +431,101 @@ def test_filesystem_artifact_reader_maps_persisted_feature_schema_into_api_snaps
         "tenure_months": "number",
         "contract_type": "string",
     }
+
+
+def test_dashboard_and_predict_include_decision_support_safeguards() -> None:
+    client, _ = _client()
+
+    dashboard = client.get("/analytics/dashboard")
+    prediction = client.post(
+        "/predict",
+        json={"customer_features": {"tenure_months": 4, "contract_type": "month-to-month"}},
+    )
+
+    assert dashboard.status_code == 200
+    assert dashboard.json()["decision_support_only"] is True
+    assert dashboard.json()["qualified_human_review_required"] is True
+    assert prediction.status_code == 200
+    assert prediction.json()["decision_support_only"] is True
+    assert prediction.json()["qualified_human_review_required"] is True
+
+
+def test_health_and_metadata_responses_omit_decision_support_flags() -> None:
+    client, _ = _client()
+
+    health = client.get("/health")
+    metadata = client.get("/model/metadata")
+
+    assert health.status_code == 200
+    assert "decision_support_only" not in health.json()
+    assert "qualified_human_review_required" not in health.json()
+    assert metadata.status_code == 200
+    assert "decision_support_only" not in metadata.json()
+    assert "qualified_human_review_required" not in metadata.json()
+
+
+def test_degraded_endpoint_emits_structured_warning_with_run_id(
+    caplog: LogCaptureFixture,
+) -> None:
+    client, _ = _client(artifacts=_MissingArtifacts())
+
+    with caplog.at_level(logging.WARNING):
+        response = client.get("/health")
+
+    assert response.status_code == 503
+    assert response.json()["status"] == "degraded"
+    assert len(caplog.records) == 1
+    record = caplog.records[0]
+    assert record.__dict__["event"] == "artifact_degraded"
+    assert record.__dict__["operation"] == "GET /health"
+    assert record.__dict__["run_id"] == "run-2026-07-02"
+    assert record.__dict__["reason"] == "metrics artifact is missing"
+
+
+def test_unconfigured_reader_emits_warning_without_run_id(caplog: LogCaptureFixture) -> None:
+    client = TestClient(create_app())
+
+    with caplog.at_level(logging.WARNING):
+        response = client.get("/analytics/dashboard")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "status": "degraded",
+        "reason": "No artifact reader configured",
+    }
+    assert len(caplog.records) == 1
+    record = caplog.records[0]
+    assert record.__dict__["event"] == "artifact_degraded"
+    assert record.__dict__["operation"] == "GET /analytics/dashboard"
+    assert record.__dict__["run_id"] is None
+    assert record.__dict__["reason"] == "No artifact reader configured"
+
+
+def test_dashboard_degrades_when_sample_omits_public_cohort_field() -> None:
+    client, _ = _client(artifacts=_InvalidSamplesArtifacts())
+
+    response = client.get("/analytics/dashboard")
+
+    assert response.status_code == 503
+    assert response.json()["status"] == "degraded"
+    assert "cohort field" in response.json()["reason"]
+    assert "prediction_samples" not in response.json()
+
+
+def test_api_exposes_no_consequential_action_endpoints() -> None:
+    app = create_app(artifact_reader=_ReadyArtifacts())
+
+    paths = {route.path for route in app.routes if isinstance(route, APIRoute)}
+    non_action_paths = {
+        "/health",
+        "/model/metadata",
+        "/analytics/dashboard",
+        "/predict",
+        "/openapi.json",
+        "/docs",
+        "/docs/oauth2-redirect",
+        "/redoc",
+    }
+    action_paths = paths - non_action_paths
+
+    assert action_paths == set()
