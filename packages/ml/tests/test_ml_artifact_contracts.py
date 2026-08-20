@@ -607,3 +607,27 @@ def test_publish_run_requires_safe_run_id(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError, match="Invalid run_id"):
         store.publish_run("../unsafe")
+
+
+def test_publish_and_verify_with_relative_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """A relative artifact root must publish and verify consistently.
+
+    Regression: the completion manifest used to record member paths relative
+    to the process working directory instead of the store root, so
+    verify_run_integrity resolved them against the store root and reported
+    every member missing (duplicated path prefix).
+    """
+    monkeypatch.chdir(tmp_path)
+    store = FilesystemArtifactStore(root=Path("store"))
+    model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    store.save_bundle(_minimal_bundle("pub-relative"))
+    store.save_model_binary(model, run_id="pub-relative")
+
+    store.publish_run("pub-relative")
+
+    assert store.verify_run_integrity("pub-relative")

@@ -41,6 +41,9 @@ artifacts/models/**
 !artifacts/metrics/
 artifacts/metrics/**
 !artifacts/metrics/.gitkeep
+!artifacts/processed/
+artifacts/processed/**
+!artifacts/processed/.gitkeep
 *.joblib
 *.pkl
 
