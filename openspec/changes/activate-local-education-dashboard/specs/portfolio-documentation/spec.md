@@ -13,7 +13,8 @@ The project MUST provide a README, dataset card, modeling report, architecture n
 - GIVEN a reviewer has an operator-supplied education CSV and the documented toolchains
 - WHEN they follow the documented ML → FastAPI → Next.js sequence
 - THEN the commands consistently reuse one explicit run ID
-- AND the documented health and dashboard checks return live education analytics
+- AND the documented health and metadata checks return live education analytics
+- AND the documentation identifies the dashboard endpoint's expected degraded response for education runs (the pipeline emits no public cohort fields) and the mock-backed dashboard visual states
 
 #### Scenario: Reviewer has not provisioned artifacts
 

@@ -1,34 +1,66 @@
 # Current Delivery Status
 
-**Status: Pending PR 1 merge**
+**Status: Chain complete — PRs 1-14 merged; ready for archive, spec sync, and issue #32 close**
 
-This file records the status after PR 1 (`docs/education-sdd-intent`) merges.
-The stacked-to-main chain will proceed from this point, with each PR
-synchronized from refreshed `origin/main` after its predecessor merges.
+This file records the reconciled state after the final chain PR (14) merges.
+The stacked-to-main chain is complete; the remaining steps are defined in
+`tasks.md` 4.4: archive the change, sync delta specs into `openspec/specs/`,
+validate OpenSpec, and close issue #32.
 
 ## Delivery Boundary
 
-After PR 1 merges, the chain continues from the refreshed `origin/main`,
-with each subsequent PR measured at ≤400 changed lines, linked to issue #32,
-and carrying exactly one `type:*` label. Package-local generated locks are
-excluded because they cannot form valid sub-400-line slices; the tracked
+Every branch started from refreshed `origin/main` after its predecessor
+merged, targeted `main`, linked issue #32, and carried exactly one `type:*`
+label. Package-local generated locks stayed excluded (tasks 4.2); the tracked
 root `uv.lock` remains authoritative. Raw data, generated artifacts, and
-unrelated archive work remain excluded.
+unrelated archive work remained excluded throughout.
 
 ## Current Implementation Evidence
 
-(N/A — this status records the clean state after PR 1 merge; implementation
-evidence will be added in subsequent PRs 3 onward.)
+- **PRs 1-2 (docs):** SDD intent and design baselines (`AGENTS.md`,
+  exploration, proposal, four delta specs, design, tasks, status).
+- **PRs 3-6 (ML contracts):** store preflight, manifest-last publication with
+  overwrite rejection, exact-byte integrity/concurrency, provenance and
+  ignore rules — each with focused artifact-store tests.
+- **PRs 7-8 (CLI):** provenance validation before CLI writes; `__main__.py`
+  lease/publish/cleanup with tests.
+- **PR 9 (reader):** snapshot reads in `artifacts.py`/`adapters/filesystem.py`;
+  unavailable, tampered, and valid reads tested.
+- **PR 10 (degradation):** `services.py`/`routes.py` warnings and `503`s;
+  fabricated analytics rejected.
+- **PR 11 (runtime composition):** `create_runtime_app(environ)` with
+  `CHURN_ARTIFACT_RUN_ID`/`CHURN_ARTIFACT_ROOT`; module-level ASGI `app`;
+  `apps/api/pyproject.toml` runtime dependency on `churn-ml`.
+- **PR 12 (CLI-to-API integration):** integration tests proving a CLI-published
+  education run serves health/metadata/predict (200) and degrades on tampering
+  (503); dashboard degrades instead of fabricating (no public cohort fields).
+- **PR 13 (docs):** README and six `docs/` files document the executable
+  education workflow, degraded dashboard behavior, and responsible-use limits;
+  fixed a relative-root bug in the artifact store completion manifest
+  (`root.resolve()`) with a regression test.
+- **PR 14 (reconcile):** status record updated; portfolio-documentation delta
+  spec aligned with the verified degraded-dashboard behavior.
+
+## Reconciliations
+
+- The portfolio-documentation scenario "dashboard returns live education
+  analytics" was aligned with the verified behavior: education prediction
+  samples carry no public cohort fields, so `/analytics/dashboard` degrades
+  (`503`) for real education runs; dashboard visual states are covered by the
+  web E2E suite with a mock API. The API never fabricates analytics.
+- The relative-root artifact store bug (completion manifest recorded
+  cwd-relative member paths) was fixed and regression-tested in PR 13.
 
 ## Bounded Review Authority
 
 The authoritative review transaction follows the native compact lineage
 finalized against the merged worktree. Its receipt, not a free-form status
 claim, is the review authority after `gentle-ai review finalize` and
-`gentle-ai review bind-sdd` complete.
+`gentle-ai review bind-sdd` complete. The final verification report is
+produced by the 4.4 verify phase before archiving.
 
 ## Next Gate
 
-After PR 1 merges, create PR 2 (`docs/education-sdd-design`) from clean,
-updated `origin/main` as defined in `tasks.md`. Do not stage, commit, push,
-or include excluded files outside its exact slice.
+After PR 14 merges, run the 4.4 closeout: execute the full verification
+(`sdd-verify`), archive the change, sync delta specs into `openspec/specs/`,
+validate OpenSpec, and close issue #32.
