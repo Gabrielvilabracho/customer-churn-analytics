@@ -64,7 +64,11 @@ def _read_metadata_or_empty(path: Path) -> dict[str, Any]:
 
 class FilesystemArtifactStore:
     def __init__(self, *, root: Path) -> None:
-        self._root = root
+        # Canonicalize to an absolute root so the completion manifest records
+        # portable member paths: relative roots used to leak cwd-relative
+        # paths that verify_run_integrity then resolved against the store
+        # root (duplicated prefix).
+        self._root = root.resolve()
 
     def save_bundle(self, bundle: ArtifactBundle) -> None:
         _validate_run_id(bundle.manifest.run_id)
