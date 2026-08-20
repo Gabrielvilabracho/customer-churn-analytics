@@ -3,6 +3,7 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
+import pytest
 from churn_api.adapters.filesystem import FilesystemArtifactSnapshotReader
 from churn_api.adapters.scoring import StubChurnScorer
 from churn_api.application.ports.artifacts import ArtifactSnapshotReader
@@ -12,7 +13,7 @@ from churn_api.domain.artifacts import (
     ModelMetadata,
 )
 from churn_api.domain.predictions import PredictionResult
-from churn_api.main import create_app
+from churn_api.main import create_app, create_runtime_app
 from churn_ml.domain.artifacts import (
     ArtifactBundle,
     ArtifactManifest,
@@ -529,3 +530,131 @@ def test_api_exposes_no_consequential_action_endpoints() -> None:
     action_paths = paths - non_action_paths
 
     assert action_paths == set()
+
+
+def _runtime_bundle(run_id: str) -> ArtifactBundle:
+    return ArtifactBundle(
+        manifest=ArtifactManifest(
+            run_id=run_id,
+            dataset_id="telco-churn",
+            model_name="candidate_logistic_regression",
+            created_at_utc="2026-07-03T00:00:00Z",
+            feature_schema={"tenure_months": "number", "contract_type": "string"},
+        ),
+        metrics=ClassificationMetricSet(
+            pr_auc=0.72,
+            roc_auc=0.80,
+            precision=0.64,
+            recall=0.81,
+            accuracy=0.77,
+            top_risk_capture=0.70,
+            workload_at_threshold=0.35,
+        ),
+        threshold=ThresholdSelection(
+            threshold=0.42,
+            tradeoff="Selected threshold 0.42 to reach recall 0.81 with workload 0.35.",
+        ),
+        prediction_samples=(
+            {
+                "customer_id": "C001",
+                "churn_probability": "0.82",
+                "actual_churn": "Yes",
+                "Contract": "Month-to-month",
+                "tenure": "3",
+                "PaymentMethod": "Electronic check",
+                "MonthlyCharges": "88.20",
+                "InternetService": "Fiber optic",
+            },
+            {
+                "customer_id": "C002",
+                "churn_probability": "0.18",
+                "actual_churn": "No",
+                "Contract": "Two year",
+                "tenure": "40",
+                "PaymentMethod": "Credit card",
+                "MonthlyCharges": "49.10",
+                "InternetService": "DSL",
+            },
+        ),
+    )
+
+
+def _publish_run(store: FilesystemArtifactStore, bundle: ArtifactBundle) -> None:
+    store.save_bundle(bundle)
+    model = BaselineChurnRateTrainer().train(
+        [{"churn": "Yes"}, {"churn": "No"}], target_column="churn"
+    )
+    store.save_model_binary(model, run_id=bundle.manifest.run_id)
+    store.publish_run(bundle.manifest.run_id)
+
+
+def test_runtime_app_configured_startup_selects_exact_run(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _publish_run(FilesystemArtifactStore(root=tmp_path), _runtime_bundle("run-runtime-001"))
+    monkeypatch.setenv("CHURN_ARTIFACT_RUN_ID", "run-runtime-001")
+    monkeypatch.setenv("CHURN_ARTIFACT_ROOT", str(tmp_path))
+
+    client = TestClient(create_runtime_app())
+
+    health = client.get("/health")
+    dashboard = client.get("/analytics/dashboard")
+    assert health.status_code == 200
+    assert health.json()["artifact_version"] == "run-runtime-001"
+    assert dashboard.status_code == 200
+    assert dashboard.json()["artifact_version"] == "run-runtime-001"
+    assert dashboard.json()["prediction_samples"][0]["Contract"] == "Month-to-month"
+    assert dashboard.json()["decision_support_only"] is True
+
+
+def test_runtime_app_without_configuration_stays_degraded(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("CHURN_ARTIFACT_RUN_ID", raising=False)
+    monkeypatch.delenv("CHURN_ARTIFACT_ROOT", raising=False)
+
+    client = TestClient(create_runtime_app())
+
+    health = client.get("/health")
+    dashboard = client.get("/analytics/dashboard")
+    prediction = client.post("/predict", json={"customer_features": {"tenure_months": 4}})
+    assert health.status_code == 503
+    assert health.json()["status"] == "degraded"
+    assert dashboard.status_code == 503
+    assert dashboard.json()["status"] == "degraded"
+    assert prediction.status_code == 503
+    assert prediction.json()["status"] == "degraded"
+
+
+def test_runtime_app_rejects_invalid_run_id_without_artifact_access(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # A run ID that could escape the artifact root must be rejected before any
+    # filesystem access, keeping the app degraded instead of probing the store.
+    monkeypatch.setenv("CHURN_ARTIFACT_RUN_ID", "run/../escape")
+    monkeypatch.setenv("CHURN_ARTIFACT_ROOT", str(tmp_path))
+
+    client = TestClient(create_runtime_app())
+
+    dashboard = client.get("/analytics/dashboard")
+    assert dashboard.status_code == 503
+    assert dashboard.json()["status"] == "degraded"
+    assert dashboard.json()["reason"] == "No artifact reader configured"
+
+
+def test_create_app_explicit_reader_wins_over_runtime_settings(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Runtime settings point at an empty store; only the injected reader can
+    # serve analytics, proving explicit dependencies still win at startup.
+    monkeypatch.setenv("CHURN_ARTIFACT_RUN_ID", "run-runtime-001")
+    monkeypatch.setenv("CHURN_ARTIFACT_ROOT", str(tmp_path))
+
+    client = TestClient(create_app(artifact_reader=_ReadyArtifacts()))
+
+    dashboard = client.get("/analytics/dashboard")
+    assert dashboard.status_code == 200
+    assert dashboard.json()["artifact_version"] == "run-2026-07-02"

@@ -6,6 +6,9 @@ requires-python = ">=3.12,<3.15"
 dependencies = [
   "fastapi>=0.125.0",
   "httpx>=0.28.1",
+  # Runtime composition: the filesystem reader validates artifacts produced
+  # by churn-ml. Package-local locks stay out; the workspace tracks uv.lock.
+  "churn-ml @ ../packages/ml",
 ]
 
 [build-system]
