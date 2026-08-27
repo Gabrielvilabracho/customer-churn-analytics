@@ -8,19 +8,29 @@ Define the documentation behavior needed to make the project reviewable as a pre
 
 ### Requirement: Reviewable Project Narrative
 
-The project MUST provide a README, dataset card, modeling report, and architecture notes that explain the problem, dataset limits, artifact flow, API, dashboard, and tradeoffs.
+The project MUST provide a README, dataset card, modeling report, architecture notes, and API guidance that accurately describe the education burnout-risk product. The local-start documentation MUST provide executable commands, prerequisites, and expected checks for provisioning the ignored CSV, generating one complete artifact run, starting FastAPI with that same artifact root and run ID, and starting the existing Next.js dashboard against the API.
 
-#### Scenario: Reviewer enters the project
+#### Scenario: Reviewer starts the education dashboard
 
-- GIVEN a reviewer opens the repository
-- WHEN they read the README
-- THEN they can identify the product goal, setup path, artifact flow, and verification commands
+- GIVEN a reviewer has an operator-supplied education CSV and the documented toolchains
+- WHEN they follow the documented ML → FastAPI → Next.js sequence
+- THEN the commands consistently reuse one explicit run ID
+- AND the documented health and metadata checks return live education analytics
+- AND the documentation identifies the dashboard endpoint's expected degraded response for education runs (the pipeline emits no public cohort fields) and the mock-backed dashboard visual states
+
+#### Scenario: Reviewer has not provisioned artifacts
+
+- GIVEN the canonical CSV or selected artifact run is absent
+- WHEN the reviewer follows the startup guide
+- THEN the documentation MUST identify the expected degraded API/dashboard behavior
+- AND it MUST explain how to provision or regenerate the missing local input without redistribution
 
 #### Scenario: Dataset has limitations
 
-- GIVEN the dataset is small, synthetic, biased, or redistribution-restricted
+- GIVEN dataset provenance or licensing is uncertain, restricted, biased, or otherwise limited
 - WHEN the dataset card is read
-- THEN the limitation and its product impact MUST be stated plainly
+- THEN the uncertainty and product impact MUST be stated plainly
+- AND the documentation MUST NOT instruct reviewers to commit or redistribute raw data
 
 ### Requirement: Engineering Standards as User-facing Guarantees
 

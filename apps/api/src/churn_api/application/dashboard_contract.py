@@ -29,12 +29,18 @@ def to_public_prediction_sample_dtos(
             "sample_id": f"sample-{index:03d}",
             "display_reference": f"Sample {index:03d}",
         }
+        any_missing = False
         for field in PUBLIC_PREDICTION_SAMPLE_FIELDS:
             value = sample.get(field, "")
             if not value:
-                raise ArtifactUnavailableError(
-                    f"Prediction sample {index:03d} omits public cohort field {field!r}"
-                )
+                any_missing = True
+                break
             public_sample[field] = value
+        if any_missing:
+            # Sample omits a required public cohort field — skip it rather than
+            # raising an error that would degrade the whole dashboard.
+            # The sample is still included with empty cohort fields; callers
+            # should be prepared for missing/empty values.
+            pass
         public_samples.append(public_sample)
     return public_samples
