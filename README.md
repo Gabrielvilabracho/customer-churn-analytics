@@ -25,7 +25,7 @@ openspec/      SDD specs, tasks, apply progress, verify report
 ## Quick start for reviewers
 
 1. Read `docs/dataset-card.md` before using any dataset.
-2. Provision the education CSV locally under the ignored path `data/raw/ai-student-impact/ai_student_impact_dataset.csv` (see `docs/dataset-card.md`; the CSV stays untracked and is never redistributed).
+2. Provision the education CSV locally under the ignored path `data/01-raw/ai-student-impact/ai_student_impact_dataset.csv` (see `docs/dataset-card.md`; the CSV stays untracked and is never redistributed).
 3. Run the ML pipeline with an explicit `run_id`:
 
 ```bash

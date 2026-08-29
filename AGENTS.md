@@ -39,7 +39,7 @@ Build a premium portfolio-grade Customer Churn Prediction platform: an end-to-en
 
 - Kaggle data acquisition MUST respect dataset licenses.
 - Raw Kaggle datasets SHOULD NOT be committed unless the license explicitly allows redistribution.
-- Prefer documenting dataset download steps and keeping raw data under `data/raw/` ignored by git.
+- Prefer documenting dataset download steps and keeping raw data under `data/01-raw/` ignored by git.
 - Check for target leakage before modeling.
 
 ## Review Budget

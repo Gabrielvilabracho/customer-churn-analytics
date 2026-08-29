@@ -1,0 +1,25 @@
+# Local Development Configuration
+
+app:
+  name: churn-prediction
+  environment: local
+  debug: true
+
+data:
+  raw_path: ../data/01-raw
+  processed_path: ../data/02-preprocessed
+  features_path: ../data/03-features
+  predictions_path: ../data/04-predictions
+
+ml:
+  random_state: 42
+  test_size: 0.2
+  model_path: ../data/04-predictions
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  reload: true
+
+logging:
+  level: DEBUG

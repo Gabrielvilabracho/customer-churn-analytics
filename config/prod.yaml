@@ -1,0 +1,25 @@
+# Production Configuration
+
+app:
+  name: churn-prediction
+  environment: production
+  debug: false
+
+data:
+  raw_path: /app/data/01-raw
+  processed_path: /app/data/02-preprocessed
+  features_path: /app/data/03-features
+  predictions_path: /app/data/04-predictions
+
+ml:
+  random_state: 42
+  test_size: 0.2
+  model_path: /app/data/04-predictions
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  reload: false
+
+logging:
+  level: WARNING

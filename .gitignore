@@ -24,16 +24,22 @@ test-results/
 !.env.example
 
 # Data and generated artifacts
-data/raw/*
-data/processed/*
+data/01-raw/*
+data/02-preprocessed/*
+data/03-features/*
+data/04-predictions/*
 !data/
-!data/raw/
-!data/raw/.gitkeep
-!data/processed/
-!data/processed/.gitkeep
+!data/01-raw/
+!data/01-raw/.gitkeep
+!data/02-preprocessed/
+!data/02-preprocessed/.gitkeep
+!data/03-features/
+!data/03-features/.gitkeep
+!data/04-predictions/
+!data/04-predictions/.gitkeep
 # Local education dataset: license unrecorded, never commit raw CSV or metadata
-data/raw/ai-student-impact/**
-!data/raw/ai-student-impact/
+data/01-raw/ai-student-impact/**
+!data/01-raw/ai-student-impact/
 !artifacts/
 !artifacts/models/
 artifacts/models/**
