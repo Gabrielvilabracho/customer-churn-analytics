@@ -50,6 +50,10 @@ artifacts/metrics/**
 !artifacts/processed/
 artifacts/processed/**
 !artifacts/processed/.gitkeep
+artifacts/education/
+artifacts/experiments/
+artifacts/mlflow/
+.ipynb_checkpoints/
 *.joblib
 *.pkl
 
