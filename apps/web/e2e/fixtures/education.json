@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "run_id": "synthetic-education-run",
+  "analysis_id": "synthetic-analysis",
+  "dataset_id": "synthetic-fixture-not-research",
+  "model_name": "synthetic-logistic",
+  "created_at_utc": "2026-11-07T12:00:00Z",
+  "summary": {
+    "train_count": 80, "test_count": 40, "threshold": 0.3,
+    "observed_high_rate": 0.5, "average_predicted_risk": 0.51, "minimum_cohort_size": 20
+  },
+  "model_metrics": {"roc_auc": 0.8, "recall": 0.88, "precision": 0.36, "pr_auc": 0.64},
+  "coefficients": [
+    {"feature": "Weekly_GenAI_Hours", "term": "numeric__Weekly_GenAI_Hours", "category": null,
+      "coefficient": 0.5, "term_coefficient": 0.5, "original_unit_coefficient": 0.1,
+      "odds_ratio": 1.6487212707001282, "direction": "positive",
+      "unit": "per training standard deviation", "reference": null},
+    {"feature": "Major_Category", "term": "categorical__Major_Category_Arts", "category": "Arts",
+      "coefficient": 0, "term_coefficient": 0.2, "original_unit_coefficient": null,
+      "odds_ratio": 1, "direction": "neutral", "unit": "category contrast", "reference": "Arts"},
+    {"feature": "Major_Category", "term": "categorical__Major_Category_Engineering", "category": "Engineering",
+      "coefficient": -0.4, "term_coefficient": -0.2, "original_unit_coefficient": null,
+      "odds_ratio": 0.6703200460356393, "direction": "negative", "unit": "category contrast", "reference": "Arts"}
+  ],
+  "importance": [
+    {"feature": "Weekly_GenAI_Hours", "mean_abs_shap": 0.2, "permutation_mean": 0.12, "permutation_std": 0.01},
+    {"feature": "Major_Category", "mean_abs_shap": 0.1, "permutation_mean": 0.02, "permutation_std": 0.005}
+  ],
+  "associations": [
+    {"feature": "Weekly_GenAI_Hours", "kind": "numeric",
+      "train": {"count": 80, "missing_count": 0, "point_biserial": 0.4, "spearman": 0.38},
+      "test": {"count": 40, "missing_count": 0, "point_biserial": 0.36, "spearman": 0.34}},
+    {"feature": "Major_Category", "kind": "categorical",
+      "train": {"count": 80, "missing_count": 0, "cramers_v": 0.15},
+      "test": {"count": 40, "missing_count": 0, "cramers_v": 0.12}}
+  ],
+  "cohorts": [
+    {"feature": "Major_Category", "group": "Arts", "count": 20, "suppressed": false,
+      "observed_high_rate": 0.6, "observed_ci": [0.39, 0.78], "average_predicted_risk": 0.65,
+      "difference_from_overall": 0.1, "precision": 0.6, "recall": 0.9},
+    {"feature": "Major_Category", "group": "Engineering", "count": 20, "suppressed": false,
+      "observed_high_rate": 0.4, "observed_ci": [0.22, 0.61], "average_predicted_risk": 0.37,
+      "difference_from_overall": -0.1, "precision": 0.4, "recall": 0.8},
+    {"feature": "Weekly_GenAI_Hours", "group": "(10, 20]", "count": 5, "suppressed": true,
+      "observed_high_rate": null, "observed_ci": null, "average_predicted_risk": null,
+      "difference_from_overall": null, "precision": null, "recall": null}
+  ],
+  "shap": {
+    "method": "exact_independent_linear", "units": "log_odds", "background_count": 80, "sample_count": 2,
+    "samples": [
+      {"sample_id": "sample-0001", "base_value": 0, "output_value": 0.3,
+        "predicted_probability": 0.574442516811659,
+        "contributions": [
+          {"feature": "Weekly_GenAI_Hours", "value": "15", "shap_value": 0.2},
+          {"feature": "Major_Category", "value": "Arts", "shap_value": 0.1}
+        ]},
+      {"sample_id": "sample-0002", "base_value": 0, "output_value": -0.3,
+        "predicted_probability": 0.425557483188341,
+        "contributions": [
+          {"feature": "Weekly_GenAI_Hours", "value": "5", "shap_value": -0.2},
+          {"feature": "Major_Category", "value": "Engineering", "shap_value": -0.1}
+        ]}
+    ]
+  },
+  "methodology": {"seed": 42, "permutation_count": 40, "permutation_repeats": 5,
+    "permutation_metric": "average_precision", "cohort_bins": "training quartiles for numeric variables",
+    "positive_label": "High", "negative_labels": ["Low", "Medium"]},
+  "warnings": ["Synthetic test fixture, not research results.", "Associations are not causal effects.",
+    "Class-balanced predictions are not necessarily calibrated population risks."],
+  "decision_support_only": true, "qualified_human_review_required": true
+}
