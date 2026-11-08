@@ -3,10 +3,11 @@
 import hashlib
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
-from churn_api.main import create_runtime_app
+from churn_api.main import create_app, create_runtime_app
 from churn_ml.education_analysis import publish_education_analysis
 from fastapi.testclient import TestClient
 
@@ -54,3 +55,29 @@ def test_education_rejects_unsafe_publication(education_source: Path, case: str)
     assert response.json()["status"] == "degraded"
     assert isinstance(response.json()["reason"], str)
     assert "Student_ID" not in response.text
+
+
+@pytest.mark.parametrize("field", ["warnings", "observed_ci", None])
+def test_injected_reader_cannot_bypass_nested_response_validation(
+    education_source: Path, field: str | None
+) -> None:
+    payload = publish_education_analysis(education_source, "education-test", "injected")
+    private_extension = {"raw_csv": "Student_ID,private-value"}
+    if field == "warnings":
+        payload["warnings"] = [private_extension]
+    elif field == "observed_ci":
+        payload["cohorts"][0]["observed_ci"] = [private_extension, private_extension]
+    reader = SimpleNamespace(read=lambda: payload)
+    with patch("joblib.load", side_effect=AssertionError("request-time deserialization")) as load:
+        response = TestClient(create_app(education_reader=reader)).get("/analytics/education")
+    load.assert_not_called()
+    if field is None:
+        assert response.status_code == 200
+        assert response.json() == payload
+    else:
+        assert response.status_code == 503
+        assert response.json() == {
+            "status": "degraded",
+            "reason": "Invalid public education analysis contract",
+        }
+        assert "Student_ID" not in response.text

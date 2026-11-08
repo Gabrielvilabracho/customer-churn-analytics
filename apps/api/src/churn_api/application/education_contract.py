@@ -5,6 +5,7 @@ those fields, including nested extensions containing identifiers or raw records.
 Reject extensions instead of silently changing the selected publication.
 """
 
+import math
 from typing import Any
 
 
@@ -29,6 +30,13 @@ def validate_public_education_analysis(payload: dict[str, Any]) -> dict[str, Any
         nested="source_hashes model_metrics versions summary coefficients importance "
         "associations cohorts shap methodology warnings",
     )
+    warnings = payload["warnings"]
+    if (
+        not isinstance(warnings, list)
+        or not warnings
+        or any(not isinstance(warning, str) or not warning.strip() for warning in warnings)
+    ):
+        raise ValueError("Invalid education response warnings")
     _record(
         payload["summary"],
         "train_count test_count threshold observed_high_rate average_predicted_risk "
@@ -54,6 +62,19 @@ def validate_public_education_analysis(payload: dict[str, Any]) -> dict[str, Any
             "average_predicted_risk difference_from_overall precision recall",
             nested="observed_ci",
         )
+        interval = cohort["observed_ci"]
+        if interval is not None and (
+            not isinstance(interval, list)
+            or len(interval) != 2
+            or any(
+                isinstance(bound, bool)
+                or not isinstance(bound, int | float)
+                or not math.isfinite(bound)
+                for bound in interval
+            )
+            or not 0 <= interval[0] <= interval[1] <= 1
+        ):
+            raise ValueError("Invalid education response confidence interval")
     shap = payload["shap"]
     _record(shap, "method units background_count sample_count samples", nested="samples")
     for sample in shap["samples"]:
