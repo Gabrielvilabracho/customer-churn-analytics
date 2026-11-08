@@ -90,8 +90,14 @@ def _top_risk_capture(
     if churn_count == 0:
         return 0.0
     top_count = max(1, round(len(probabilities) * fraction))
-    ranked = sorted(zip(probabilities, actual_labels, strict=True), reverse=True)
-    captured = sum(actual for _, actual in ranked[:top_count])
+    captured = 0.0
+    remaining = top_count
+    for count, positives in _score_groups(actual_labels, probabilities):
+        # Expected capture under a uniformly random, label-blind boundary tie.
+        captured += positives * min(remaining, count) / count
+        remaining -= min(remaining, count)
+        if remaining == 0:
+            break
     return captured / churn_count
 
 
@@ -99,14 +105,27 @@ def _average_precision(actual_labels: tuple[int, ...], probabilities: tuple[floa
     positives = sum(actual_labels)
     if positives == 0:
         return 0.0
-    ranked = sorted(zip(probabilities, actual_labels, strict=True), reverse=True)
     precision_sum = 0.0
     found_positives = 0
-    for index, (_, actual) in enumerate(ranked, start=1):
-        if actual == 1:
-            found_positives += 1
-            precision_sum += found_positives / index
+    found_rows = 0
+    for count, group_positives in _score_groups(actual_labels, probabilities):
+        found_rows += count
+        found_positives += group_positives
+        precision_sum += group_positives * found_positives / found_rows
     return precision_sum / positives
+
+
+def _score_groups(
+    actual_labels: tuple[int, ...], probabilities: tuple[float, ...]
+) -> list[tuple[int, int]]:
+    from itertools import groupby
+
+    ranked = sorted(zip(probabilities, actual_labels, strict=True), key=lambda x: -x[0])
+    groups = []
+    for _, group in groupby(ranked, key=lambda x: x[0]):
+        labels = [label for _, label in group]
+        groups.append((len(labels), sum(labels)))
+    return groups
 
 
 def _roc_auc(actual_labels: tuple[int, ...], probabilities: tuple[float, ...]) -> float:
