@@ -1,7 +1,7 @@
 [project]
-name = "personal-portafolio"
+name = "ai-student-impact-analytics"
 version = "0.1.0"
-description = "Customer churn analytics portfolio workspace."
+description = "AI student impact analytics portfolio workspace."
 requires-python = ">=3.12,<3.15"
 dependencies = []
 

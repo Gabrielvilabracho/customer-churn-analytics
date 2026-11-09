@@ -11,6 +11,39 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "ai-student-impact-analytics"
+version = "0.1.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "fastapi" },
+    { name = "httpx" },
+    { name = "joblib" },
+    { name = "mypy" },
+    { name = "pandas" },
+    { name = "pytest" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+    { name = "scikit-learn" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "fastapi", specifier = ">=0.125.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "joblib", specifier = ">=1.5.3" },
+    { name = "mypy", specifier = ">=1.18.2" },
+    { name = "pandas", specifier = ">=3.0.3" },
+    { name = "pytest", specifier = ">=8.4.2" },
+    { name = "pytest-cov", specifier = ">=7.0.0" },
+    { name = "ruff", specifier = ">=0.14.9" },
+    { name = "scikit-learn", specifier = ">=1.9.0" },
+]
+
+[[package]]
 name = "annotated-doc"
 version = "0.0.4"
 source = { registry = "https://pypi.org/simple" }
@@ -492,39 +525,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/5a/82/42f767fc1c1143d6fd36efb827202a2d997a375e160a71eb2888a925aac1/pathspec-1.1.1.tar.gz", hash = "sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a", size = 135180, upload-time = "2026-04-27T01:46:08.907Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f1/d9/7fb5aa316bc299258e68c73ba3bddbc499654a07f151cba08f6153988714/pathspec-1.1.1-py3-none-any.whl", hash = "sha256:a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189", size = 57328, upload-time = "2026-04-27T01:46:07.06Z" },
-]
-
-[[package]]
-name = "personal-portafolio"
-version = "0.1.0"
-source = { virtual = "." }
-
-[package.dev-dependencies]
-dev = [
-    { name = "fastapi" },
-    { name = "httpx" },
-    { name = "joblib" },
-    { name = "mypy" },
-    { name = "pandas" },
-    { name = "pytest" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-    { name = "scikit-learn" },
-]
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "fastapi", specifier = ">=0.125.0" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "joblib", specifier = ">=1.5.3" },
-    { name = "mypy", specifier = ">=1.18.2" },
-    { name = "pandas", specifier = ">=3.0.3" },
-    { name = "pytest", specifier = ">=8.4.2" },
-    { name = "pytest-cov", specifier = ">=7.0.0" },
-    { name = "ruff", specifier = ">=0.14.9" },
-    { name = "scikit-learn", specifier = ">=1.9.0" },
 ]
 
 [[package]]
