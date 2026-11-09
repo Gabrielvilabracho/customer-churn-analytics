@@ -17,6 +17,7 @@ dev = [
   "ruff>=0.14.9",
   "scikit-learn>=1.9.0",
 ]
+tracking = ["mlflow>=3.7,<4"]
 
 [tool.pytest.ini_options]
 addopts = "--strict-markers --cov=packages/ml/src --cov=apps/api/src --cov-report=term-missing"
