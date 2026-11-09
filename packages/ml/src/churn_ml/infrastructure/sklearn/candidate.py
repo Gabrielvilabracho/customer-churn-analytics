@@ -17,6 +17,7 @@ class SklearnLogisticRegressionTrainer:
     model_name: str
     feature_columns: tuple[str, ...]
     random_state: int = 42
+    regularization: float = 1.0
 
     def train(
         self,
@@ -38,6 +39,7 @@ class SklearnLogisticRegressionTrainer:
             labels=labels,
             feature_columns=self.feature_columns,
             random_state=self.random_state,
+            regularization=self.regularization,
         )
         if sklearn_model is not None:
             return SklearnProbabilityModel(
@@ -97,6 +99,7 @@ def _fit_sklearn_model(
     labels: tuple[int, ...],
     feature_columns: tuple[str, ...],
     random_state: int,
+    regularization: float = 1.0,
 ) -> Any | None:
     try:
         ColumnTransformer = import_module("sklearn.compose").ColumnTransformer
@@ -125,7 +128,9 @@ def _fit_sklearn_model(
             ("preprocess", transformer),
             (
                 "classifier",
-                LogisticRegression(random_state=random_state, class_weight="balanced"),
+                LogisticRegression(
+                    random_state=random_state, class_weight="balanced", C=regularization
+                ),
             ),
         ]
     )
