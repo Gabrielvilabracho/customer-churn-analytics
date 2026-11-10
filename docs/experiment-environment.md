@@ -42,7 +42,7 @@ and out of Git. Installation alone does not establish experiment validity.
 
 ## Typing boundaries
 
-The mypy configuration exempts missing typing metadata only for `joblib`;
-project code and other dependencies remain under strict checking. Missing
-third-party stubs are environment limitations to report explicitly, not a
-reason to silently disable project checks.
+The mypy configuration keeps project code under strict checking while
+explicitly exempting untyped third-party runtime boundaries: `joblib`, optional
+`mlflow`, and the scientific stack (`pandas`, `scipy`, and `scikit-learn`).
+Missing third-party stubs do not disable checks for project code.

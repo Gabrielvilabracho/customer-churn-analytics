@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { EducationAnalysis } from "@/lib/api/education-types";
 import { decimal, DependencyChart, ImportanceChart, label, percent, ShapDistribution, Waterfall } from "./charts";
 import styles from "./education.module.css";
@@ -87,7 +88,7 @@ export function EducationDashboard({ analysis }: { analysis: EducationAnalysis }
           </> : null}
         </> : <p>No held-out explanations are available.</p>}
       </section> : null}
-      <footer className={styles.footer}>Reproducible local analysis. No live surveillance. No automatic student decisions. <a href="/">Legacy dashboard</a></footer>
+      <footer className={styles.footer}>Reproducible local analysis. No live surveillance. No automatic student decisions. <Link href="/">Legacy dashboard</Link></footer>
     </div>
   </main>;
 }

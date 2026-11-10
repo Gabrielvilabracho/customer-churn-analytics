@@ -42,5 +42,5 @@ strict = true
 mypy_path = ["packages/ml/src", "apps/api/src"]
 
 [[tool.mypy.overrides]]
-module = ["joblib"]
+module = ["joblib", "mlflow", "pandas", "scipy", "scipy.*", "sklearn", "sklearn.*"]
 ignore_missing_imports = true
