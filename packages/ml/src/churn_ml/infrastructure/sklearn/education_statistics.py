@@ -1,6 +1,6 @@
 """Descriptive associations and held-out cohorts, not causal estimates."""
 
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -76,7 +76,9 @@ def cohorts(
             # Training-only quantiles keep the held-out cohort definition honest.
             cuts = np.unique(np.quantile(train[feature].astype(float), [0.25, 0.5, 0.75]))
             edges = np.concatenate(([-np.inf], cuts, [np.inf]))
-            groups = pd.cut(test[feature].astype(float), edges, include_lowest=True).astype(str)
+            numeric_values = cast("pd.Series[Any]", test[feature].astype(float))
+            numeric_edges = cast(list[float], edges.tolist())
+            groups = pd.cut(numeric_values, numeric_edges, include_lowest=True).astype(str)
         else:
             groups = test[feature].astype(str)
         for group in sorted(groups.unique()):
