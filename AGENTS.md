@@ -2,7 +2,7 @@
 
 ## Project Goal
 
-Build a premium portfolio-grade Customer Churn Prediction platform: an end-to-end analytical product that predicts customer churn, explains risk factors, and helps prioritize retention actions through a FastAPI prediction API and a Next.js executive dashboard.
+Build a premium portfolio-grade AI Student Impact Analytics platform: an end-to-end analytical product that studies how AI use relates to student burnout risk, explains measured risk factors without causal claims, and presents education-oriented findings through a FastAPI API and a Next.js analytical dashboard.
 
 ## Language Contract
 

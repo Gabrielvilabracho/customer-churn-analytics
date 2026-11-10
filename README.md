@@ -1,6 +1,6 @@
-# Customer Churn Analytics Platform
+# AI Student Impact Analytics Platform
 
-Portfolio-grade analytics platform that turns a local AI-in-education dataset into reproducible ML artifacts, a FastAPI prediction API, and a Next.js executive dashboard for student burnout-risk (churn) analytics.
+Portfolio-grade analytics platform that turns a local AI-in-education dataset into reproducible ML artifacts, a FastAPI analytical API, and a Next.js dashboard for measured student burnout-risk factors.
 
 ## What this proves
 
@@ -8,7 +8,7 @@ Portfolio-grade analytics platform that turns a local AI-in-education dataset in
 |------|-----------|
 | Data | Raw education data stays local unless the license allows redistribution; acquisition metadata is recorded locally. |
 | ML | Splits, schema, metrics, threshold, model binary, and samples are versioned by `run_id`. |
-| API | FastAPI serves only artifact-backed predictions, analytics, metadata, and health; missing or tampered artifacts degrade with `503` instead of fabricated values. |
+| API | FastAPI serves artifact-backed analytics and metadata; missing or tampered artifacts degrade with `503`. The legacy `/predict` endpoint remains a deterministic placeholder, not verified model inference. |
 | Web | The dashboard renders data, empty, degraded, loading, and error states without fabricated metrics. |
 | Use | Burnout-risk outputs are decision-support-only and require qualified human review before any consequential use. |
 
@@ -16,7 +16,7 @@ Portfolio-grade analytics platform that turns a local AI-in-education dataset in
 
 ```text
 packages/ml/   Dataset checks, preprocessing, training, evaluation, artifact persistence
-apps/api/      FastAPI Clean Architecture adapter over local model artifacts
+apps/api/      FastAPI Clean Architecture adapter over local analytical artifacts and a legacy prediction stub
 apps/web/      Next.js 15 executive dashboard and browser E2E tests
 artifacts/     Local-only generated metrics/model outputs
 openspec/      SDD specs, tasks, apply progress, verify report
@@ -30,7 +30,7 @@ openspec/      SDD specs, tasks, apply progress, verify report
 
 ```bash
 uv run --project packages/ml python -m churn_ml \
-  --csv-path data/raw/ai-student-impact/ai_student_impact_dataset.csv \
+  --csv-path data/01-raw/ai-student-impact/ai_student_impact_dataset.csv \
   --dataset-id ai-student-impact \
   --run-id local-review \
   --artifact-root artifacts
@@ -60,6 +60,26 @@ curl http://127.0.0.1:8000/analytics/dashboard
 ```
 
 `/analytics/dashboard` returns `503 degraded` for the current education pipeline because its prediction samples do not carry the public cohort fields of the dashboard contract (`Contract`, `tenure`, `PaymentMethod`, `MonthlyCharges`, `InternetService`). The API degrades instead of fabricating analytics; the dashboard visual states are covered by the web E2E suite with a mock API (see `docs/api-contract.md` and `docs/architecture.md`).
+
+## Student variable analysis
+
+The new **`/education`** dashboard explains an existing education logistic model:
+coefficients and odds ratios, held-out permutation importance, signed independent
+linear SHAP, train/test associations and student cohort comparisons. It uses the
+additive `GET /analytics/education` endpoint; the legacy `/` dashboard remains
+unchanged, and `/predict` remains a placeholder until it executes verified model inference.
+
+See [Generate and explore education variable analysis](docs/education-variable-analysis.md)
+for the CLI, exact run/analysis selection, startup commands and statistical limits.
+Analysis artifacts remain local and ignored; published model runs are never rewritten.
+
+## Experiment tracking and independent evaluation
+
+See [Trustworthy education experiments](docs/education-experiments.md) for tie-safe
+metrics, additive historical reevaluation, separate train/validation/test experiments,
+calibration/workload diagnostics, optional local MLflow and
+`notebooks/EducationExperiments.ipynb`. These experiments do not replace the
+dashboard model or rewrite historical publications.
 
 ## Verification commands
 
