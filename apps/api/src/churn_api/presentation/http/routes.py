@@ -10,9 +10,24 @@ from churn_api.application.services import (
 )
 from churn_api.domain.artifacts import ArtifactUnavailableError
 from churn_api.domain.predictions import PredictionValidationError
-from churn_api.presentation.http.schemas import PredictionRequest
+from churn_api.presentation.http.schemas import (
+    DashboardResponse,
+    DegradedResponse,
+    HealthResponse,
+    ModelMetadataResponse,
+    PredictionErrorContract,
+    PredictionRequest,
+    PredictionResponse,
+)
 
 logger = logging.getLogger(__name__)
+
+DEGRADED_RESPONSE: dict[int | str, dict[str, Any]] = {
+    503: {
+        "model": DegradedResponse,
+        "description": "The selected artifact-backed operation is unavailable.",
+    }
+}
 
 
 def _degraded_response(
@@ -48,7 +63,7 @@ def create_router(
 ) -> APIRouter:
     router = APIRouter()
 
-    @router.get("/health", response_model=None)
+    @router.get("/health", response_model=HealthResponse, responses=DEGRADED_RESPONSE)
     def health() -> Any:
         try:
             return analytics_service.health()
@@ -59,7 +74,11 @@ def create_router(
                 error=error,
             )
 
-    @router.get("/model/metadata", response_model=None)
+    @router.get(
+        "/model/metadata",
+        response_model=ModelMetadataResponse,
+        responses=DEGRADED_RESPONSE,
+    )
     def model_metadata() -> Any:
         try:
             return analytics_service.model_metadata()
@@ -70,7 +89,11 @@ def create_router(
                 error=error,
             )
 
-    @router.get("/analytics/dashboard", response_model=None)
+    @router.get(
+        "/analytics/dashboard",
+        response_model=DashboardResponse,
+        responses=DEGRADED_RESPONSE,
+    )
     def dashboard() -> Any:
         try:
             return analytics_service.dashboard()
@@ -81,7 +104,17 @@ def create_router(
                 error=error,
             )
 
-    @router.post("/predict", response_model=None)
+    @router.post(
+        "/predict",
+        response_model=PredictionResponse,
+        responses={
+            **DEGRADED_RESPONSE,
+            422: {
+                "model": PredictionErrorContract,
+                "description": "The request body or artifact feature values are invalid.",
+            },
+        },
+    )
     def predict(request: PredictionRequest) -> Any:
         try:
             return prediction_service.predict(request.customer_features)

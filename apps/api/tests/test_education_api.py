@@ -1,6 +1,8 @@
+import json
 from pathlib import Path
 from unittest.mock import patch
 
+from churn_api.adapters.education import FilesystemEducationReader
 from churn_api.main import create_app, create_runtime_app
 from churn_ml.education_analysis import publish_education_analysis
 from fastapi.testclient import TestClient
@@ -28,6 +30,32 @@ def test_education_endpoint_serves_real_publication_without_loading_model(
     assert data["decision_support_only"] is True
     assert data["qualified_human_review_required"] is True
     assert "Student_ID" not in response.text
+
+
+def test_education_success_preserves_verified_publication_json_bytes(
+    education_source: Path,
+) -> None:
+    publish_education_analysis(education_source, "education-test", "analysis-1")
+    reader = FilesystemEducationReader(education_source, "education-test", "analysis-1")
+    expected = json.dumps(
+        reader.read(),
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    app = create_runtime_app(
+        {
+            "CHURN_ARTIFACT_ROOT": str(education_source),
+            "CHURN_ARTIFACT_RUN_ID": "education-test",
+            "CHURN_EDUCATION_ANALYSIS_ID": "analysis-1",
+        }
+    )
+
+    with patch("joblib.load", side_effect=AssertionError("No request-time deserialization")):
+        response = TestClient(app).get("/analytics/education")
+
+    assert response.status_code == 200
+    assert response.content == expected
 
 
 def test_education_configuration_is_optional_and_legacy_default_is_unchanged() -> None:
