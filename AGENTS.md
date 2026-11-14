@@ -8,6 +8,7 @@ Build a premium portfolio-grade AI Student Impact Analytics platform: an end-to-
 
 - Code, identifiers, comments, documentation, UI copy, and technical artifacts MUST be written in English.
 - User conversation may happen in Spanish, but generated project artifacts stay in English unless explicitly requested otherwise.
+- Narrow exception: ODD `## Specs` and `## Log` entries MAY preserve user-authored requirements and decisions verbatim in their original language when exact wording is required as execution evidence. All agent-authored explanation around those quotations MUST remain in English.
 
 ## Architecture Direction
 
