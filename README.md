@@ -19,12 +19,19 @@ packages/ml/   Dataset checks, preprocessing, training, evaluation, artifact per
 apps/api/      FastAPI Clean Architecture adapter over local analytical artifacts and a legacy prediction stub
 apps/web/      Next.js 15 executive dashboard and browser E2E tests
 artifacts/     Local-only generated metrics/model outputs
-openspec/      SDD specs, tasks, apply progress, verify report
+docs/          Canonical portfolio-facing documentation; start at docs/README.md
+odd/tasks/     Current execution and recovery logs for scoped work
+openspec/      Durable product/spec deltas, accepted specs, and archived history
 ```
+
+ODD and OpenSpec have different jobs: ODD records how active work is executed and
+recovered, while OpenSpec preserves durable product intent and specification
+history. Private Obsidian planning may inform maintainers, but repository review
+never requires access to it.
 
 ## Quick start for reviewers
 
-1. Read `docs/dataset-card.md` before using any dataset.
+1. Start at `docs/README.md`, then read `docs/dataset-card.md` before using any dataset.
 2. Provision the education CSV locally under the ignored path `data/01-raw/ai-student-impact/ai_student_impact_dataset.csv` (see `docs/dataset-card.md`; the CSV stays untracked and is never redistributed).
 3. Run the ML pipeline with an explicit `run_id`:
 
@@ -81,6 +88,13 @@ calibration/workload diagnostics, optional local MLflow and
 `notebooks/EducationExperiments.ipynb`. These experiments do not replace the
 dashboard model or rewrite historical publications.
 
+MLflow is optional and local-only: it uses a SQLite backend and local artifact
+directory, accepts only allowlisted aggregate experiment reports, and does not
+provide a remote tracking server, model registry, promotion workflow, deployment,
+production monitoring, drift alerts, or rollback. Application logs are local
+process output; the repository does not configure centralized log collection.
+See `docs/experiment-environment.md` for the exact boundary.
+
 ## Verification commands
 
 ```bash
@@ -96,4 +110,4 @@ pnpm --dir apps/web test:e2e
 
 ## Portfolio review path
 
-Read this README, then `docs/dataset-card.md`, `docs/modeling-report.md`, `docs/architecture.md`, and `docs/api-contract.md`.
+Use `docs/README.md` as the canonical documentation index and reviewer path.

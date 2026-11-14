@@ -1,18 +1,29 @@
 # Architecture
 
-The platform follows a core-first Clean/Hexagonal shape: ML artifacts are created first, FastAPI adapts them into HTTP contracts, and the dashboard consumes only the public API shape.
+The platform follows a core-first Clean/Hexagonal shape: local education data is
+turned into immutable analytical artifacts, FastAPI adapts verified artifacts into
+HTTP contracts, and the dashboard consumes only the public API shape.
 
 ## System flow
 
 ```text
 Operator-provisioned education CSV (git-ignored)
-  -> packages/ml application pipelines
-  -> filesystem artifact store (immutable published runs)
-  -> apps/api artifact readers and scoring ports
-  -> FastAPI HTTP routes
-  -> apps/web typed API client
-  -> executive dashboard components
+  -> packages/ml training/evaluation pipelines
+  -> filesystem artifact store (immutable published runs and splits)
+       |-> independent experiment reports
+       |     `-> optional local aggregate-only MLflow tracking
+       `-> offline education variable-analysis publication
+             `-> apps/api verified education artifact reader
+  -> apps/api artifact readers and HTTP contracts
+  -> apps/web typed API clients
+  -> legacy dashboard and education-analysis dashboard
 ```
+
+The education analysis explains an existing trusted logistic model; it does not
+retrain the model or rewrite its published run. `GET /analytics/education` serves
+the exact configured analysis publication. Existing analytics routes remain
+artifact-backed, while `/predict` remains the legacy deterministic stub and must
+not be described as verified model inference.
 
 ## Runtime composition
 
@@ -28,10 +39,10 @@ Normal FastAPI startup composes analytics from one exact published run via `crea
 
 | Layer | Owns | Must not own |
 |-------|------|--------------|
-| `packages/ml/domain` | Model concepts, metrics, artifact metadata | pandas, sklearn, filesystem, HTTP |
-| `packages/ml/application` | Dataset acquisition, profile/train/evaluate orchestration | FastAPI or dashboard rendering |
-| `packages/ml/infrastructure` | Filesystem and sklearn adapters | Product UI decisions |
-| `apps/api` | Prediction, dashboard, metadata, health HTTP contracts | Model training decisions |
+| `packages/ml/src/churn_ml/domain` | Model concepts, metrics, artifact metadata | pandas, sklearn, filesystem, HTTP |
+| `packages/ml/src/churn_ml/application` | Dataset acquisition, profile/train/evaluate orchestration | FastAPI or dashboard rendering |
+| `packages/ml/src/churn_ml/infrastructure` | Filesystem, sklearn, and optional local MLflow adapters | Product UI decisions or remote MLOps orchestration |
+| `apps/api` | Analytics, legacy prediction, metadata, health HTTP contracts | Model training, deployment, or promotion decisions |
 | `apps/web` | API consumption and executive UI states | Fabricated analytics or direct artifact reads |
 
 ## Design guarantees
@@ -43,6 +54,29 @@ Normal FastAPI startup composes analytics from one exact published run via `crea
 - Burnout-risk outputs are decision-support-only and require qualified human review; automated student actions (discipline, grading, enrollment, accommodations, access to services) are prohibited.
 - Generated code, docs, UI copy, and API fields stay English-only.
 
+## Experiment and operations boundary
+
+- Immutable filesystem publications are the analytical source of truth.
+- Optional MLflow tracking uses a local SQLite database and local artifact
+  directory. It logs reviewed aggregate metrics/configuration and selected local
+  artifacts; it does not accept raw student rows or identifiers.
+- Python pipeline lifecycle messages and API degradation warnings use process
+  logging. No centralized log aggregation or production telemetry sink is
+  configured in this repository.
+- There is no remote tracking server, model registry, promotion workflow,
+  deployment automation, production monitoring, drift alerting, or rollback
+  mechanism. Local tracking does not imply any of those capabilities.
+
+## Documentation ownership
+
+| Surface | Role |
+|---------|------|
+| `docs/README.md` and `docs/` | Canonical portfolio-facing reviewer and operator documentation. |
+| `odd/tasks/` | Current execution/recovery logs and task-scoped acceptance status. |
+| `openspec/changes/` and `openspec/specs/` | Durable product deltas and accepted specifications. |
+| `openspec/changes/archive/` | Historical context only. |
+| Obsidian | Private planning context; never required for repository review. |
+
 ## Documentation acceptance guardrail
 
 - Changes that bypass artifact contracts are non-compliant until they restore the artifact-backed flow.
@@ -53,7 +87,7 @@ Normal FastAPI startup composes analytics from one exact published run via `crea
 
 | Concern | Evidence |
 |---------|----------|
-| ML artifact determinism | `packages/ml/tests` and OpenSpec apply progress. |
-| API degraded/prediction behavior | `apps/api/tests` (incl. CLI-to-API integration) and OpenSpec apply progress. |
+| ML artifact determinism | ML tests and the relevant OpenSpec specification evidence. |
+| API degraded/prediction behavior | API tests, including CLI-to-API integration evidence. |
 | Dashboard data/empty/degraded states | `apps/web` Vitest and Playwright tests. |
-| Documentation traceability | `README.md`, this file, `docs/modeling-report.md`, `docs/api-contract.md`. |
+| Documentation traceability | `README.md`, `docs/README.md`, this file, `docs/modeling-report.md`, `docs/api-contract.md`. |
