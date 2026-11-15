@@ -154,6 +154,54 @@ def test_evaluate_predictions_reports_business_oriented_metrics() -> None:
     assert metrics.roc_auc > 0
 
 
+@pytest.mark.parametrize("labels", [(1, 0, 1, 0), (0, 1, 0, 1)])
+def test_equal_scores_do_not_use_outcomes_to_rank_students(labels: tuple[int, ...]) -> None:
+    metrics = evaluate_predictions(
+        actual_labels=labels,
+        probabilities=(0.5,) * 4,
+        threshold=0.5,
+        top_risk_fraction=0.5,
+    )
+    assert metrics.pr_auc == pytest.approx(0.5)
+    assert metrics.top_risk_capture == pytest.approx(0.5)
+    assert metrics.precision == 0.5
+    assert metrics.recall == 1
+    assert metrics.roc_auc == 0.5
+
+
+def test_partial_boundary_tie_uses_expected_capture_and_grouped_precision() -> None:
+    metrics = evaluate_predictions(
+        actual_labels=(1, 0, 1, 0),
+        probabilities=(0.9, 0.5, 0.5, 0.1),
+        threshold=0.5,
+        top_risk_fraction=0.5,
+    )
+    assert metrics.pr_auc == pytest.approx((1 + 2 / 3) / 2)
+    assert metrics.top_risk_capture == pytest.approx(0.75)
+
+
+def test_non_tied_metrics_preserve_existing_results() -> None:
+    metrics = evaluate_predictions(
+        actual_labels=(1, 0, 1, 0),
+        probabilities=(0.9, 0.7, 0.6, 0.1),
+        threshold=0.5,
+        top_risk_fraction=0.5,
+    )
+    assert metrics.pr_auc == pytest.approx((1 + 2 / 3) / 2)
+    assert metrics.top_risk_capture == 0.5
+
+
+def test_grouped_ap_matches_sklearn_for_mixed_ties() -> None:
+    from sklearn.metrics import average_precision_score
+
+    labels = (1, 0, 0, 1, 0, 1, 1)
+    scores = (0.9, 0.9, 0.5, 0.5, 0.5, 0.2, 0.1)
+    metrics = evaluate_predictions(
+        actual_labels=labels, probabilities=scores, threshold=0.5, top_risk_fraction=0.3
+    )
+    assert metrics.pr_auc == pytest.approx(average_precision_score(labels, scores))
+
+
 def test_misleading_accuracy_is_rejected_for_executive_reporting() -> None:
     metrics = evaluate_predictions(
         actual_labels=(0, 0, 0, 0, 0, 0, 0, 0, 1, 1),

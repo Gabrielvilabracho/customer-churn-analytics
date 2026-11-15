@@ -8,7 +8,12 @@ from scripts.delivery_guardrails_lib.result import GuardrailResult
 PR_TITLE_EXPRESSION = "${{ github.event.pull_request.title }}"
 PR_BODY_EXPRESSION = "${{ github.event.pull_request.body }}"
 PR_BASE_REF_EXPRESSION = "${{ github.base_ref }}"
+PR_ACTIVITY_TYPES_MARKER = "types: [opened, synchronize, reopened, labeled, unlabeled]"
 BASE_REF_ENV_MARKER = "BASE_REF: origin/${{ github.base_ref }}"
+SIZE_EXCEPTION_ENV_MARKER = (
+    "SIZE_EXCEPTION: ${{ contains(github.event.pull_request.labels.*.name, "
+    "'size:exception') }}"
+)
 REQUIRED_JOBS = frozenset({"pr-validation", "python", "web", "web-e2e"})
 
 
@@ -111,6 +116,7 @@ def check_pull_request_workflow(workflow_path: Path) -> GuardrailResult:
     passed = all(
         (
             state["has_pull_request"],
+            state["has_pull_request_activity_types"],
             state["has_pr_validation_job"],
             state["has_metadata"],
             not state["has_unsafe_metadata"],
@@ -141,6 +147,9 @@ def _workflow_state(lines: Sequence[str]) -> dict[str, object]:
     delivery_guardrails_cli = _delivery_guardrails_cli_status(lines)
     return {
         "has_pull_request": has_active_marker(lines, "pull_request:"),
+        "has_pull_request_activity_types": has_active_marker(
+            lines, PR_ACTIVITY_TYPES_MARKER
+        ),
         "has_pr_validation_job": has_active_marker(lines, "pr-validation:"),
         "has_metadata": has_metadata,
         "has_unsafe_metadata": has_unsafe_metadata,
@@ -156,13 +165,23 @@ def _delivery_guardrails_cli_status(lines: Sequence[str]) -> str:
     guardrail_lines = [line for line in lines if "python scripts/delivery_guardrails.py" in line]
     if not guardrail_lines or not any("--base-ref" in line for line in guardrail_lines):
         return "missing"
+    if not any(_selects_required_delivery_checks(line) for line in guardrail_lines):
+        return "missing"
     if any(PR_BASE_REF_EXPRESSION in line for line in guardrail_lines):
         return "unsafe_base_ref"
     if not has_active_marker(lines, BASE_REF_ENV_MARKER):
         return "missing"
+    if not has_active_marker(lines, SIZE_EXCEPTION_ENV_MARKER):
+        return "missing"
     if not any('--base-ref "$BASE_REF"' in line for line in guardrail_lines):
         return "missing"
     return "present"
+
+
+def _selects_required_delivery_checks(command: str) -> bool:
+    if "--check" not in command or "--check all" in command:
+        return True
+    return "--check pr-workflow" in command and "--check review-budget" in command
 
 
 def _missing_runtime_jobs(lines: Sequence[str]) -> list[str]:
@@ -192,7 +211,7 @@ def _has_required_runtime_marker(lines: Sequence[str], marker: str) -> bool:
 
 def _workflow_details(state: dict[str, object]) -> dict[str, str]:
     details = {
-        "pull_request_trigger": "present" if state["has_pull_request"] else "missing",
+        "pull_request_trigger": _pull_request_trigger_status(state),
         "metadata_validation": _metadata_status(state),
         "delivery_guardrails_cli": str(state["delivery_guardrails_cli"]),
         "runtime_checks": "ml,api,web,e2e"
@@ -202,6 +221,14 @@ def _workflow_details(state: dict[str, object]) -> dict[str, str]:
     if state["disabled_checks"]:
         details["disabled_checks"] = ",".join(state["disabled_checks"])
     return details
+
+
+def _pull_request_trigger_status(state: dict[str, object]) -> str:
+    if not state["has_pull_request"]:
+        return "missing"
+    if not state["has_pull_request_activity_types"]:
+        return "missing_label_events"
+    return "present"
 
 
 def _metadata_status(state: dict[str, object]) -> str:

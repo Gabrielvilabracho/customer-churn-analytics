@@ -70,3 +70,39 @@ def test_cli_runs_pr_metadata_and_documentation_when_both_checks_requested(
     assert status == 1
     assert "PASS pr_metadata" in output
     assert "FAIL documentation" in output
+
+
+def test_cli_accepts_review_budget_when_size_exception_label_is_recorded(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    git_cmd,
+) -> None:
+    git_cmd(tmp_path, "init")
+    git_cmd(tmp_path, "config", "user.email", "reviewer@example.com")
+    git_cmd(tmp_path, "config", "user.name", "Reviewer")
+    (tmp_path / "README.md").write_text("base\n", encoding="utf-8")
+    git_cmd(tmp_path, "add", "README.md")
+    git_cmd(tmp_path, "commit", "-m", "base")
+    (tmp_path / "README.md").write_text("base\none\ntwo\n", encoding="utf-8")
+    git_cmd(tmp_path, "add", "README.md")
+    git_cmd(tmp_path, "commit", "-m", "oversized change")
+    monkeypatch.setenv("SIZE_EXCEPTION", "true")
+
+    status = main(
+        [
+            "--root",
+            str(tmp_path),
+            "--check",
+            "review-budget",
+            "--base-ref",
+            "HEAD~1",
+            "--budget",
+            "1",
+        ]
+    )
+    output = capsys.readouterr().out
+
+    assert status == 0
+    assert "PASS review_budget" in output
+    assert "'size_exception': 'recorded'" in output

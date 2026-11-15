@@ -1,4 +1,7 @@
 import { createServer } from "node:http";
+import { readFileSync } from "node:fs";
+
+const educationFixture = JSON.parse(readFileSync(new URL("./fixtures/education.json", import.meta.url), "utf8"));
 
 const server = createServer(async (request, response) => {
   if (!request.url) {
@@ -10,6 +13,23 @@ const server = createServer(async (request, response) => {
 
   if (url.pathname === "/health") {
     sendJson(response, 200, { status: "ready" });
+    return;
+  }
+
+  if (url.pathname === "/analytics/education") {
+    const scenario = url.searchParams.get("scenario");
+    if (scenario === "degraded") {
+      sendJson(response, 503, { reason: "Education analysis is not published." });
+    } else if (scenario === "empty") {
+      sendJson(response, 200, { ...educationFixture, coefficients: [], importance: [], associations: [],
+        cohorts: [], shap: { ...educationFixture.shap, samples: [], sample_count: 0 } });
+    } else if (scenario === "undefined") {
+      sendJson(response, 200, { ...educationFixture, cohorts: educationFixture.cohorts.map(
+        (cohort) => ({ ...cohort, precision: null, recall: null }),
+      ) });
+    } else {
+      sendJson(response, 200, educationFixture);
+    }
     return;
   }
 

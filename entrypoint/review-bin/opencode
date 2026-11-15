@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# GGA reads the original staging index before this runtime-only boundary.
+# Foreign Git operations inside a reviewer must not inherit the commit's index.
+binary="${GGA_OPENCODE_BINARY:-}"
+if [[ "$binary" != /* || ! -x "$binary" || "$binary" == "$0" ]]; then
+    printf '%s\n' 'GGA requires an explicit, executable OpenCode binary.' >&2
+    exit 2
+fi
+git_variables="$(git rev-parse --local-env-vars)"
+while IFS= read -r variable; do
+    [[ -z "$variable" ]] || unset "$variable"
+done <<< "$git_variables"
+
+# Preserve the model, agent, input prompt and existing OpenCode authentication.
+if [[ "${1:-}" == run ]]; then
+    for argument in "${@:2}"; do
+        case "$argument" in
+            --) break ;;
+            --format|--format=*) exec "$binary" "$@" ;;
+        esac
+    done
+    decoder="${BASH_SOURCE[0]%/*}/opencode_review_output.py"
+    # Exec keeps the model runtime at GGA's original PID/signal boundary.
+    # The reader buffers until EOF; its failure verdict also guards runtime exit 0.
+    exec "$binary" run --format json "${@:2}" > >(exec python3 -B "$decoder")
+fi
+exec "$binary" "$@"

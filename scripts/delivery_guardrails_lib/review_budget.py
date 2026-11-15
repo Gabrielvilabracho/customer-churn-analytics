@@ -12,14 +12,18 @@ def check_pr_changed_line_budget(
     numstat_output: str,
     *,
     budget: int = REVIEW_LINE_BUDGET,
+    size_exception: bool = False,
 ) -> GuardrailResult:
     changed_lines, skipped_rows, malformed_rows = _parse_numstat(numstat_output)
-    passed = changed_lines <= budget and malformed_rows == 0
+    exception_used = size_exception and changed_lines > budget
+    passed = malformed_rows == 0 and (changed_lines <= budget or exception_used)
     details = {"changed_lines": str(changed_lines), "budget": str(budget)}
     if skipped_rows:
         details["skipped_rows"] = str(skipped_rows)
     if malformed_rows:
         details["malformed_rows"] = str(malformed_rows)
+    if exception_used:
+        details["size_exception"] = "recorded"
     if not passed:
         details["required_action"] = "split work-unit PR or record size exception"
     return GuardrailResult(passed, details)
@@ -63,10 +67,13 @@ def check_current_review_budget(
     *,
     base_ref: str | None,
     budget: int,
+    size_exception: bool = False,
 ) -> GuardrailResult:
     try:
         return check_pr_changed_line_budget(
-            current_numstat(project_root, base_ref=base_ref), budget=budget
+            current_numstat(project_root, base_ref=base_ref),
+            budget=budget,
+            size_exception=size_exception,
         )
     except RuntimeError as exc:
         return GuardrailResult(False, {"git_diff": "failed", "error": str(exc)})
@@ -89,11 +96,15 @@ def _parse_numstat_row(line: str) -> tuple[int, int, int]:
     if len(fields) < 3:
         return 0, 0, 1
     if fields[0] == "-" or fields[1] == "-":
-        return 0, 1, 0
+        return (0, 1, 0) if fields[0] == fields[1] == "-" else (0, 0, 1)
     try:
-        return int(fields[0]) + int(fields[1]), 0, 0
+        additions = int(fields[0])
+        deletions = int(fields[1])
     except ValueError:
         return 0, 0, 1
+    if additions < 0 or deletions < 0:
+        return 0, 0, 1
+    return additions + deletions, 0, 0
 
 
 def _untracked_row(project_root: Path, relative_path: str) -> str:

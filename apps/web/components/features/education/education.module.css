@@ -1,0 +1,71 @@
+.page {
+  --paper: #f3f4ef;
+  --surface: #fcfcf8;
+  --ink: #20323a;
+  --muted: #50616a;
+  --line: #c9d1cc;
+  --increase: #a43f30;
+  --decrease: #17646a;
+  margin: -8px;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  line-height: 1.6;
+}
+.shell { max-width: 1400px; margin: auto; padding: 48px 40px 24px; }
+.header { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 28px; }
+.page h1 { margin: 8px 0; font: 500 clamp(2.4rem, 5vw, 4.4rem)/1.05 "Iowan Old Style", "Palatino Linotype", serif; letter-spacing: -0.04em; }
+.eyebrow { font: 600 11px/1.4 "Avenir Next", sans-serif; text-transform: uppercase; letter-spacing: 0.13em; color: var(--muted); margin: 0 0 12px; }
+.lead { max-width: 58ch; color: var(--muted); font-size: 17px; }
+.identity { display: flex; flex-direction: column; flex-shrink: 0; padding-bottom: 12px; font-size: 12px; color: var(--muted); }
+.identity strong { color: var(--ink); font-size: 14px; overflow-wrap: anywhere; }
+.notice { background: #e5ede6; border: 1px solid #bdcdbc; border-radius: 4px; padding: 12px 18px; font-size: 13px; }
+.summary { display: flex; flex-wrap: wrap; gap: 24px 48px; padding: 28px 0; margin: 0; }
+.summary dt { font-size: 12px; color: var(--muted); }
+.summary dd { margin: 4px 0 0; font-size: 22px; font-variant-numeric: tabular-nums; }
+.summary small { display: block; font-size: 11px; color: var(--muted); }
+.navigation { display: flex; gap: 24px; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+.navigation button { border: 0; border-bottom: 3px solid transparent; padding: 12px 0; font: inherit; font-size: 14px; color: var(--muted); background: transparent; cursor: pointer; }
+.navigation button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--decrease); font-weight: 700; }
+.page :is(button, select, a):focus-visible { outline: 3px solid var(--decrease); outline-offset: 4px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 32px; }
+.page h2 { margin: 0 0 16px; font-size: 26px; line-height: 1.25; letter-spacing: -0.025em; }
+.page h3 { margin: 32px 0 12px; font-size: 18px; }
+.panel > p { max-width: 75ch; font-size: 14px; color: var(--muted); }
+.sectionHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.control { display: flex; flex-direction: column; gap: 6px; width: fit-content; max-width: 100%; font-size: 12px; font-weight: 600; }
+.control select { padding: 10px 32px 10px 12px; min-width: 220px; max-width: 100%; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); color: var(--ink); font: inherit; }
+.twoColumns { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 32px; margin: 24px 0; }
+.figure { margin: 24px 0; min-width: 0; }
+.figure figcaption { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+.figure figcaption span { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
+.figure svg { width: 100%; height: auto; display: block; fill: var(--ink); overflow: visible; }
+.importanceBar { fill: var(--decrease); }
+.positive { fill: var(--increase); }
+.negative { fill: var(--decrease); }
+.axis { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+.tableScroll { overflow-x: auto; margin-top: 24px; }
+.page table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+.page caption { text-align: left; font-weight: 600; font-size: 14px; padding-bottom: 12px; }
+.page :is(th, td) { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.page th { font-weight: 600; }
+.page thead th { background: var(--paper); color: var(--muted); font-size: 11px; }
+.page td { font-variant-numeric: tabular-nums; }
+.metrics { display: flex; gap: 32px; flex-wrap: wrap; padding: 24px 0; }
+.metrics dt { color: var(--muted); font-size: 12px; }
+.metrics dd { margin: 0; font-size: 22px; }
+.prediction { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 24px 0; }
+.prediction strong { color: var(--ink); font-size: 26px; }
+.prediction span { font-size: 12px; }
+.footer { padding: 24px 0; font-size: 11px; color: var(--muted); }
+.footer a { color: var(--ink); margin-left: 12px; }
+@media (max-width: 800px) {
+  .shell { padding: 28px 16px 16px; }
+  .header, .sectionHeader { flex-direction: column; align-items: flex-start; }
+  .twoColumns { grid-template-columns: 1fr; gap: 0; }
+  .panel { padding: 20px 16px; }
+  .navigation { gap: 16px; overflow-x: auto; }
+  .summary { gap: 20px 28px; }
+  .control { width: 100%; }
+}

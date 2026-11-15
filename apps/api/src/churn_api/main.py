@@ -5,12 +5,15 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
+from churn_api.adapters.education import FilesystemEducationReader
 from churn_api.adapters.filesystem import FilesystemArtifactSnapshotReader
 from churn_api.adapters.scoring import StubChurnScorer
 from churn_api.application.ports.artifacts import ArtifactSnapshotReader
+from churn_api.application.ports.education import EducationAnalysisReader
 from churn_api.application.ports.scoring import ChurnScorer
 from churn_api.application.services import AnalyticsService, PredictionService
 from churn_api.domain.artifacts import ArtifactSnapshot, ArtifactUnavailableError
+from churn_api.presentation.http.education import create_education_router
 from churn_api.presentation.http.routes import create_router
 
 _RUN_ID_PATTERN = re.compile(r"[A-Za-z0-9_-]+")
@@ -21,6 +24,7 @@ def create_app(
     *,
     artifact_reader: ArtifactSnapshotReader | None = None,
     scorer: ChurnScorer | None = None,
+    education_reader: EducationAnalysisReader | None = None,
 ) -> FastAPI:
     if artifact_reader is None:
         artifact_reader = _UnavailableArtifactReader()
@@ -28,6 +32,7 @@ def create_app(
         scorer = StubChurnScorer()
 
     app = FastAPI(title="Customer Churn Analytics API", version="0.1.0")
+    app.include_router(create_education_router(education_reader))
     app.include_router(
         create_router(
             analytics_service=AnalyticsService(artifact_reader),
@@ -53,7 +58,11 @@ def create_runtime_app(environ: Mapping[str, str] | None = None) -> FastAPI:
 
     root = Path(settings.get("CHURN_ARTIFACT_ROOT", _DEFAULT_ARTIFACT_ROOT))
     reader = FilesystemArtifactSnapshotReader(root=root, run_id=run_id)
-    return create_app(artifact_reader=reader)
+    analysis_id = settings.get("CHURN_EDUCATION_ANALYSIS_ID", "").strip()
+    education_reader = None
+    if re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,99}", analysis_id):
+        education_reader = FilesystemEducationReader(root, run_id, analysis_id)
+    return create_app(artifact_reader=reader, education_reader=education_reader)
 
 
 class _UnavailableArtifactReader:
