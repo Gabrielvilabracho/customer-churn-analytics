@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ed10f8021803d6dc55e6484c77c8f5174b12801ffc2d81e991634329c9641bea",
+  "claims": [
+    {
+      "id": "claim_48bea884596d428d8ab199bb84c2fc15",
+      "statement": "The FastAPI composition root injects artifact, scoring, and education ports into application services and routers, keeping filesystem adapters outside the application layer.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/application/ports/artifacts.py#L1-L10",
+          "version": "repo-lines-v1:sha256:33aea80d4fe054312287904d9a91fd2c0bcc3ba3a4e0858e19da2ce843cf575e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhN2FkZmYzNTJlNGVjYTExY2UxOTgzOGI0YmUwOWMyZjYzNTFkNDY5MjY2ZDYwNDhhMzcwZGQ1YTlmM2MxNjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzNDRmZDM3NTBmZWNmMjM4MTAxOTZhNDVjZDEyNTQ0NTJlZTM0N2ExYzM1NjAzYTc1Y2M2ZTI2MmM1ODQyMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://apps/api/src/churn_api/application/ports/education.py#L1-L5",
+          "version": "repo-lines-v1:sha256:3ad20244f2abadb0b75aaa90240e85205a33b9123929d2506f58447dc006327d:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjZjZTFlNzZmYzczN2JmY2FmZWVlZTEzYmU1YzU3NTNjMjA3NWE2MmM3YzA4MjBkY2JlYjgyYWExNTY0YjJlMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODM0MWZiZWI0ZjMzMzE4YTg3MjViZjk3MTA5OWNmNmNlNWVjNWVkODU3NmMxOWJiYmM5ZGE2ZmJjZTQwYWFjMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://apps/api/src/churn_api/main.py#L23-L42",
+          "version": "repo-lines-v1:sha256:b17381d16e9dfbc7c640bb78933a14f69174bc6cf41557c5e797fd483db069ca:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyYzRjZmIyZTdjZjM3NTI4MjFiN2MzMWJkNDI2N2ViYTQ2ODZhMzMyZTMyZWQ0ZWY2NzE0MmMwODkwMDhiNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkNjdiNDY2Mzc4NzVjM2JiN2Y5MDNiMWRiODczNGI0YTI5NjY4NWRmNGRiZTY2YTRmNmNlZjdmZGM0MTE2M2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRkYmRlY2E1NzI5OTQ2ZjgwMmJkN2ZiMmUxNDg3OTZhNDcwYzRjZGU4NGVmOWIxNjUzYzVlMGFiZjlmNzAxODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhYjU3YTE4YzViM2JjZTJhMTMyY2QyNTQ4ZDk5NDU4YjFiMmU1YWI5OTNlMjE5MmRjMzYyNDAxZGI0ZjNiYzYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_563086cee6574fd8967acca045761532",
+      "statement": "Runtime startup selects an exact artifact run from validated environment identifiers and deliberately stays degraded when the run identifier is blank or invalid instead of discovering a latest run.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/main.py#L45-L65",
+          "version": "repo-lines-v1:sha256:fa52cb9b74e383298fac67e9a26eadc8fd94a36fbc8cdd8a6310bc0b445ae895:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0NzRhNGI5NWZmNmU5YmZhNTJlMWY5OWIyNTE2YWY4Nzc3NjE2Mjg3YzQzODdkZWMyYjhlNTQwMjVhYmJkN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0YjYwZmUzZGFmMzY3NjdlMmUzZGY5NDI0YmI4ZGI3NmQ2MjVlN2MyYjQ3ZjNhMWFiZWJlN2FkMjNjMDc2NmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlZmFjOWE2YjY4ZDA5NDRmZDMzNmRjOGYzOTM4YjhhMTVjZGY2YzQ2ZWJiODViNDk4MzViODIxNGNhMDE5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRjZjRiZDA0ZTU3N2ZlNGE3MGU4Mzk0ZjZlZDRhNWU4ZDg3NjJhMThiYWMxZjNhZTU3ZTBkNzk3MzIwMTY2N2MifQ"
+        },
+        {
+          "resource": "repo://apps/api/tests/test_analytics_api.py#L591-L644",
+          "version": "repo-lines-v1:sha256:bf1b693f93be3c37b26631d11875231715851e05a8e51e662be49e50c1f67089:eyJzZWxlY3RlZExpbmVDb3VudCI6NTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlMmFjNGE0NTNhOGRiNDRhN2YyYjI5ZThjYTg4NjYxZWZmYzBkZDBlZDE0ZjlmNmZkOWVmNjgxMGQzZDdhYjYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIyOWNkYzkzNWQwOTU5NTAxZThkYTQ1YTE0MTk1NTM1MmNlZGE3MTY3YjIzYWVhMmY3ZDc1YjRjOWJiOTE0ZWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVhNzA0MmU0ZDAwOTFlMTg4ZDQyYWRhODM2NDUwMDc0ZmY5Y2I1MDc2MTc1YTMxNThhNDNhNzdlNTIyZTc1MWQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ2MzFjYmE3NTBhZGQ2NzgxYWI3MGI1OWZkNjg5NTI3OGZhMzU0MGFjYzY1NmUyYmM2YTg2ODVhN2VmMDMxYmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8f960b208fc6484684addccbed47a864",
+      "statement": "The filesystem snapshot reader verifies completion-manifest integrity before loading a run and rejects a loaded manifest whose run identity differs from the selected run.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/adapters/filesystem.py#L16-L57",
+          "version": "repo-lines-v1:sha256:2e984595d2998d5f743f2ee14d1d753bdd6b68af095da04756e8cb7bb48c17c3:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA2NWJkZmFlMTJlMjg2ZDU2YWZlOWRjYWViOWM2MmM5MmMxZTQ2MThlMTc3ZThiZGI4YzJkZTk5ZGUyOTk5OTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGIwNjNkOWI0N2U2NTM3OTYyNTU3MmNjZTE5NzY2OWQ1NzY3ZTEyYzE4YmUwNzU2NTJiOGNkOTgxY2U4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_349fef50532b4cbba86661a4ab7a18ec",
+      "statement": "Education analytics are exposed only after an exact closed-shape validator rejects undeclared fields, invalid confidence intervals, malformed labels, and nested dynamic metadata.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/application/education_contract.py#L1-L102",
+          "version": "repo-lines-v1:sha256:ce710fa9e99b88c31ce540d853e5522dc749db6766323691e3457dc8e4981758:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAyLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI1Mzg1ZTlkMTc0ZjVmM2U3ZDgxNzg2YjBhYmE2YjIwZTA2MGUxYjdmNDI3YzdmMjE5NjU5NTFmZmMxYjkwYmEwIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJhYTA4NTFhYzVhMDRkOTA3ZTY0YzkwOGU1MjA0MTAyOGJiODNmZDBmZWFhN2NmZTU3Y2IwY2ZjODY0MTQwNjU0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MCwicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        },
+        {
+          "resource": "repo://apps/api/src/churn_api/presentation/http/education.py#L13-L35",
+          "version": "repo-lines-v1:sha256:bc56c847253758b319e6d0a0980f2a914650f63e2b337bc87210044a00cd24ff:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlMDNiNDk1ZGM1ODUyZGIyNDdiMGJlOTExYzFmNzc1MzQ2YzQyNmY0MTY2N2U4NTc0NmY3OWFkMDMyN2E3ZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAxYmE0NzE5YzgwYjZmZTkxMWIwOTFhN2MwNTEyNGI2NGVlZWNlOTY0ZTA5YzA1OGVmOGY5ODA1ZGFjYTU0NmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY3Y2MxOTBhNzc1MzFhN2NlMDNkNGNiODFjN2ZmODZiNDM2OThjYzgxNWFhODNkZmQ0YjM3YmU5Y2Y1ZTI0ZTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMxNjRiMmVmYzA5YTcwMTQ4ZDRhMWEyNjY0OWY3YjBjYmMyMzFlZDNmYmZjMTk4OWFkNWM5NjMwNzE2YjM3NGQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_65d95f2a7c6944139a575a803e67878a",
+      "statement": "Artifact-backed route failures are converted to a structured HTTP 503 response and logged with operation, run identity, and reason without logging artifact contents.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/presentation/http/routes.py#L25-L56",
+          "version": "repo-lines-v1:sha256:7edfa2389a3a41d98664461d2dbe97b54f75d78f25d93eedf0b904f19817461d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczNWYwNzUxYzhiMWY0NmFlMDI4NDA4ZWY3MmFiNWFmZjNkZTM5ZmU4MTEwNDRhYTllYWJlYzk4OGQzNDNjMzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1YzFjNDYyZTJhMzlkNzQ3NTlmNWUxYjEyNmY3NjgzYTJiNzMwMTE4ZTE4ZjUxMjJiMDhjZWRlZWI2NTBlMjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVmNjAyNjliMGRjMmNlNDU2NjRjZmI4ZjU1ZDMzNjdmYTM0OTU4N2IxYTU3MDQ2YjAzYjAyMWY2YzFkOGVmZDkifQ"
+        },
+        {
+          "resource": "repo://apps/api/src/churn_api/presentation/http/routes.py#L66-L131",
+          "version": "repo-lines-v1:sha256:aa7e3d7fe9088b5b22b3eaef829abb9526eb794c552e3661d6b0478ec03328f9:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIyMTI5YWI1OWE1YjUxMzVlODU2YzM2MjFmNzdjOTUwYWEyYjhiZjBlNzdhYjQ3ZjNlNmUxNjE5ODdiZGYwMzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzMDNhNWMwZWQwMDQ0NzVhODQ4MjIyN2EzMjNhMzU1ODM1OWIxOGMwMzBhM2IzZDliNjYxNDczN2ExYWM2NzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYyYWQ5YWQ0NWNiMGQxOGVkYjU2MzJjYmViZTFkYzE3NDgzNjUxNjkxY2I4N2NlYzE4MzRkZDBlYjJhOTJkNjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_273716aefe034115a4e896ebb50e86d1",
+      "statement": "Dashboard and prediction responses explicitly identify themselves as decision support and require qualified human review.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/application/services.py#L36-L80",
+          "version": "repo-lines-v1:sha256:14a0d963af55fac56dbb5770630a32c133722aafc5290992381b697715a1758b:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE5MDhhNWI5MzI3OTAwNjE4ZjUwN2I1Yzc2YThjMjU4YTdkOWFmOWZlZDAwNjgxOTBhNjAxZDE0MTUzNmUxYjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2YjA0NDkxNDY5NzIyZTgzNjNhOTRlNDA0NDUzOGUwMTNhMmEyMTdlMzZiMWU1NjhiYTYwYWNiN2I0YzhmMmUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA4Mzg5NDcyNmU1MGVlZDM5M2M3N2RhNjBlZjA4MGRiOTQzMTEwNjk0ZDIzMzY3YmM0OThmMzliNzIwYmY2ZGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzZmVlODdlOGM1OGI0ZjA4ZDAxZjZlMGJhMTk4MTBkMGVkYWU3M2JjOTRjZjkyMTI4MGRjMzE1NDQyNzZjZDQifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-15T18:18:27.480Z"
+  }
+}

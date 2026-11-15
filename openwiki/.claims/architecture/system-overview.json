@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:ac6b1c2ffe1c17bbcd1882a9f4af0a588403d6a994a3e157bbc2d49ecd6a5424",
+  "claims": [
+    {
+      "id": "claim_4c822736179244289bd5d8b633036d9c",
+      "statement": "The platform uses a core-first Clean and Hexagonal flow in which local data becomes immutable analytical artifacts, FastAPI adapts verified artifacts into HTTP contracts, and Next.js consumes only those public contracts.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/main.py#L23-L42",
+          "version": "repo-lines-v1:sha256:b17381d16e9dfbc7c640bb78933a14f69174bc6cf41557c5e797fd483db069ca:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYyYzRjZmIyZTdjZjM3NTI4MjFiN2MzMWJkNDI2N2ViYTQ2ODZhMzMyZTMyZWQ0ZWY2NzE0MmMwODkwMDhiNDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJkNjdiNDY2Mzc4NzVjM2JiN2Y5MDNiMWRiODczNGI0YTI5NjY4NWRmNGRiZTY2YTRmNmNlZjdmZGM0MTE2M2UiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImRkYmRlY2E1NzI5OTQ2ZjgwMmJkN2ZiMmUxNDg3OTZhNDcwYzRjZGU4NGVmOWIxNjUzYzVlMGFiZjlmNzAxODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhYjU3YTE4YzViM2JjZTJhMTMyY2QyNTQ4ZDk5NDU4YjFiMmU1YWI5OTNlMjE5MmRjMzYyNDAxZGI0ZjNiYzYifQ"
+        },
+        {
+          "resource": "repo://docs/architecture.md#L1-L20",
+          "version": "repo-lines-v1:sha256:067dade2b5f83a30d105bd97fb3d962bcfa3ed8e87e49527b6b3d0787e761ab3:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJlN2NiMzgyMjlmNzg3N2U1NjljYzA1ZGQ5YzhmYjcxYjMwOTU0YWQyYzk5NzgzMjhkNjlmNWQzNzdmODE1MDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3YzYyMTQxZDkyNjk2YjRmMDMxZjhiZDc3YjQwZjg4YjA1YTQ4N2Q1OGJlOWEwMGZjZDQ0ZWYzYzRmYjRiYTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_aecd81a8831545fdbc0bc161541bd5d7",
+      "statement": "The ML domain owns framework-independent concepts, the application layer orchestrates use cases, and infrastructure supplies filesystem, scikit-learn, and optional local tracking adapters.",
+      "evidence": [
+        {
+          "resource": "repo://docs/architecture.md#L38-L46",
+          "version": "repo-lines-v1:sha256:cdf63e123f975f43492f2a297f79bb405725988bae7662c6611d50d064c7aaf9:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzFlY2RmMDliMTcyNzJmZGRkMWQxMWE4MWYzNWMxNTgxZjAyMWZkOTYwNzVjYjRiNDljNmFhOTNkZmM1NmJjZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzM5MTMxZjE1ZTFlYmQwZTdlNjMxYzBjMjAzZjBmNzZhNWU5M2I3MDU4NzBlYTA0MjJhY2ExMjVmNGYwNjk1YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjk3YjdmMjAwNjhmZGEyNzI5ZWQ1MzIyOGE4Yzc0MzU5MmUzMWViYWViN2Y5NDY1MTcxZGNmMzU5YzZjY2IzNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzYxMWVjMmExMzc0M2Q1MDJlMzQ4OGQ3N2JhYzg4MTE5NjY2MzY2OThhMzAxMGFlZGM1NTk4ZDEwZjU4NTMyYiJ9"
+        },
+        {
+          "resource": "repo://packages/ml/src/churn_ml/application/ports/artifact_store.py#L1-L13",
+          "version": "repo-lines-v1:sha256:8b1b94d5ecf19106b6d2bfc24050a6751a0c1cc8b625a316ca742fd493fbd81e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhN2FkZmYzNTJlNGVjYTExY2UxOTgzOGI0YmUwOWMyZjYzNTFkNDY5MjY2ZDYwNDhhMzcwZGQ1YTlmM2MxNjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUxNDhjOGI2YmRmMmE3NjRiMTM0YTFlNzBmNDJmYTg5ZTY4NmM4MzJkMjUzMmJhZmNhMTdhZDFiMzhkMmViMzciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_db5f24496bcd4853b9e82b5a4343f12f",
+      "statement": "Published filesystem artifacts, rather than optional MLflow records, are the analytical source of truth, and the repository provides no remote registry, promotion, deployment, production monitoring, drift-alerting, or rollback system.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L83-L96",
+          "version": "repo-lines-v1:sha256:b7ead836ed9c07fd9c7830a38c7beab59d9c1952826b77671952566122e6d514:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVkZGM5YWU0YWJmYTE0ZTcyMzBjY2I2NDYwYmNhMTk0MWU1YmY5OTE3MzU1OWNhMmM2YzhmZTU5MmIxOTBmMjQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiYWVmODc1NTZmY2FjZmExYTIyNjUyNDI2NTI1ODE0NGQzYWY1M2Q4OTllMGY3ZDg2MzYwMzQ4Y2U0YzhhYTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNhMGNiMzVjMmM1N2UzYjk5ZmMzMzdhYmMxN2Q3ZGJmMjg1NTEyMjJjZjkzYTJlN2Q2MzRmYjViZTgxNTllZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjRhOWM5ZDc1ZGI2ZTEwNDdmODliZTI3MzAxYmUxMmY5N2UwZjVjZTE0NTc3NWIyZjRiNjM4NjM0ZTMyNTViYzMifQ"
+        },
+        {
+          "resource": "repo://docs/architecture.md#L57-L68",
+          "version": "repo-lines-v1:sha256:71e65e50125ac6f93b82bae674ee76bf16cacf190bbfe19da1595d001e309493:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkZmFjODVkYmExNzQwNGFhMzJmY2E0YWFhYzlkMzYxNWIzNTg0MmJhYjBiNDI5ZDQ5ZmMwZWZhZTU4NTg2MDMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlMzNkZjcxYTg2NTNmYTE2YjhlNTFhMjhjODEwNjg0MDU3NmI3NjY0NDRmZGU1YjBjZjdmZTdmNmRkM2I3MTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2OGI3MmY5ZGM4ZmVhMmUwZDM4YzNmMzA0NjI4N2QwOGJjNzAxMDQ0NWIzZmE1MGFhYmRiNjA4Njk1ZjUxMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhhNjQ3NWI1MGM0ZDcyNzAyNGZkNDE3MmJiN2Q3MTZlNzlmNjIyNTA3OTVmMDE2NDM2YWFlMGZlMjgxYjMyNzIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_f30f56593b004672a5e606429954b107",
+      "statement": "FastAPI startup selects one exact run without import-time artifact I/O or latest-run discovery and remains available in a degraded state when configuration or artifacts are unavailable.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/main.py#L45-L72",
+          "version": "repo-lines-v1:sha256:7cdbec1f59cc36e4926b83f4b84570af15d4a0b9bc4a1298747f4d1147f99e1b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0NzRhNGI5NWZmNmU5YmZhNTJlMWY5OWIyNTE2YWY4Nzc3NjE2Mjg3YzQzODdkZWMyYjhlNTQwMjVhYmJkN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3NzhlZTc5OTExYWNkNjVmOWYxNjY2ZjVmOWNjMzFlYTQwYjg2OWZlMzExZmFlM2E1Mzc3ZWQ4MmI5MzAzYjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlZmFjOWE2YjY4ZDA5NDRmZDMzNmRjOGYzOTM4YjhhMTVjZGY2YzQ2ZWJiODViNDk4MzViODIxNGNhMDE5NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQ3NzliYWQ2OTkyM2MyNDFkYjlhMzUwZGQ2YThlOWVkYzM2MjM1MzQxZjgyZGJlOGJlMTFmMGJjZjU5MjRhMDIifQ"
+        },
+        {
+          "resource": "repo://docs/architecture.md#L28-L36",
+          "version": "repo-lines-v1:sha256:5149e2b6c0570332a574bf6c7a86b7fb2bbd2817fdabbc795697876ddf4802b5:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjlhM2Q1OTA1NTAzMTc5Y2ZjOWU4NDVkMDY5MDgyYTE0MTFkNmFiM2M5YWI0MzMxMDhkMjRhZGUxMTM4NmU3NiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmQ1ZWQ0ZTFhMGI5MjA3NjNkMzdjNTdmYzk5ZmJjZWU1MjJlYjAxNjJiMjE1M2FmYmRjMTNlNmI5Zjk4NDYxYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmI0NmQ4NzYyYThmZjY3YTk2ZmI0NWIwMDE2NmE0ZTE2ZDY0NTQ3ZmI4Zjc4NDRmN2NlNGQ2OTI4NTUyOTk1NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMmM0NThjNjAyNDg1MjQyZmIyYzgyNGZiOGM0ZjAyNDBjNWYzMmVkZDNjYTgyZmU3MzI0NmFlYjM4ZGYzZTljNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2a212bd1fe124a4ca8c2cb0e97805ff2",
+      "statement": "The education analysis explains an existing trusted model without retraining it or rewriting the published run, while the prediction endpoint remains a deterministic stub rather than verified model inference.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/adapters/scoring.py#L4-L14",
+          "version": "repo-lines-v1:sha256:2daa50e6424bf2943fe87a0c3213bdb6e6d7085626de30abb867446016acec95:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3NmNhMWU3M2I4MDZjNGE0M2VlNGNhYjZiOWRkNGE2ZDFiMjIzZGMzNWM3MTc2OTMwOGIwNmIyOGU2OTUwYWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhMmJlNTVkNmRmMzkzZGM3N2M2MzhiMGY4OGFiZDQ3ODJmOTFkMmIxMDdhNjE2YTdjNmEyMDFjY2VkOGEyMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://docs/architecture.md#L22-L26",
+          "version": "repo-lines-v1:sha256:fcd72d11c6fcd6e4604f1ca6528ebfbc229bf063dc5765b2b5e4fa2566a238ae:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTgxYzQwNDk2YmRlZDg5MGQ2NjE5NGZhZWVhYmUzNzlmZjg1MGJlN2VmNGVjMmZmY2Q2NjJlZWNlYjNhOGU3YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTRiZTA5NjExOWEyYmM1NGJiNTJjNTYwODNkYjEyNTQwNmQwODhlZjg3NzAxZGI5OTNhZjI4MzAxYTdjNGNhYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTRiYmM5ODhlOTgwMjNkMWExOWRhZTkzYTA2NjNkODZkM2EwYjdiOThmOTk4NzUwMzUzMDA0OGUwODcyODQ5MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWRhNzU5NDE5NGFjMjU1NjliYWEzMTVlZDRkZGU0YmY0ZGNkZmJhN2FjOTkyNTk4NTU2ZGI0YWJlOTBhZmE2YyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3e6b3ab4b3b8415787f00abbf23d93de",
+      "statement": "The dashboard must consume API-backed analytics and represent missing or tampered artifacts as degraded states instead of using fabricated values.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/presentation/http/routes.py#L33-L56",
+          "version": "repo-lines-v1:sha256:12ff2f494495fb0464e82ba0c48c0ea1a2c3e099235a302390e5ad005cff5be8:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI5NTU3YTE2MjM5ZGJmNDIzNmY5ZGQwNmJjYzIzMDM2YTRiM2VhNzA2OTgyMjEyYjQ3N2UyNmEzYmNhNTBjZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwYzFmMTg4ZjE0MmVkN2E4MjQ2ODBiMjA3MTcyYzU1MTliYzYxNGE0OGZkYTdjZjE2N2VkYjhkZGY3OTk1NmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA5ZjkzMDgzYzE5NzEyMWI5ODI3MDBiYThhZmFiZDE3MjJjZjFkM2U3NDA0NTA5ZTgwZWZhMjcyNDdmNjJmMDciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVmNjAyNjliMGRjMmNlNDU2NjRjZmI4ZjU1ZDMzNjdmYTM0OTU4N2IxYTU3MDQ2YjAzYjAyMWY2YzFkOGVmZDkifQ"
+        },
+        {
+          "resource": "repo://docs/architecture.md#L48-L55",
+          "version": "repo-lines-v1:sha256:35fbb41f7729b68dc5ecb708c1b7ecc30facc652356deaf12b8e7c1093a6e5f5:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjU5MjY5NjU1NWEwNzI1MDYzMTM0NGNhNjg4ODQ5NzM0NzlkYjFhOTEyNDMxZGMwNjZiZDVlMTg5MmI0OTliZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzdjZDZhNDNkZGJkNTIxMmIzODQyZjllMTY0NDdkNzkyNjVlMGNjNDIxZmVlNWE3NGQxYTRiNDNhNWE3YzAzNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTY1ZjY4NDMzMmZmNjdhY2MzOGQ5Njk1ZDc0YTNmMDBkY2M5ZDRlNWQxNTMyODEwYjRjODRiYjIyNzExMDFiMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjJhZDNiNDBmZmY2NGYzY2U0MTcwNzhjMTZkNTU2Zjk3Mjg0NzhiYjM5YTBjNTIwZmE1YWViOTdmMjhmNzgzNSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-15T18:18:27.480Z"
+  }
+}

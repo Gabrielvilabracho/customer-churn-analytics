@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/architecture/api-serving.md": {
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:23623589c6c7a1837b614f2c169cebf0baad0e1310dd23c2035da0c5be72c131",
+      "pageVersion": "sha256:ed10f8021803d6dc55e6484c77c8f5174b12801ffc2d81e991634329c9641bea",
+      "completedBy": "opencode",
+      "completedRunId": "d030378a-df94-4712-bd5f-8de10dd329c4"
+    },
+    "/openwiki/architecture/artifact-contracts.md": {
+      "pageVersion": "sha256:4b291765f04ed0071b6a254cb46ce706614f67e8d79b0f493fe109e2c2049575",
+      "completedBy": "opencode",
+      "completedRunId": "9ac9b977-4174-4ba9-8b6e-57e64fbebad0",
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:35bf4c6ec851d7e061be2f8333fc7e1e95ca12c6fddcd0caa4e4bc8ed08c540b"
+    },
+    "/openwiki/architecture/system-overview.md": {
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:23623589c6c7a1837b614f2c169cebf0baad0e1310dd23c2035da0c5be72c131",
+      "pageVersion": "sha256:ac6b1c2ffe1c17bbcd1882a9f4af0a588403d6a994a3e157bbc2d49ecd6a5424",
+      "completedBy": "opencode",
+      "completedRunId": "d030378a-df94-4712-bd5f-8de10dd329c4"
+    },
+    "/openwiki/architecture/web-dashboard.md": {
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:23623589c6c7a1837b614f2c169cebf0baad0e1310dd23c2035da0c5be72c131",
+      "pageVersion": "sha256:f2b76d26dac91070ea1fa1ba8a8569f90e8e9e5e86f3ebb119ce174b6f6cf885",
+      "completedBy": "opencode",
+      "completedRunId": "d030378a-df94-4712-bd5f-8de10dd329c4"
+    },
+    "/openwiki/operations/local-development-and-verification.md": {
+      "pageVersion": "sha256:e0cfda19ed3c711dadab1831d2c0f0ea8ad897f5b3e94c6e7afbf26ec203ec15",
+      "completedBy": "opencode",
+      "completedRunId": "9ac9b977-4174-4ba9-8b6e-57e64fbebad0",
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:35bf4c6ec851d7e061be2f8333fc7e1e95ca12c6fddcd0caa4e4bc8ed08c540b"
+    },
+    "/openwiki/quickstart.md": {
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:a57c86c3606ffb966cee7f8f56303473cdafabddde15b66606a7b00ea1c6f9e0",
+      "pageVersion": "sha256:bb9e7df249057e0f47ea594aa8d9d87ad7c1c814e6e0e31b36a1d82478cdb869",
+      "completedBy": "opencode",
+      "completedRunId": "ea21e540-185a-472e-981c-13cd36e04051"
+    },
+    "/openwiki/workflows/education-analysis.md": {
+      "pageVersion": "sha256:3311f5421a8b5c1002b5a2a444208a1f33e3e64923c48f378cac64f662359806",
+      "completedBy": "opencode",
+      "completedRunId": "9ac9b977-4174-4ba9-8b6e-57e64fbebad0",
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:35bf4c6ec851d7e061be2f8333fc7e1e95ca12c6fddcd0caa4e4bc8ed08c540b"
+    },
+    "/openwiki/workflows/ml-training-and-publication.md": {
+      "pageVersion": "sha256:c1b1b115eef234e57510916561cf9c07390773dd3f4b8c00dd5fb59ae15482a7",
+      "completedBy": "opencode",
+      "completedRunId": "9ac9b977-4174-4ba9-8b6e-57e64fbebad0",
+      "gitHead": "7d0713d08577050130985e577a62fbc01a60c14b",
+      "sourceFingerprint": "sha256:35bf4c6ec851d7e061be2f8333fc7e1e95ca12c6fddcd0caa4e4bc8ed08c540b"
+    }
+  }
+}

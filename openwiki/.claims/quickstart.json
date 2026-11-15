@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:bb9e7df249057e0f47ea594aa8d9d87ad7c1c814e6e0e31b36a1d82478cdb869",
+  "claims": [
+    {
+      "id": "claim_e5e9678752484adba9291a94bd49e55d",
+      "statement": "The repository turns a local education dataset into reproducible ML artifacts, a FastAPI analytical API, and a Next.js dashboard for measured burnout-risk factors.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L1-L13",
+          "version": "repo-lines-v1:sha256:6af65c44fc4d362dfc2bbb6889c50e7847833a3c38ebca13f0d7fb2e7ebc3164:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhM2FjYTBiMzFjYjdlNjIxY2IyOTNkNmI5NzMyOWM2MTg4ZmY0NjIyMTM0MjE1MmMyNmVhMDBmMDhhNmU4MmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmY2UxZDMxNTcxYjgyNGMwMmYxZmMyZWM1MGU1YTEwNGQwMzdjYTRlNGVlZDA4NmFjM2M4MWFlMjUxNGFiZmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ4MDhmYjE0MzkyYjY0ZjRkMGZhYzcxMmYxMWNmYWQ3NzE3ZWE4YmJkODBmZjc0MWVlNzQ5ZTE3NjdkMmUxZjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7e879b8c79f74e3d9db43d480723f012",
+      "statement": "CSV and JSON artifacts form the authoritative integration boundary: ML publishes versioned runs, FastAPI verifies and serves them, and the web dashboard consumes public API contracts without direct artifact reads.",
+      "evidence": [
+        {
+          "resource": "repo://docs/architecture.md#L3-L20",
+          "version": "repo-lines-v1:sha256:31cf53f5b3b64ad7fbf2da4cd0dcf5c2b16e8b7dda977826ad4d7113c25599db:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyYjE4OGYwYjM4ZmU4N2FjMGY5MTc0OTRkYjcwZWQ2MmRkZTc4NzM4MTY2NzFiZmExYWI1NTczOGQ4ZGViYjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3ZTY3OTcyZDQ3ZjMyMTc2ZWUwZmNkYjVjOTRkYzVhYTI1Y2NhZDdiYTliMzdjMGI5ZDg3NjgwY2UwM2Y1MTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3YzYyMTQxZDkyNjk2YjRmMDMxZjhiZDc3YjQwZjg4YjA1YTQ4N2Q1OGJlOWEwMGZjZDQ0ZWYzYzRmYjRiYTUifQ"
+        },
+        {
+          "resource": "repo://docs/architecture.md#L38-L55",
+          "version": "repo-lines-v1:sha256:cf8991ac8261a5b722ced481b5feceee0fac65ae5308bfc4eaa1316f2f12e279:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImMxZWNkZjA5YjE3MjcyZmRkZDFkMTFhODFmMzVjMTU4MWYwMjFmZDk2MDc1Y2I0YjQ5YzZhYTkzZGZjNTZiY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc3Y2Q2YTQzZGRiZDUyMTJiMzg0MmY5ZTE2NDQ3ZDc5MjY1ZTBjYzQyMWZlZTVhNzRkMWE0YjQzYTVhN2MwMzUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjI5N2I3ZjIwMDY4ZmRhMjcyOWVkNTMyMjhhOGM3NDM1OTJlMzFlYmFlYjdmOTQ2NTE3MWRjZjM1OWM2Y2NiMzQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYyYWQzYjQwZmZmNjRmM2NlNDE3MDc4YzE2ZDU1NmY5NzI4NDc4YmIzOWEwYzUyMGZhNWFlYjk3ZjI4Zjc4MzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_db01c3d1666b43d2b39d6609e2d18ba0",
+      "statement": "The supported reviewer path uses an explicit local dataset path, explicit run ID and artifact root, exact FastAPI runtime selection, and a Next.js API base URL.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L32-L67",
+          "version": "repo-lines-v1:sha256:c29829873a33f23d29188eec886d80a4a2b57782ee8e992064c9aad06965701d:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFmOTc3NzFiNjdmNTAxNTBlNDFlNTM4MjdjYjQyYWY2YmY0NDZmNzQ4MDIwNTMxZTY0YWE5N2VjZTMwN2Q0YTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ3YzA2YzU2MWQ1YzMyNzM0MzY4NTI2OGE0NmIzMzkxZjM5OThlZWU4OTBkMmJlNTFmMGQyMWNjNGE1M2FlNmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0ZWVhOTg5MWQzMzg0OTM4NDM1MjA2ODAxNTVmNzlmYWFkMmU0YWZjMjJiMjc3N2ZjZGEyODkxZDg1Yzg2OTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0YTc1N2ZkMDY2N2ZiMWJhNDJhMmNiZWU5OTM3YjVlZjlkNDA4MTdjY2JhOGU3OTU0MTU1MDAzNDA3YmUzMTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5dadff0bab1a41be9d152f647e5003bd",
+      "statement": "The education dataset can correctly cause the legacy dashboard endpoint to degrade because its prediction samples lack the public customer-cohort fields, and the system must not fabricate replacements.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L61-L69",
+          "version": "repo-lines-v1:sha256:e82a54eca26cf60febb11a3d8d1e1617143f3c04e8e8371debc732ea209ef12f:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzFjMjZjOTFkMDBkY2NiM2U2YTljMDBjOTlmNTczZTdkMDA2NjZlYzFhYWZiYTViZTEwMTU5ODIyNjVhMjg5OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjYxNDBiZGMyN2IxYTViN2QwOTIwZWZiYmU5NzI2Nzc4YjY0ZWVlNTg1NDFlYWQ3OGFhNzg2YzE5YzVmMjE3NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjllOTFhMDA2ZjEwZjE3ZDY5YzY5MjI4NjUzMzZmOThjNjgxZjc1NjVmZTMzMTg1NmQzMWNhOGYyOGJhZGE4MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDhhMjY3NTdlYjJlYzM1ZjUzMjZlZjgzOGUxMDJhNGY4NTNlYzYxMTg3NDFmN2NhOWVjNjdmOTNmODJmZDA3YyJ9"
+        },
+        {
+          "resource": "repo://packages/ml/src/churn_ml/application/pipelines/run_training.py#L114-L140",
+          "version": "repo-lines-v1:sha256:9d65979348ac80e62501b55f1149a2255d0746937a0ed3366ef08dc2e9778509:eyJzZWxlY3RlZExpbmVDb3VudCI6MjcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhmN2E3NmQwZDhmMDk4ZWE0MjVlN2VjMTJkYmQyNTJkOGY4NDFmYjY5ZTliMDMyOWNiMmVlN2ZiZmY0NjE3MTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ4OTNmNDBlMzc4MWViODk2YzgyZDA0NmEwODA2N2ExMWUzNWNkZjJmMWRmYWYyNmZlYTkwYjhkYjY2NzY0MTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAyYzJkNmE1NDdlM2MyYzcwZjRjM2YwYzE2NzZkODUwMzE5NTUyODc4NDVkOTljODI3ZGVmZGU2ZTYxNjBlNjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://packages/ml/src/churn_ml/application/pipelines/run_training.py#L17-L23",
+          "version": "repo-lines-v1:sha256:b8416831065a367ba04ebb76e7bf2b9e8b04996898fdf18a4927a3c9d1b1d538:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzk2YjE2MDhmMzlhYjY5NTE4M2JlZWU1ZTM3NGEwMDQ0N2I2NjE4ZGU3YzViNWRiMTBhMmEwNTgxZWEwMDVkOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFmYmEwNTI3YzM5NTNjNGI2ZTBlNWI1NzM5YmE4MzYxMmY4MDUzYmNkYzk0NjY3MzAxOTNjZDFkNTkwYjQwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTVjMWM0NjJlMmEzOWQ3NDc1OWY1ZTFiMTI2Zjc2ODNhMmI3MzAxMThlMThmNTEyMmIwOGNlZGVlYjY1MGUyMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGQ2MjExN2U0NWZjMGY3MjU1NmNhZDkwYWExMGJkYzQ0YjFkZmI5NWE0NmY1MzIxM2I4ZDIzNjc4OTMzOTUxNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_19ae0974ce694c2ab2a7585ab51c275d",
+      "statement": "Repository documentation distinguishes canonical reviewer docs, active ODD execution logs, active and accepted OpenSpec artifacts, historical archives, and non-required private planning context.",
+      "evidence": [
+        {
+          "resource": "repo://docs/README.md#L24-L37",
+          "version": "repo-lines-v1:sha256:d95dc03ea5e810f6121dc282ba72574603d4512ae9284bc23f7dc1d983cb104d:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMTkxZTNhNTQ2ODM2NGUwNDI3MjBiODI1ZTdlNzhkZTA3ZjJlNzVlMTEyYjljZTgxMjhhNGUxYWU1NTYwNzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0Njk1MjE0MzE2NWIwNjI2NTViMjNiNzJlYmRmNjQyMzcxZWFlYjdjOGE4MWFiYjNjNDlhNWY1ZjdiNDBmZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg3MzM5NTBiNTYyNTI0N2MyZjEzZWVlZWQ1ZGRlMTg5OTMyN2U1ODJlNGM4ZmE2OTZkYzM2YTcwMzI0ZGZlOGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5MWI0NmQ5ZmZiOTM0NWExZjU4MGUwMTRjNjkyNDE1MmVhODczZmY3ODdjZDI5ODc0NmY0NDVhM2FkMDYxNTgifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-15T18:46:51.616Z"
+  }
+}
