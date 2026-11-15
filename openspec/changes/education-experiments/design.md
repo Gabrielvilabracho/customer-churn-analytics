@@ -23,7 +23,7 @@ composition facade; in-memory port tests prove the application can run without
 concrete storage or ML frameworks. This correction changes architecture, not
 model fitting, evaluation results or published files.
 
-## Planned comparable-candidate extension
+## Comparable-candidate execution
 
 The application candidate-provider port remains the model-family boundary.
 Logistic regression stays the mandatory baseline adapter; XGBoost and LightGBM
@@ -42,6 +42,36 @@ selection authority.
 Selected-model SHAP, Registry promotion, serving, and monitoring are downstream
 phases. Their adapters and contracts must not be introduced through the
 candidate-provider boundary before the preceding evidence gate closes.
+
+The CLI keeps logistic-only execution as its default. A repeatable
+`--candidate-family` option may add `xgboost` or `lightgbm`; requesting an
+adapter whose independently locked optional dependency is unavailable fails
+before model fitting. The provider reports each candidate's family and resolved
+hyperparameters without encoding those details only in a display name.
+
+Every estimator uses the same train-fitted preprocessing contract. Boosting
+configurations use fixed, predeclared rounds and hyperparameters; they do not use
+the shared validation split for early stopping. Validation independently selects
+each model's highest configured threshold that satisfies the recall gate. The
+best eligible logistic candidate is the reference for advanced candidates.
+Rank eligible logistic candidates by higher average precision, higher ROC-AUC,
+higher precision, and then ascending stable model name.
+
+An advanced candidate qualifies only when its validation average precision is
+at least 0.01 absolute above that logistic reference, recall remains at least
+0.70, and Brier score, false-positive rate, and flagged fraction are no worse at
+the candidates' selected validation thresholds. When several advanced
+candidates qualify, rank by higher average precision, then lower Brier score,
+lower false-positive rate, lower flagged fraction, and finally stable model
+name. When none qualifies, retain the logistic reference. Prevalence remains a
+diagnostic baseline, not the replacement reference.
+
+Selection and every gate outcome are frozen before the selected model receives
+one final-test prediction. New comparable-candidate reports use schema version 2
+and bind the serialized selected-model checksum. Verification remains backward
+compatible with immutable schema-version-1 reports; historical bytes and
+interpretations are never rewritten. The optional MLflow mirror records the
+same aggregate evidence and checksum after validating the local report.
 
 ## Commit-review transport
 

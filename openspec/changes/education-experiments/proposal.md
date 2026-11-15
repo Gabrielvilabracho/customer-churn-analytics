@@ -7,7 +7,7 @@ Correct tied-score evaluation before comparing experiments. Add a standalone edu
 - Immutable reevaluation of a trusted existing education model at full prediction precision.
 - Separate training, validation selection and final test evaluation, with calibration and workload diagnostics.
 - Optional local SQLite MLflow tracking and a notebook calling tested Python functions.
-- A planned comparable-candidate extension that keeps logistic regression as the mandatory baseline and evaluates opt-in XGBoost and LightGBM adapters under identical data, split, preprocessing, selection, and final-test contracts.
+- A comparable-candidate extension that keeps logistic regression as the mandatory reference and evaluates explicitly requested XGBoost and LightGBM adapters under identical data, split, preprocessing, selection, and final-test contracts.
 
 ## Boundaries
 No remote services, raw student tracking, redistribution, automatic student decisions, implicit calibrator fitting or historical artifact rewriting. Existing explored data cannot become a genuinely unseen external validation set. Diagnostic experiments do not promote or replace dashboard models. Selected-model explanations, Registry promotion, deployment, and monitoring remain separately gated future phases; this change supplies comparison evidence but does not authorize those capabilities.
