@@ -42,6 +42,7 @@ of treating a private note or stale archive entry as current authority.
 |---------|-----------------------|---------------------|
 | Dataset provenance and safe use | [Dataset card](dataset-card.md) | [Source verification record](dataset-source-verification.json), [research protocol](research-protocol.md), and [literature evidence matrix](literature-evidence-matrix.md) |
 | Modeling and metric interpretation | [Modeling report](modeling-report.md) | [Metric semantics](metric-semantics.md) |
+| Review capacity and error costs | [Exploratory review-capacity protocol](review-capacity-protocol.md) | Validation threshold/top-k trade-offs, hypothetical effort, and unresolved operational acceptance |
 | Education-variable interpretation | [Education variable analysis](education-variable-analysis.md) | [Education artifact publication](education-artifacts.md) |
 | Experiment tracking and MLOps boundary | [Trustworthy education experiments](education-experiments.md) | [Experiment environment](experiment-environment.md) and [model lifecycle roadmap](model-lifecycle-roadmap.md) |
 | Runtime architecture | [Architecture](architecture.md) | [Local verification](local-verification.md) |
