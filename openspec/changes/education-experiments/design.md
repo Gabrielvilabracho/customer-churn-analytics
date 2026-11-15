@@ -23,6 +23,26 @@ composition facade; in-memory port tests prove the application can run without
 concrete storage or ML frameworks. This correction changes architecture, not
 model fitting, evaluation results or published files.
 
+## Planned comparable-candidate extension
+
+The application candidate-provider port remains the model-family boundary.
+Logistic regression stays the mandatory baseline adapter; XGBoost and LightGBM
+may be added as optional infrastructure adapters without importing either
+framework into application or domain modules. Candidate availability must be
+explicit, dependency-locked, and incapable of changing the baseline path when an
+optional package is absent.
+
+All adapters receive the same feature contract and train/validation/test
+identities. They return probability models plus losslessly attributable
+parameters. Application logic continues to own validation-only selection,
+threshold choice, final-test isolation, diagnostics, and report construction.
+MLflow mirrors allowlisted immutable report evidence; it never becomes the
+selection authority.
+
+Selected-model SHAP, Registry promotion, serving, and monitoring are downstream
+phases. Their adapters and contracts must not be introduced through the
+candidate-provider boundary before the preceding evidence gate closes.
+
 ## Commit-review transport
 
 OpenCode activity events are not the final reviewer verdict. For GGA's implicit

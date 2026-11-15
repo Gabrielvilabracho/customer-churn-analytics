@@ -33,6 +33,21 @@ local CSV
 
 The independent protocol uses seed 42, candidate `C` values 0.1, 1, and 10, a minimum validation recall gate of 0.7, and thresholds 0.7, 0.5, and 0.3. Eligible candidates are ranked by validation average precision, ROC-AUC, and precision. There is no implicit train-plus-validation refit after selection.
 
+## Planned model-family comparison
+
+The next experimental phase will retain the current logistic regression as the
+mandatory baseline and evaluate opt-in XGBoost and LightGBM candidates under the
+same verified dataset, split hashes, feature exclusions, preprocessing policy,
+seed, validation gates, threshold protocol, and frozen final-test boundary. The
+implementation task must predeclare a minimum meaningful improvement and
+non-regression gates; a numerically higher metric alone will not replace the
+simpler baseline.
+
+This section is a plan, not a result. `education-v1` remains the current
+authoritative logistic experiment until a new immutable comparison report is
+published and verified. The gated explanation, Registry, deployment, and
+monitoring sequence is defined in the [model lifecycle roadmap](model-lifecycle-roadmap.md).
+
 ## Evaluation contract
 
 Accuracy alone cannot establish value. The recorded metrics answer narrower technical questions:

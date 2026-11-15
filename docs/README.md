@@ -17,6 +17,9 @@ without relying on private planning tools.
 5. Read [Education variable analysis](education-variable-analysis.md) and
    [Trustworthy education experiments](education-experiments.md) for the local
    analysis and independent evaluation workflows.
+6. Read the [Education model lifecycle roadmap](model-lifecycle-roadmap.md) for
+   the gated path from model comparison through explanation, Registry,
+   controlled deployment, and privacy-safe monitoring.
 
 ## Source-of-truth hierarchy
 
@@ -40,7 +43,7 @@ of treating a private note or stale archive entry as current authority.
 | Dataset provenance and safe use | [Dataset card](dataset-card.md) | [Source verification record](dataset-source-verification.json), [research protocol](research-protocol.md), and [literature evidence matrix](literature-evidence-matrix.md) |
 | Modeling and metric interpretation | [Modeling report](modeling-report.md) | [Metric semantics](metric-semantics.md) |
 | Education-variable interpretation | [Education variable analysis](education-variable-analysis.md) | [Education artifact publication](education-artifacts.md) |
-| Experiment tracking and MLOps boundary | [Trustworthy education experiments](education-experiments.md) | [Experiment environment](experiment-environment.md) |
+| Experiment tracking and MLOps boundary | [Trustworthy education experiments](education-experiments.md) | [Experiment environment](experiment-environment.md) and [model lifecycle roadmap](model-lifecycle-roadmap.md) |
 | Runtime architecture | [Architecture](architecture.md) | [Local verification](local-verification.md) |
 | HTTP behavior | [API contract](api-contract.md) | [Education API](education-api.md) |
 | Exploratory analysis | `notebooks/EDA.ipynb` | Notebook outputs remain uncommitted unless a governing documentation contract says otherwise. |

@@ -16,3 +16,8 @@ Training SHALL fit preprocessing and estimators using training rows only. Valida
 
 ### Requirement: Experiment tracking is optional and local
 With tracking disabled no MLflow import or write SHALL occur. Explicit tracking SHALL use local SQLite and local artifact storage independent of ambient remote tracking settings. Tracking SHALL allowlist parameters and aggregate reports, excluding raw rows, IDs, source filenames and individual predictions.
+
+### Requirement: Model-family comparisons are evidence-equivalent
+The experiment workflow SHALL retain logistic regression as a mandatory baseline and MAY add XGBoost and LightGBM through optional infrastructure adapters. Every candidate SHALL use the same verified dataset identity, split hashes, feature exclusions, preprocessing policy, seed, validation thresholds and selection criteria. Optional dependency absence SHALL fail that candidate explicitly without changing the baseline workflow.
+
+Candidate attribution SHALL preserve model family and hyperparameters without lossy names. Validation evidence SHALL select the model and threshold before one frozen final-test evaluation. The immutable report and optional MLflow run SHALL agree on candidate configuration, split identity, metrics, diagnostics, selected model and model checksum. No candidate SHALL be promoted solely because one metric is numerically higher; the execution task SHALL define minimum meaningful improvement and non-regression gates before training.

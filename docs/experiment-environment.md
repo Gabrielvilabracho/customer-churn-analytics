@@ -87,6 +87,24 @@ they do not provide:
 Do not infer any of these capabilities from the presence of MLflow dependencies,
 a local SQLite database, or checksum-bound artifacts.
 
+## Planned lifecycle expansion
+
+The [education model lifecycle roadmap](model-lifecycle-roadmap.md) sequences
+future work without changing the current capability claims:
+
+1. compare logistic regression, XGBoost, and LightGBM under one immutable
+   experiment contract;
+2. explain only the selected model with estimator-appropriate SHAP;
+3. register reviewed, checksum-bound model versions behind an explicit promotion
+   gate;
+4. deploy one exact version through a controlled, reversible serving contract;
+   and
+5. monitor aggregate runtime, drift, workload, and valid delayed-performance
+   signals without storing student identities or raw rows.
+
+Each step requires its predecessor's verified evidence. Listing a phase here does
+not mean that its Registry, deployment, or monitoring capability is implemented.
+
 ## Typing boundaries
 
 The mypy configuration keeps project code under strict checking while

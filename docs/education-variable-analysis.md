@@ -103,6 +103,16 @@ model_probability = sigmoid(decision_output)
 
 This is the exact independent/interventional linear SHAP formulation; it does **not** require installing the SHAP package and does not claim correlation-dependent credit allocation. Full training data supplies the background; deterministic held-out samples supply explanations. Category groups preserve signed additivity. Automated checks verify both log-odds additivity and probability parity. A waterfall must never label these contributions as additive probability increments.
 
+### Future selected-model explanation boundary
+
+This exact linear formulation belongs only to the historical logistic model
+identified by `student-analysis-20261108` / `variables-v1`. It must not be reused
+or relabeled as the explanation for a future XGBoost or LightGBM candidate. After
+the planned comparison fixes one selected model identity, a separate OpenSpec
+change will define estimator-appropriate SHAP, model/report/background hashes,
+output-parity checks, aggregate global importance, and private run-local sample
+explanations. See the [model lifecycle roadmap](model-lifecycle-roadmap.md).
+
 ## Provenance and responsible use
 
 - Every analytical payload binds source run, dataset/model metadata, dependencies, sampling settings and hashes of current model publication and split bytes. Completion is written last and checked against the same in-memory payload served by the API.
