@@ -38,3 +38,6 @@ class SklearnExperimentCandidates:
         if estimator is None:
             return {"strategy": "training_prevalence"}
         return dict(estimator.named_steps["classifier"].get_params())
+
+    def family(self, model: ProbabilityModel) -> str:
+        return "baseline" if getattr(model, "estimator", None) is None else "logistic"
