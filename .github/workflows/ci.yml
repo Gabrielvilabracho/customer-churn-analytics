@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [main]
 
@@ -25,6 +26,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           BASE_REF: origin/${{ github.base_ref }}
+          SIZE_EXCEPTION: ${{ contains(github.event.pull_request.labels.*.name, 'size:exception') }}
         run: python scripts/delivery_guardrails.py --check pr-workflow --check review-budget --base-ref "$BASE_REF"
 
   python:

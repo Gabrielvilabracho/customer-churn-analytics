@@ -25,8 +25,13 @@ def test_ci_workflow_runs_delivery_guardrail_cli_as_executable_gate(
     )
 
     assert "python scripts/delivery_guardrails.py" in workflow
+    assert "types: [opened, synchronize, reopened, labeled, unlabeled]" in workflow
     assert "--base-ref" in workflow
     assert "BASE_REF: origin/${{ github.base_ref }}" in workflow
+    assert (
+        "SIZE_EXCEPTION: ${{ contains(github.event.pull_request.labels.*.name, "
+        "'size:exception') }}"
+    ) in workflow
     assert '--base-ref "$BASE_REF"' in workflow
     assert '--base-ref "origin/${{ github.base_ref }}"' not in workflow
     assert "--check pr-metadata" in workflow
@@ -36,6 +41,48 @@ def test_ci_workflow_runs_delivery_guardrail_cli_as_executable_gate(
     assert 'test -n "$PR_BODY"' not in workflow
     assert 'test -n "${{ github.event.pull_request.title }}"' not in workflow
     assert 'test -n "${{ github.event.pull_request.body }}"' not in workflow
+
+
+def test_workflow_guardrail_requires_label_change_revalidation(
+    tmp_path: Path,
+    project_root: Path,
+) -> None:
+    workflow_path = tmp_path / "ci.yml"
+    workflow = (project_root / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    workflow_path.write_text(
+        workflow.replace(
+            "types: [opened, synchronize, reopened, labeled, unlabeled]",
+            "types: [opened, synchronize, reopened]",
+            1,
+        ),
+        encoding="utf-8",
+    )
+
+    result = check_pull_request_workflow(workflow_path)
+
+    assert result.passed is False
+    assert result.details["pull_request_trigger"] == "missing_label_events"
+
+
+def test_workflow_guardrail_requires_review_budget_check_selection(
+    tmp_path: Path,
+    project_root: Path,
+) -> None:
+    workflow_path = tmp_path / "ci.yml"
+    workflow = (project_root / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    workflow_path.write_text(
+        workflow.replace(" --check review-budget", "", 1),
+        encoding="utf-8",
+    )
+
+    result = check_pull_request_workflow(workflow_path)
+
+    assert result.passed is False
+    assert result.details["delivery_guardrails_cli"] == "missing"
 
 
 def test_workflow_guardrail_rejects_direct_base_ref_shell_interpolation(
@@ -50,6 +97,8 @@ def test_workflow_guardrail_rejects_direct_base_ref_shell_interpolation(
         workflow.replace(
             "        env:\n"
             "          BASE_REF: origin/${{ github.base_ref }}\n"
+            "          SIZE_EXCEPTION: ${{ contains(github.event.pull_request.labels.*.name, "
+            "'size:exception') }}\n"
             "        run: python scripts/delivery_guardrails.py "
             "--check pr-workflow --check review-budget --base-ref \"$BASE_REF\"",
             "        run: python scripts/delivery_guardrails.py "
@@ -254,11 +303,15 @@ def test_workflow_guardrail_rejects_disabled_delivery_guardrail_step(
             "        if: github.event_name == 'pull_request'\n"
             "        env:\n"
             "          BASE_REF: origin/${{ github.base_ref }}\n"
+            "          SIZE_EXCEPTION: ${{ contains(github.event.pull_request.labels.*.name, "
+            "'size:exception') }}\n"
             "        run: python scripts/delivery_guardrails.py",
             "      - name: Run delivery guardrails\n"
             f"        {disabled_if}\n"
             "        env:\n"
             "          BASE_REF: origin/${{ github.base_ref }}\n"
+            "          SIZE_EXCEPTION: ${{ contains(github.event.pull_request.labels.*.name, "
+            "'size:exception') }}\n"
             "        run: python scripts/delivery_guardrails.py",
             1,
         ),

@@ -22,6 +22,48 @@ def test_review_budget_allows_small_slices_and_blocks_oversized_slices() -> None
     }
 
 
+def test_review_budget_accepts_oversized_slice_with_recorded_size_exception() -> None:
+    oversized_slice = "250\t20\tREADME.md\n150\t5\tdocs/architecture.md\n"
+
+    accepted = check_pr_changed_line_budget(
+        oversized_slice,
+        budget=400,
+        size_exception=True,
+    )
+
+    assert accepted.passed is True
+    assert accepted.details == {
+        "changed_lines": "425",
+        "budget": "400",
+        "size_exception": "recorded",
+    }
+
+
+def test_review_budget_size_exception_does_not_accept_malformed_numstat() -> None:
+    malformed = "abc\t1\tbroken.md\n"
+
+    result = check_pr_changed_line_budget(
+        malformed,
+        budget=400,
+        size_exception=True,
+    )
+
+    assert result.passed is False
+    assert result.details["malformed_rows"] == "1"
+
+
+def test_malformed_numstat_preserves_existing_action_without_exception() -> None:
+    result = check_pr_changed_line_budget("abc\t1\tbroken.md\n", budget=400)
+
+    assert result.passed is False
+    assert result.details == {
+        "changed_lines": "0",
+        "budget": "400",
+        "malformed_rows": "1",
+        "required_action": "split work-unit PR or record size exception",
+    }
+
+
 def test_review_budget_boundary_cases_and_malformed_numstat_rows() -> None:
     exact_budget = "399\t1\texact.md\n"
     one_over = "400\t1\tover.md\n"
@@ -45,6 +87,17 @@ def test_review_budget_boundary_cases_and_malformed_numstat_rows() -> None:
     malformed_result = check_pr_changed_line_budget(malformed, budget=400)
     assert malformed_result.passed is False
     assert malformed_result.details["malformed_rows"] == "2"
+
+
+def test_review_budget_rejects_negative_and_partial_binary_numstat_rows() -> None:
+    malformed = "-500\t0\tnegative.md\n-\t500\tpartial-binary.md\n"
+
+    result = check_pr_changed_line_budget(malformed, budget=400)
+
+    assert result.passed is False
+    assert result.details["changed_lines"] == "0"
+    assert result.details["malformed_rows"] == "2"
+    assert "skipped_rows" not in result.details
 
 
 def test_review_budget_uses_named_policy_constant() -> None:

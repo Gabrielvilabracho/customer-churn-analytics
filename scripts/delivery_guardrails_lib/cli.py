@@ -29,6 +29,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         root=root,
         base_ref=args.base_ref,
         budget=args.budget,
+        size_exception=os.environ.get("SIZE_EXCEPTION", "").casefold() == "true",
     )
     for name, check in checks.items():
         print(f"{'PASS' if check.passed else 'FAIL'} {name}: {check.details}")
@@ -67,6 +68,7 @@ def _run_checks(
     root: Path,
     base_ref: str | None,
     budget: int,
+    size_exception: bool,
 ) -> dict[str, GuardrailResult]:
     checks: dict[str, GuardrailResult] = {}
     if "pr-metadata" in requested_checks:
@@ -77,7 +79,10 @@ def _run_checks(
         )
     if "review-budget" in requested_checks:
         checks["review_budget"] = check_current_review_budget(
-            root, base_ref=base_ref, budget=budget
+            root,
+            base_ref=base_ref,
+            budget=budget,
+            size_exception=size_exception,
         )
     if "documentation" in requested_checks:
         checks["documentation"] = check_documentation_guardrails(root)
