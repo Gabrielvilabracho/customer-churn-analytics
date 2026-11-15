@@ -50,9 +50,11 @@ Acceptance evidence:
 - the comparison table reports ranking, calibration, false-positive rate, and
   flagged workload without claiming deployment readiness.
 
-Before execution, the implementation task must set a minimum meaningful
-improvement rule and non-regression gates. A numerically higher metric alone does
-not justify replacing the simpler logistic baseline.
+An advanced candidate must improve validation average precision by at least
+0.01 absolute over the best recall-eligible logistic reference, preserve the
+0.70 recall gate, and not worsen Brier score, false-positive rate, or flagged
+fraction at the compared selected validation thresholds. A numerically higher
+metric alone does not justify replacing the simpler logistic baseline.
 
 ### Phase 2 — Explain the selected model
 
@@ -140,7 +142,6 @@ Acceptance evidence:
 The roadmap does not invent decisions that require implementation evidence or an
 operating environment:
 
-- the minimum meaningful improvement over logistic regression;
 - whether XGBoost or LightGBM remains after the comparison;
 - the shared Registry provider and access model;
 - the deployment target and authentication design;
