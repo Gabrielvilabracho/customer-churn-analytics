@@ -11,7 +11,7 @@ The unit is one synthetic student record, not a verified enrolled participant. T
 | What does this dataset measure and represent? | Publisher/version, generator rules, data dictionary and label construction | Local CSV identity and source/version verified; generator and measurement validity remain unresolved |
 | Which variables are associated with High labels? | Descriptive distributions, conditional contrasts, model explanations, uncertainty | Generated associations; not AI-caused burnout or clinically measured risk |
 | Can ranking improve on prevalence? | Average precision, ROC-AUC and capture within the top 20%; matched validation reference | Internal discrimination only; no claim of external validity |
-| Can scores support a defined review capacity? | Validation-only threshold comparisons, FP/FN and workload | Blocked until intended users, capacity and error-cost preferences are supplied |
+| Can scores support a defined review capacity? | [Validation threshold/top-k comparisons and hypothetical review effort](review-capacity-protocol.md) | Portfolio scenarios defined; operational suitability remains unapproved without stakeholder capacity and error-cost acceptance |
 | Do probabilities match outcomes? | Reliability bins, Brier score and log loss | Current scores are not established calibrated individual probabilities |
 | Do findings transfer? | Compatible, licensed, genuinely new external observations | Not evaluated; synthetic validation is not external student validation |
 
@@ -49,4 +49,14 @@ Include sources with identifiable authors, accessible methods, a defined populat
 
 Phase 1 is closed with unavailable label-generation methods and targeted, non-systematic literature coverage preserved as explicit limitations. No reviewed GenAI-dependency instrument is ready for direct adoption: any future real-student use requires a prespecified construct, cognitive pilot, psychometric validation, behavioral criteria, test–retest evidence and invariance checks. Phase 2 may define intended users, human review capacity and false-positive/false-negative costs; no new algorithm search, automatic intervention, model promotion or deployment is authorized by this document alone.
 
-Source of scope: Obsidian `Student Impact - Evidence and Research Roadmap`, Phase 1 and its canonical research task. Local source evidence: [dataset card](dataset-card.md), experiment reports and the implementation locations cited in the [dated record](research-foundation-2026-11-13.md).
+## Phase 2 checkpoint — 2026-11-15
+
+The [review-capacity protocol](review-capacity-protocol.md) records a user-approved
+hypothetical guidance-team scenario, 10/20/30% review capacities, and 5/10/15-minute
+initial-review assumptions. Verified validation-only scoring of the existing
+`education-v1` model supplies matched threshold and top-k trade-offs; no retraining
+or new final-test evaluation occurred. None of these capacity scenarios meets
+the existing 0.70 recall gate. Relative error costs and operational acceptance
+remain unresolved; the checkpoint does not authorize training or deployment.
+
+Source of scope: Obsidian `Student Impact - Evidence and Research Roadmap`, Phase 1 and its canonical research task, plus the user-approved Phase 2 portfolio scenarios. Local source evidence: [dataset card](dataset-card.md), experiment reports and the implementation locations cited in the [dated record](research-foundation-2026-11-13.md).
