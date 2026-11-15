@@ -174,7 +174,8 @@ def _validate_tracking_fields(report: dict[str, Any]) -> None:
             "input_csv_sha256",
         },
     )
-    _require_private_safe(report["schema_version"] == 1)
+    schema_version = report["schema_version"]
+    _require_private_safe(schema_version in {1, 2})
     _require_private_safe(report["kind"] == "independent_education_experiment")
     _require_private_safe(report["dataset_id"] == "ai-student-impact")
     _require_private_safe(_is_digest(report["dataset_sha256"]))
@@ -222,12 +223,21 @@ def _validate_tracking_fields(report: dict[str, Any]) -> None:
             and not isinstance(split["count"], bool)
             and _is_digest(split["sha256"])
         )
-    _only_fields(report["selection"], {"split", "model_name", "threshold", "criterion"})
+    selection_fields = {"split", "model_name", "threshold", "criterion"}
+    if schema_version == 2:
+        selection_fields.update({"reference_model_name", "advanced_gates"})
+    _only_fields(report["selection"], selection_fields)
     _require_private_safe(
         all(isinstance(report["selection"][key], str) for key in ("model_name", "criterion"))
         and report["selection"]["split"] == "validation"
         and _is_number(report["selection"]["threshold"])
     )
+    if schema_version == 2:
+        _require_private_safe(
+            isinstance(report["selection"]["reference_model_name"], str)
+            and isinstance(report["selection"]["advanced_gates"], list)
+            and not report["selection"]["advanced_gates"]
+        )
     _require_private_safe(isinstance(report["validation_candidates"], list))
     names = [candidate["model_name"] for candidate in report["validation_candidates"]]
     expected_names = [
@@ -254,7 +264,10 @@ def _validate_tracking_fields(report: dict[str, Any]) -> None:
         "strategy",
     }
     for candidate in report["validation_candidates"]:
-        _only_fields(candidate, {"model_name", "parameters", "thresholds", "eligible"})
+        candidate_fields = {"model_name", "parameters", "thresholds", "eligible"}
+        if schema_version == 2:
+            candidate_fields.add("family")
+        _only_fields(candidate, candidate_fields)
         _only_fields(candidate["parameters"], parameter_names)
         _require_private_safe(
             isinstance(candidate["eligible"], bool)
@@ -263,6 +276,11 @@ def _validate_tracking_fields(report: dict[str, Any]) -> None:
             )
             and isinstance(candidate["thresholds"], list)
         )
+        if schema_version == 2:
+            expected_family = (
+                "baseline" if candidate["model_name"] == "baseline_churn_rate" else "logistic"
+            )
+            _require_private_safe(candidate["family"] == expected_family)
         for choice in candidate["thresholds"]:
             _only_fields(choice, {"threshold", "metrics", "diagnostics"})
             _require_private_safe(_is_number(choice["threshold"]))

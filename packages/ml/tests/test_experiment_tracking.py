@@ -12,6 +12,17 @@ def test_tracker_rejects_remote_destinations_before_import_or_writes(tmp_path: P
     assert not list(tmp_path.iterdir())
 
 
+def test_schema_v2_experiment_report_is_tracking_allowlisted() -> None:
+    from churn_ml.experiments import run_experiment
+    from churn_ml.infrastructure.mlflow_tracking import _validate_tracking_fields
+    from test_education_experiments import student_rows
+
+    report = run_experiment(student_rows(), c_values=(1.0,)).report
+
+    assert report["schema_version"] == 2
+    _validate_tracking_fields(report)
+
+
 def test_local_mlflow_ignores_ambient_remote_settings_and_logs_only_aggregates(
     tmp_path: Path, monkeypatch
 ) -> None:
