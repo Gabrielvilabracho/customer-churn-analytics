@@ -1,0 +1,39 @@
+{
+  "checked_on": "2026-11-13",
+  "dataset_handle": "laveshjadon/ai-impact-on-students",
+  "version": 1,
+  "version_url": "https://www.kaggle.com/datasets/laveshjadon/ai-impact-on-students/versions/1",
+  "publisher_api_url": "https://www.kaggle.com/api/v1/datasets/view/laveshjadon/ai-impact-on-students",
+  "download_url": "https://www.kaggle.com/api/v1/datasets/download/laveshjadon/ai-impact-on-students?datasetVersionNumber=1",
+  "license_observed": "CC0: Public Domain",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source_release_date": "2026-05-10T23:12:10.07Z",
+  "archive": {
+    "bytes": 1187170,
+    "sha256": "95ce57103064ed70fec9320e4cbf224d1dc593750eaa0f4a8f4d76e3f267161f",
+    "md5_base64": "EQyubJxLD6Cnlfk2p2rBhw==",
+    "matches_supplied_metadata_md5": true
+  },
+  "csv": {
+    "archive_member": "ai_student_impact_dataset (1).csv",
+    "local_path": "data/01-raw/ai-student-impact/ai_student_impact_dataset.csv",
+    "bytes": 5892478,
+    "sha256": "4d911088c4b12d60a450a9acae6b606f4119ebbb48679518e427a4fc00778472",
+    "byte_identical_to_local_input": true,
+    "matches_education_v1_input_csv_sha256": true
+  },
+  "evidence_limits": [
+    "This documentary record is not a replacement runtime provenance schema or signed attestation.",
+    "The public API independently confirms the declared license and current version, not measurement validity.",
+    "Synthetic origin remains user-supplied methodology; exact generator code, seed and burnout-label rules are unverified.",
+    "Metadata creator and API owner display names differ; attribution uses the stable dataset handle.",
+    "Historical acquisition metadata was preserved; no source data or model publication was replaced."
+  ],
+  "operations": {
+    "public_download_only": true,
+    "credentials_used": false,
+    "local_input_replaced": false,
+    "model_retrained": false,
+    "raw_data_redistributed": false
+  }
+}
