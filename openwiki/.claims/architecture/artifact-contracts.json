@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:4b291765f04ed0071b6a254cb46ce706614f67e8d79b0f493fe109e2c2049575",
+  "claims": [
+    {
+      "id": "claim_66a6be69dec54238879d614a7d4cc612",
+      "statement": "A model run is published only after all required metrics and model members exist and a checksum-bearing completion manifest is written last; an already published run cannot be overwritten.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py#L152-L187",
+          "version": "repo-lines-v1:sha256:1aa03d17b01fd591d66db4e5eb8bb45900c6d3665cb9d99bbce5cdf8f4756725:eyJzZWxlY3RlZExpbmVDb3VudCI6MzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjliMmM0N2QyMGI1ZGFiYTM0MDVhN2U5NWQ3NzUyMzQ4ZTE0ZGQ1ZDBhNDg3OWVhZjgwYjNjNjAyZmI5OTJmYTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwMzM1MTFiZjlkNTQyYzE3ZDM4ZWY2NjBkYmFkMzA2YmMxNzdlOGQwODZhNDEzNjg2YTA1OTE3OTg5NGI0NmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUxMTk3NzRjZTU1MTY4Yjg2NWRiMjBkOTM3NjYwOWNiOTc2Nzk4ZjFlZDY5ZmQ5MDEyMTk2ZTM3ZmU1NDIzOGUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2YzJhODhkN2YwMGJjZGFjZjRlZDMzMDkyMzYzYjE5YzNlNjljMzQ4Y2I5Y2ExYjlmZDcxOTM4NzgwN2Y2YmUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a1dea8b163ee41c581fae7f2f7e398b9",
+      "statement": "Run integrity verification recomputes every completion-manifest checksum and rejects unpublished, missing, or altered members.",
+      "evidence": [
+        {
+          "resource": "repo://apps/api/src/churn_api/adapters/filesystem.py#L25-L40",
+          "version": "repo-lines-v1:sha256:e9ca7ab3b14d16ad4623dd3d231016b1d76bccccf27cb73f8492577447410725:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhlNTJkNTYyZjM3ODNjZDMzNjkzZGMzNzg0ZjhjOWI1NmU0MGQ4ZTRiMTRiN2NmZGYxZDA5MzM4ZTk2YmE2ZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFlMjAxYmVlZTU2NmUyZTk5ZGFhZDJkYzEyZDJjMmIyOTc1NjRhMTdkOWUxMWJmMTc1MGI5YTQ2ZWQzNTBlNGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYzNGU4MzdlYTBhZWQwYjU3YmY3N2I2NDM0MjViOTMyMTMyNzNiMDEzYzYyNzlkMTdiYTIzZTVhZTY1MmQyZjAifQ"
+        },
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py#L189-L221",
+          "version": "repo-lines-v1:sha256:c88ab46b5ca20dda75e9a21ddb05aa758eca88f1c8f7716b3409fce5d1da8168:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZThmZWY4ZmEzYjk0NjFlOGViNTk5NGMwMjA2MTBiN2Q4NTAxOTFmNGE1MTM0ODk4OGEwYmI4MzA1NTZkYzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1MmNiYTEwNjhiNWFjNGU0M2M2YzZjNTU3ODNmOGQ2ZmNjMmJjNzcyZDNjYzQ3NjE0MjEzZWQzMDVlNzk1NTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVjZWU1OTEyNzBlMTIyMTc0ZGEwNzQ5ZTVkN2U0NWRmZTA5OWYyODRlOGZjNTM1ZGVjNTk1NzE4ZDhkYWU5NWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMxZTIxY2QwNWUyYmUyODM4OTRmM2QyNTUyNmI3MjdlNjI0NjdkMmU4MTc0NmMyODk2YmY4NDNhNGZiOWFjYTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_045f3d7597d444b9b69997e678dce623",
+      "statement": "Model binary persistence uses a temporary joblib file followed by atomic replacement and records a separate SHA-256 sidecar.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py#L234-L254",
+          "version": "repo-lines-v1:sha256:979ad5b7e8043b54f0fdf681d6b2adbe59a5435f37939a2136353fbcacb06d80:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2YmQ2OTRjM2M3MTUwNjc1ZDc3OTVjNmYzYzZmOTIxNGYzOTZkZTcwNDNkMjZlNDEwMWVjMzg0YzIxZGIzN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjMjc3NzY5OWE5OTMwODVkODY3OWNjY2IzZDUyNDJhZWI3Nzk1OGM5Yjc1M2NlMjliZDY4M2I1ZDkyYmY1YjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZkYzU4MmI1ODlhYmZhM2JjMDYzZDIzMTllYzI1ZmM2MGEzZTkwMzMwMmI5ZThiZjExNzQ5ZGJkYTgxZDc5NjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_7f4cf16618444141a6e8e8fa9bf9e162",
+      "statement": "Education source loading accepts only an allowlisted publication, rejects symlink or out-of-root reads, verifies model and manifest checksums, and enforces consistent run, dataset, target, and feature identities across artifacts and processed splits.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/education_analysis_store.py#L20-L95",
+          "version": "repo-lines-v1:sha256:6f006707f96af10dd7d82787faa716a20bd69394761af8fb2df5e1c816896e71:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFmMDhiNjdhNTdiZjk2ZjU5MGE4NmM0NzQ0MmFlMmYyODZiMmNiZWU2YTg3MjNiYzgxZWM0Yzk0NWI4YTc1ZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4NDIxZjliMGZlMWFmZjVlYjk5ZjlhN2ZhNDMyZmVjYWU5MzhhOTAyZDMwYzFiNzFiYmY4NWU3N2Q0NDExYTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE4MDY3N2QxM2VjMzUwYzQxYTJiM2EyMmFkNTc0ODhkMzFjMTFlZjUwZGU4YTBlMTIzOTgwY2QwZjMxYjNhZDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI2ZjVkM2M0M2UxMmM1MzljZWM2ZjM1MGE0NGI2NTQzNWIyOGI2OTg2NDY0NjZjNzNhMzhhYzRiMmFmM2ZkNTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9ec9c4abe3bf4d989818a6816eaa16aa",
+      "statement": "Education analysis publication reserves a new identity directory, writes the payload before an exclusive completion marker, and refuses duplicate or concurrent publication under the same analysis identity.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/education_analysis_adapters.py#L62-L71",
+          "version": "repo-lines-v1:sha256:c55b8b61db038f13a86dfe12db16ed6748e865a116009fce2228dfa5f4a138f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3ZWIxYTkxYWJiODI2NTdmNDI5MjdkZDNhMmI3YTk2ZmJhMmUwNWFiMWZiZmY3OTAxNWNhODI1ZWJkMjc5OWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM5NjFhOThhMjJkMDBjZmUyMzZlMDQ0YmQ4ODU5ZjRhMjc4ZDA1MzRiYTc3YWU1OTQzOWE5Nzc5ZjE2YWEzNzEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE4ZGNlMGE0YzcxMzVhZmVmZDEzZDQ0YTdiMzAxNTYyN2U1NzhjYmY4YTlhZDAwMTliNjhlODVhMzNkZjY5NDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/education_analysis_store.py#L98-L130",
+          "version": "repo-lines-v1:sha256:f7f62030653f9e3d5dee685e3bb771edce8752ef54d4c5140f262efe48e39da6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlZDIxYmVmZWE3MDI1YmVkMzEyZGE3MDAxY2M2MzFjYzAyZDM5NjgxOTVjZWEzNDZjZTFmYjNjZTJkMWQzYzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MDMyZTk2NGQwOTMyMzUxZTVkMTg1MjY5MjgxYjE3MWEzYTA5YjA4YjI4NmU2NjFlYTQ3MDMyM2M4MmViNGQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVlYjRiZDFkZjExOTQ5M2E5ZDkxZjkxYmU5MTQxN2VlZmI1YjZkOGIxYzg4OWRkOWI1OTA0NDdkODhhYWJjYTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImMwZjk1MjcwYmY5M2M0ZGRhOGUxZjVmMzBjNzBlY2ZiYTlhZTA3NGQ5YmNmNDE4NDY1YjdlZDQ4MjU0YmJlMTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d431968cbfce4a2692c5715095c23c21",
+      "statement": "A published education analysis remains readable only while its payload checksum, run and analysis identity, source hash binding, dataset identity, and model identity all remain valid.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/education_analysis_store.py#L132-L156",
+          "version": "repo-lines-v1:sha256:eff579c3ff076d1d243df0d00bc986e1e36af2bfc973c2581a47b8336b1eb308:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxMmU3MTU2M2JlMGE2YmM0N2QzM2U4OWM2NTQ5NzhlZDNkMjFmMjk2NjkzNGU1MzIyMzAwNDk2MTlmZjY4NDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZjYTU4M2IyMGE1ZDc5OGY0N2ZkYmFiZmFkNjlmMThlNTU1OTNkZWNjZDMyNjdmZjUzNTZlNWMwY2U3YTczMDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImMxMzFmYTc4MDYyNTA1MjYxZjEyNTg0NmNhOTM3MjY5YjAxOWY5ZWY2ZmVlYjQ0Y2JlYThmZjczZmJmYjU2ZjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1fe1491c2c934de2ac4282e7e8b9f654",
+      "statement": "Education model loading deserializes the checksum-verified in-memory model bytes and aborts if source artifacts change during analysis.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/education_analysis_adapters.py#L17-L59",
+          "version": "repo-lines-v1:sha256:c9d2bda18440b193598952838d2e9de3f470cc3cd97cf9876ed9bf7470b35b02:eyJzZWxlY3RlZExpbmVDb3VudCI6NDMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjllZDliMWE2YmVjYmQ2YmQ5NGNiMmIxOTI2NmY2MWM5NGI4YWVjOTFjODcyMjY4Y2JjZTNiMWE5M2M3MTA0MzYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY4ZWZjZDgyMWNjNDU0NTBjMjQ5ZDI4NjZhMzYzZTllMDZjN2E0ZGIyM2E0NzJjZjM4ZTc1NTBkNzc4YzhjNGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImE5OGIwNjNkOWI0N2U2NTM3OTYyNTU3MmNjZTE5NzY2OWQ1NzY3ZTEyYzE4YmUwNzU2NTJiOGNkOTgxY2U4ZDUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM1NmU1ODJiZjA5MjBlMjM3MjBlZWI3Y2M5OTMzMWVjM2EzMmU2MTM4ODQwZWI2MzE5NWJlZGZmYjE1YTQ1YTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_487673dc26e443759fddf411eb90fc77",
+      "statement": "Base run lease acquisition detects an existing conflicting owner but performs its existence check and write separately, so it does not guarantee atomic mutual exclusion for racing first-time publishers.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py#L113-L136",
+          "version": "repo-lines-v1:sha256:2438b98ca11dd1b90089face7cdb48ac1a52c437d80e4b705a15b2e5fd13e696:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1NTFjZGNlMGUyYmE0ZTg5OWZkYmYzNzY2YTE2ODBkYTI0ZGMxOWFhNjYwODQ1ZDEzYTAxMWZkMTczZThiN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQxNTA4OTdkMmYyNjg2YTU4NTc0YjI3OTk0YTA5ZTZmMzMyMDI5NTgzNWI0OWM1YzUyNGFlZTAzMjE2YjM0MjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA3NTBhODA1MTdhYTFmYmY4ZGQ5NTFmMGU2NzU5MWRmZTdkZTk3MjBmNjkxNmMwYzExZmQzZWZmNjgyZGM1NjcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_633aa27910684d3fbac7b6d0a412b07f",
+      "statement": "The base run-integrity reader validates manifest-listed files and checksums without applying the education reader's explicit path-resolution, containment, and symlink rejection checks.",
+      "evidence": [
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/artifact_store.py#L189-L221",
+          "version": "repo-lines-v1:sha256:c88ab46b5ca20dda75e9a21ddb05aa758eca88f1c8f7716b3409fce5d1da8168:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZThmZWY4ZmEzYjk0NjFlOGViNTk5NGMwMjA2MTBiN2Q4NTAxOTFmNGE1MTM0ODk4OGEwYmI4MzA1NTZkYzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY1MmNiYTEwNjhiNWFjNGU0M2M2YzZjNTU3ODNmOGQ2ZmNjMmJjNzcyZDNjYzQ3NjE0MjEzZWQzMDVlNzk1NTMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVjZWU1OTEyNzBlMTIyMTc0ZGEwNzQ5ZTVkN2U0NWRmZTA5OWYyODRlOGZjNTM1ZGVjNTk1NzE4ZDhkYWU5NWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMxZTIxY2QwNWUyYmUyODM4OTRmM2QyNTUyNmI3MjdlNjI0NjdkMmU4MTc0NmMyODk2YmY4NDNhNGZiOWFjYTgifQ"
+        },
+        {
+          "resource": "repo://packages/ml/src/churn_ml/infrastructure/filesystem/education_analysis_store.py#L20-L25",
+          "version": "repo-lines-v1:sha256:16b123237e5e8d1e5cc7afb626a331bcd97b9240e84122c8e270785115b70383:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWYwOGI2N2E1N2JmOTZmNTkwYTg2YzQ3NDQyYWUyZjI4NmIyY2JlZTZhODcyM2JjODFlYzRjOTQ1YjhhNzVkMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTEyNmJhN2ZjN2JkOGZmMjM0N2E0ZDI5NDNmNzJjMDRhNmYyMDQxNTNkYjI3MDZmNGVmZDA3NGNmY2U1NDU5NyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTgwNjc3ZDEzZWMzNTBjNDFhMmIzYTIyYWQ1NzQ4OGQzMWMxMWVmNTBkZThhMGUxMjM5ODBjZDBmMzFiM2FkMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzBjZTNmMjRhYjQ3YzJmNWE5ZDMzN2YzNzdlZDg1NzNmYTU2NTg0MDc2NDAyZjFhZjA1NGEzZGVkNjE5NDYyZiJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-15T19:20:50.688Z"
+  }
+}

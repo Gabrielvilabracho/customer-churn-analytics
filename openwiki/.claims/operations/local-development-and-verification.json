@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:e0cfda19ed3c711dadab1831d2c0f0ea8ad897f5b3e94c6e7afbf26ec203ec15",
+  "claims": [
+    {
+      "id": "claim_7c8f5fd249b4411d8e096d24172ef558",
+      "statement": "The supported Python verification path runs the full pytest suite, Ruff over ML and API code, and strict mypy with pandas stubs and the repository source roots.",
+      "evidence": [
+        {
+          "resource": "repo://docs/local-verification.md#L6-L17",
+          "version": "repo-lines-v1:sha256:f5ed00c04704b024d3a195074a1d705b286af23aec043dbcdc8bb6742efc1fd3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhNmMzODJiMmZmNDI0ZTczMmVhMjg4YzI0MmIwZGFiYWVmNTI1NDYxYmQwY2YyZTkyNDJmMjJkYjhkZGVhZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJmM2NkYjg0ODI0Yzk5Mzc1NmMwY2I2NmI1ODU5MjhiZjA2ZjE3MjY3NDY1OTNmZmEwMmNiNzZhNWZhNDQxMWUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA1OTcxNzQ5NmI1YjA5NzBlZGViYjdhZDIxYmQwMmQ2NTFkYjQ1ZjJjYmY4Njk5MDAzYzhmMDU0ZGZiZmVlOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZkNTM2ZjU2ZTI4YTQxYThjYTViMDIyY2FiYjZhYjU3YzdlYjI0YzU3ZTA4ZjM4YTBlOTYyNzc4MjZlZWRiZWEifQ"
+        },
+        {
+          "resource": "repo://pyproject.toml#L23-L46",
+          "version": "repo-lines-v1:sha256:1669b0ade87ffc5fe1c2029aa0f5628e70e3792bbe432e3ee62fa8c255a7789d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg2NzZlNjQxNDY1YTY1NTFlOWU5Y2ZmZDdmYWExZTZhNDJmOWI3MjQ4MDk4MTNjOTAzZDdlZGNiNTJmMzAwNmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjAwYjBmNWVjZTM4ZWY5NzA0ZDM5YTUwYzNlYjJmNzYwNTU2MzRhZGIxOWI4MGNiM2MxY2I0M2YyZTU4MTYzMDQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJjNmIyYjUxNGIwMTE3YjEyMTA3OTAyM2Y4OGNkYmU5MjZlYWE0ZmU1M2Q5MGVkNzE1NTZmZjBmZmM5ZTg4ODciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_629ae1089fb943aca5958b504d2b3248",
+      "statement": "The local smoke workflow publishes an explicit run, serves that exact root and run ID, and expects checksum tampering to degrade health rather than serve altered bytes.",
+      "evidence": [
+        {
+          "resource": "repo://docs/local-verification.md#L19-L38",
+          "version": "repo-lines-v1:sha256:8300f1599bf9a91c19715c8c9ea7dd23831e735258d7a3c679259b86c2f6f818:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5MzFiODgwNjEwMWJlMDU1MDlhOGNkZTczNzY3NTE5Y2VjZmI3ZjM0MDA3NWVlYWM0ODZkOTYzNTFhOWIwNTMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjMTJhZTU5NmY4MGJmYjQ5ODc0Y2E4NjRhODNkYjk3NDZlYjE1MzliMGMwMDAyYTdjZDNjMTJkN2I1MzJlNzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzNTZhYWJkNzkwYmM0YzllNDlkZWM4NTEzNmUyYzFmYmUzMzU1NWQwNTQ4ZWJjM2ZkZDdlNzRlYjU1NmFjMDYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcwMjMwZjY5YzM4YmM1MGIwZDI5YTBiZTM0MjVjNzQ0ZjgzMTVmNTEyMGQwNzYxYjkzYWU4MjdkY2ZkOTZjM2QifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0888bfe79c474efe8eb6b4be82d063c3",
+      "statement": "The web package exposes separate development, production build, lint, Vitest, Playwright, and TypeScript no-emit commands.",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/package.json#L1-L12",
+          "version": "repo-lines-v1:sha256:78f79a73be345d9bdab4d40eb03a1ea4b20e5f43275c6e9a5e2010d467b5ee76:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2ZmIwOGZkYTFhY2I5NTdiNjExNmJkMzc4MTFhMWZlNDFhMDE2MTFjMDYzMWVkYmY3ODZkNjg4OWEyN2E1NWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkNWNkMmZiNGYzZGY4ODQ1MTUyNTViMzk1MjNmMmY4YjU0NzJiZWVhOWY1NjZmZmNhMjA0ZGI4MDI1NjEwNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNlNWI5OTA2ZmVmMzNlZTVlMTU5NjE4ZDU1NTU0ZDgxM2Y3MjIyYTUwYmYwZDQyNzFhZjg0OGUwZWRhZjU3N2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_36bf35270a064afe8b30b53caa4b881c",
+      "statement": "CI separately enforces PR delivery guardrails, Python tests/lint/types, web tests/lint/types/build, and Chromium E2E tests.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/ci.yml#L12-L84",
+          "version": "repo-lines-v1:sha256:2af70f6ce35cfb3419b745a247beb9568e99664cb592e4a43d5dcc3431476268:eyJzZWxlY3RlZExpbmVDb3VudCI6NzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5ZDgwMTU0ZWQ0MmZjNWM3NzliMTMzMTU3OGI1OGI4OWM4MDFlYWNlNzRmMjRjZDQ4ZWI0YTIzNTc5NDBhOTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0ZjlkMmJmNzIxYzM1YjQyOTkwYzMyNTU2ZTEyMWFiNTAxNzU5YTliZTA3ZjMxYmMzMWE5MDgwN2NhYThhNDEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjZmMWQ3MGQ3MmJhZDIzMWQ0M2M1NzVhY2VmNjk0NjU4MGU0MzljODc5Nzk0ZWQyZWExZjRhNDAzNDAyNDUxNzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_019d72b034e24d568e622851adddfa44",
+      "statement": "The OpenWiki workflow supports manual and daily scheduled updates, isolates generation in a read-only checkout without persisted credentials, and uses a separate write-capable job to replace generated paths and open a pull request while preserving partial progress on failure.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/openwiki-update.yml#L1-L70",
+          "version": "repo-lines-v1:sha256:771e19e35f6e168df4ac37f776cc2dd7b9b427b640cb25b8c1c1be58092369b6:eyJzZWxlY3RlZExpbmVDb3VudCI6NzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA2MDI3ODdhZjZkY2MwODM0ZGUxMjFjYmIxY2I5NWY5NDU5YjcyMWVhYjAzNDlmMTA1MDFiOTk2YzFjNzdmZmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjlhZTZlNzI5MTZkNjM0MTM2YjkxNWI3YTVmY2Y5NTUxZDM4ZjE3YjY5ODk0ZGUwZTMxMmQ1NmRjMzMzNDkyOTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhjODA1ZmFhMDk2Nzg3MDUwYjE5NWRmZWQ5MTNlNDJmMzgwOWYzYjJjM2NhYWNmZjAwMjNlNzlhOTYwMmU2ZGUifQ"
+        },
+        {
+          "resource": "repo://.github/workflows/openwiki-update.yml#L72-L131",
+          "version": "repo-lines-v1:sha256:3cd0a47a9ff5c5ea844f34d87e4ef3fd55df9d92016c2bea69ec62f3409cff4e:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4MjU0YzkxNmE0NDgxMjNlMmQzZDk1ZWJhYTJlNGIxZGIwZmE3YjU0M2UxMmMzZTFiMTFjZjM2MjE2ZjIwMGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM2NzE4ZjA2N2I1ZTVjMWYwOTkxYTZlNzQ3MjZmZTJhMjNkMjY0MzQ1ZTA4ZTRlYWQwNGZhZjczYzI3ZWQ0NDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY5ODY4ZjNhMmFiNDZjYjI1ODhhMGE4ZGY4NjUyNjMxZjU5Y2ZhN2Y1ZmU0Mjg0ZTIwMDJiODE1ZTU2Mzc2NTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3e2fc577070a452299b2ed1ef0d5262d",
+      "statement": "The delivery guardrail entrypoint exposes PR metadata, workflow, documentation, and changed-line review-budget checks through one CLI.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/delivery_guardrails.py#L10-L50",
+          "version": "repo-lines-v1:sha256:1b4dc8d0a502705ba293dae204e68b93179f1d6a5446ce74b8d6193b880d98bf:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA5ZjQ4YmE3MzIzOTA3NzFhMWNiM2U1ODExZjFiNjc5MzM1MWEzZGIwMmE4ZDU4NzUwNmM4ZmRjZjk0MThjZTQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiNjRlOTIwMDBhMTljYTM4NTkzYTRlNmEwYmFjNzcwOTZkMWU5ODY5NDlhM2I2MjgyNmI3Y2VhNGY3M2Q5ZTkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY4YTQyYzgzYjc1YTE0NDMyMDYzMWRjMjBiMzk1NmE3ZjRhYmY4NmU0YjU4ODhhMTFlMGI4ZDYyYTcwMWY3YWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-15T19:20:50.688Z"
+  }
+}

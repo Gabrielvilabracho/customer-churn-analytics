@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:f2b76d26dac91070ea1fa1ba8a8569f90e8e9e5e86f3ebb119ce174b6f6cf885",
+  "claims": [
+    {
+      "id": "claim_ca053c94680243998baabe9ab972ecb7",
+      "statement": "The customer dashboard server page fetches the configured analytics API and passes either validated initial analytics or a resolved error into the client presentation component.",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/app/(dashboard)/dashboard-client.tsx#L14-L63",
+          "version": "repo-lines-v1:sha256:52c6476745ac1a982ddec086065cee5e0dcf6f391bfb1b8067c21d7c7979cff8:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIzZTVkYjdlYjU4Y2U1MjE1NGQ3Zjc3YzgwNjYxMWFmYmUzZDY5MjI5YWNlNjNlNzc3MGM4MzljZWExMGIwYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjljZDM3ZWIyOGZiMDhjMDQ1YjllYmVmMGI0MTQ1ZjQyODM3ODU2MzNjNTU4Y2FmNTI1NGY1NzIyNzg5OTUzZTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA0MTQxNmQzY2NkYTMwNmNjMTc5YjhjYWFjOTU3OTczMjFkYTMwOTE4NDk0ZDM3ZmU0ODQ5YjY1MzQ1OWQ2YjAifQ"
+        },
+        {
+          "resource": "repo://apps/web/app/(dashboard)/page.tsx#L1-L32",
+          "version": "repo-lines-v1:sha256:903acb0d45ff31e1b08dace97ace9c20f923f766df3e0c39e75f5cf14dab5c49:eyJzZWxlY3RlZExpbmVDb3VudCI6MzIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgzYjI1MjdjMDI5M2ZhMzdmYzk2MzllZDlhY2NjOGI0NjE5ZjA2YTY2OWQyZGQ2NGEzOGEyYzljOTQxMDVlODkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_eb6a4f5fa6594865aca2d08cd264a4fc",
+      "statement": "The customer dashboard view model derives KPI cards, contract cohorts, and the five highest-risk samples from API prediction samples using deterministic grouping, sorting, thresholding, and formatting.",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/components/features/churn/dashboard-model.ts#L28-L137",
+          "version": "repo-lines-v1:sha256:14f45e644805dbf160db90c2cdb3b6d78f599e35bc6267229b28a8da9cee9be3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJmZTc5NDRjNjFiNzExMjFlYmMxZmQyYzM5NDExYjk4NjNkYWU4Mzg0OTY0ZTcwYWZhYjg0MTI4OGFlMDNiZWY1IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI0MTJjYTM0NWNjZjc1YmY5YzA4MDZiY2U2OTViZThkZTgwOGI3OTk4NDI1MWE3YTU0ZDIwMmNmNjEwMWRkNDUxIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI2OGYyMGVmNGVmMjgwZjIzYmEyNjgzMGQxZTk4YzE2ODZkM2ZlZGY2YTk0MGRiZWNiZTA5Y2M2NGJlY2M0NTc4IiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MCwiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlM2IwYzQ0Mjk4ZmMxYzE0OWFmYmY0Yzg5OTZmYjkyNDI3YWU0MWU0NjQ5YjkzNGNhNDk1OTkxYjc4NTJiODU1In0"
+        }
+      ]
+    },
+    {
+      "id": "claim_5b03b571651c4e2686fe9d2a3bc47809",
+      "statement": "The education page dynamically fetches the configured API publication and displays a dedicated unavailable state without substituting demonstration values when the fetch fails.",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/app/education/page.tsx#L1-L26",
+          "version": "repo-lines-v1:sha256:8bf2e68fc73097bb4254c6630bbe268e98f93e5e6f887fdfeb624a2e258e4ebe:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZlZDAzOWNiMWM0MzA0OTlkYzkyNDZiZTdhNDIyMWYwMDM4NTU4ODhjMjk5YzMzMTk2MmQ1MDAxMWNjZjczM2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a27e22b9fb3941ba9e5f0a333979e5d2",
+      "statement": "The education client fetches with no-store caching and a ten-second timeout, propagates API degradation reasons, and validates the response before exposing it to components.",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/lib/api/education-client.ts#L110-L122",
+          "version": "repo-lines-v1:sha256:5c1d686197f47d745296c300f03c71bddecfe084434e88419368d7a5f2bd534e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0N2E5NDIyMGIxMGM3NThjNTYyZjdhNWNhNThhZjRmZjgzMzcwNjcxMmVmODgwZTNiZDBiYTFjMTVlY2UzYzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkyMDQwZTA5NWE5NGUyYWRhNzRlNDIxZjM3MTg3NTFhOTFhODEwYmZkNjZmNDhmNGU5MzljN2I3NDgwZWI2NzAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ebfd434c67a04c889c40eee82cd18528",
+      "statement": "The education runtime parser requires decision-support and human-review safeguards, rejects Student_ID, enforces cohort suppression, and verifies additive SHAP log-odds explanations against reported probabilities.",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/lib/api/education-client.ts#L37-L107",
+          "version": "repo-lines-v1:sha256:99bae16ba5abed70ae69cbaa179df9f2f9e5614c95f34a83c51620e03248931a:eyJzZWxlY3RlZExpbmVDb3VudCI6NzEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJiNmE4NTYwYWRkZGY0MTg0NDQ2ZmFjN2UyYmZkYjQ1M2RjN2RiODVkNjNiN2JkMWMxYWRmZGQzNzAzZTdiYjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRhNDYxNjgxNzhiYzEwNzAxMzY4NjEwOTBlOTc1ZjBkMzU5ZDdmYzdiMTMxNzQ4NGNlNzVhYzM1ZGU1MTAyMjYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM0OTY0OWIyZTIxYmEyNDdkZDFhMzkxNDBkNmJkMzRmNzFlYTliNDMwMzNkYzhhNmQ2YTcyNmNlN2Q5NTExZDMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c151a186a2074f9e8212929d4d33d136",
+      "statement": "Dashboard transport interfaces model artifact version, freshness, metrics, risk distribution, threshold, and bounded prediction samples separately from component-facing display models.",
+      "evidence": [
+        {
+          "resource": "repo://apps/web/components/features/churn/dashboard-model.ts#L1-L44",
+          "version": "repo-lines-v1:sha256:ac38d12330d7a65ca9072bc1d95e3edca52a3a21e46601d9b3bc322a3c7ca488:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjMDdmZmFmYzlhMmUxM2UyMGVhNWMwMGE5MTIwZTZlODU1MTU2YzJkYzgxZTIwODJmYjk3MTViZTAyMTQxZWUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYTJjYjI1YTEyMmI0NDIyMWE2MjM0ZWM2NjBhN2I1ZmI3ZjliZGU3YjNiOWUyYjNjNTU5YTBkOTZmYWM3MzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjNiYTZkMTYwYWNiYzllOTkxZGE1ZTAyOWQxNmY0NzZhNjZhY2Q0ZTEwOTY3NmFhMTc3ZmQ3OTcyMjQwYTFlOTIifQ"
+        },
+        {
+          "resource": "repo://apps/web/lib/api/types.ts#L1-L38",
+          "version": "repo-lines-v1:sha256:5e8132f55dc4738e4b7dcb559a1e2a041f31600122e5b2288c6b7bbdff440105:eyJzZWxlY3RlZExpbmVDb3VudCI6MzgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2ODA0Zjc2MTE0ZmVkMWMyYmEyYWIxZDkwNDY0ZjljNjc0MTI5ZGQ5NmYzMTQ1NjRmNGUxOGZhYWQ2ZTRiNWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQxMmNhMzQ1Y2NmNzViZjljMDgwNmJjZTY5NWJlOGRlODA4Yjc5OTg0MjUxYTdhNTRkMjAyY2Y2MTAxZGQ0NTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-15T18:18:27.480Z"
+  }
+}
